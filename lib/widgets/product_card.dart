@@ -29,9 +29,31 @@ class ProductCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
+                  // A softened, edge-to-edge copy of the SAME photo fills
+                  // the frame first — no plain white/solid slab behind it
+                  // — so wherever .contain below leaves empty space, it's
+                  // a blended backdrop of the product itself, not a bare
+                  // wall of color.
+                  Opacity(
+                    opacity: 0.45,
+                    child: Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: context.colors.surfaceRaised),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Container(color: context.colors.surfaceRaised.withOpacity(0.35)),
+                  ),
                   Image.network(
                     product.imageUrl,
-                    fit: BoxFit.cover,
+                    // .contain instead of .cover: the whole photo is
+                    // always visible, uncropped — .cover was slicing off
+                    // the top/bottom (or sides) of the image whenever its
+                    // proportions didn't exactly match the card's fixed
+                    // aspect ratio, which is what was cutting products off
+                    // on phones.
+                    fit: BoxFit.contain,
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(color: context.colors.surfaceRaised);

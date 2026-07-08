@@ -11,6 +11,13 @@ enum ShopPage { home, search, services, cart, about }
 /// The same frosted glass pill nav from the Aya's Graphique brand system,
 /// re-purposed for page navigation instead of scroll-to-section links, plus
 /// a cart icon with a live item-count badge.
+///
+/// The bar itself stays a fixed, compact size (smaller on desktop, since
+/// desktop has room to spare and a big bar there looks heavy). Each icon
+/// inside it is what grows: the moment a pointer hovers (desktop) or
+/// touches (mobile) a single icon, that icon pops up a bit larger with a
+/// soft glow, then eases straight back to its normal size the instant the
+/// pointer leaves or lifts — the rest of the bar never moves.
 class ShopNavBar extends StatelessWidget {
   final ShopPage active;
   final ValueChanged<ShopPage> onTap;
@@ -52,37 +59,41 @@ class ShopNavBar extends StatelessWidget {
                 child: Text(
                   "Aya's",
                   style: AppFonts.display(
-                    size: isMobile ? 20 : 23,
+                    size: isMobile ? 20 : 17,
                     weight: FontWeight.w800,
                     color: context.colors.cream,
                     letterSpacing: 1.0,
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 16 : 26),
+              SizedBox(width: isMobile ? 16 : 18),
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: Icons.storefront_rounded,
                   label: strings.navShop,
                   active: active == ShopPage.home,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.home),
                 ),
                 _NavIconLabel(
                   icon: Icons.search_rounded,
                   label: strings.navSearch,
                   active: active == ShopPage.search,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.search),
                 ),
                 _NavIconLabel(
                   icon: Icons.design_services_rounded,
                   label: strings.navServices,
                   active: active == ShopPage.services,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.services),
                 ),
                 _NavIconLabel(
                   icon: Icons.person_outline_rounded,
                   label: strings.navAbout,
                   active: active == ShopPage.about,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
@@ -91,6 +102,7 @@ class ShopNavBar extends StatelessWidget {
                 label: strings.navCart,
                 stacked: isMobile,
                 active: active == ShopPage.cart,
+                isMobile: isMobile,
                 badge: cartCount > 0 ? cartCount : null,
                 onTap: () => onTap(ShopPage.cart),
               ),
@@ -100,6 +112,7 @@ class ShopNavBar extends StatelessWidget {
                   label: strings.navSearch,
                   stacked: true,
                   active: active == ShopPage.search,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.search),
                 ),
                 _NavIconLabel(
@@ -107,6 +120,7 @@ class ShopNavBar extends StatelessWidget {
                   label: strings.navServices,
                   stacked: true,
                   active: active == ShopPage.services,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.services),
                 ),
                 _NavIconLabel(
@@ -114,12 +128,14 @@ class ShopNavBar extends StatelessWidget {
                   label: strings.navAbout,
                   stacked: true,
                   active: active == ShopPage.about,
+                  isMobile: isMobile,
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
               _NavIconLabel(
                 icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                 active: false,
+                isMobile: isMobile,
                 onTap: () => context.themeController.toggleTheme(),
               ),
               _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
@@ -132,8 +148,8 @@ class ShopNavBar extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 20 : 30,
-            vertical: isMobile ? 12 : 18,
+            horizontal: isMobile ? 20 : 18,
+            vertical: isMobile ? 12 : 10,
           ),
           decoration: BoxDecoration(
             color: context.colors.surface.withOpacity(0.55),
@@ -176,8 +192,8 @@ class _LanguageToggle extends StatelessWidget {
           context.fontController.toggleArabicMode();
         },
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 9),
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 13 : 16, vertical: isMobile ? 8 : 10),
+          margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 6),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 13 : 12, vertical: isMobile ? 8 : 7),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: context.colors.creamDim.withOpacity(0.35)),
@@ -185,7 +201,7 @@ class _LanguageToggle extends StatelessWidget {
           child: Text(
             isArabic ? 'EN' : 'AR',
             style: AppFonts.label(
-              size: isMobile ? 14 : 15,
+              size: isMobile ? 14 : 12.5,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
@@ -197,12 +213,19 @@ class _LanguageToggle extends StatelessWidget {
   }
 }
 
+/// A single icon (+ optional label) in the nav bar. Sits at a fixed, small
+/// resting size, and pops up larger with a glowing backdrop the moment a
+/// pointer hovers or presses it — then eases straight back down the
+/// instant that pointer leaves or lifts. The scale/glow live entirely on
+/// this one item, so growing one icon never nudges its neighbours or the
+/// bar's overall size.
 class _NavIconLabel extends StatefulWidget {
   final IconData icon;
   final String? label;
   final bool active;
   final int? badge;
   final VoidCallback onTap;
+  final bool isMobile;
   /// When true, renders the label in a small caption under the icon
   /// instead of beside it — used on mobile, where the nav bar is too
   /// narrow for the desktop's side-by-side icon + label layout.
@@ -214,6 +237,7 @@ class _NavIconLabel extends StatefulWidget {
     required this.active,
     this.badge,
     required this.onTap,
+    this.isMobile = false,
     this.stacked = false,
   });
 
@@ -223,13 +247,16 @@ class _NavIconLabel extends StatefulWidget {
 
 class _NavIconLabelState extends State<_NavIconLabel> {
   bool _hovered = false;
+  bool _pressed = false;
+
+  bool get _expanded => _hovered || _pressed;
 
   @override
   Widget build(BuildContext context) {
     final highlighted = widget.active || _hovered;
     final color = highlighted ? context.colors.cream : context.colors.creamDim;
 
-    final iconSize = widget.stacked ? 25.0 : 26.0;
+    final iconSize = widget.isMobile ? 25.0 : 20.0;
 
     final iconWithBadge = Stack(
       clipBehavior: Clip.none,
@@ -284,11 +311,11 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             children: [
               iconWithBadge,
               if (widget.label != null) ...[
-                const SizedBox(width: 10),
+                const SizedBox(width: 7),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 15.5, color: color, letterSpacing: 1.2)
-                      .copyWith(fontWeight: FontWeight.w700),
+                  style: AppFonts.label(size: 12.5, color: color, letterSpacing: 1.0)
+                      .copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ],
@@ -299,11 +326,14 @@ class _NavIconLabelState extends State<_NavIconLabel> {
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 9 : 6)),
+          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 6 : 4)),
           padding: EdgeInsets.symmetric(
-            horizontal: widget.stacked ? 6 : (widget.label != null ? 12 : 9),
-            vertical: widget.stacked ? 6 : 9,
+            horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
+            vertical: widget.stacked ? 6 : 6,
           ),
           decoration: BoxDecoration(
             border: widget.stacked
@@ -319,7 +349,32 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 ? context.colors.orchid.withOpacity(0.14)
                 : null,
           ),
-          child: content,
+          // A tiny bit of extra breathing room around the icon so it has
+          // somewhere to grow into without visually colliding with its
+          // neighbours when it pops up.
+          child: AnimatedScale(
+            scale: _expanded ? 1.35 : 1.0,
+            duration: Duration(milliseconds: _expanded ? 220 : 280),
+            curve: _expanded ? Curves.easeOutBack : Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                boxShadow: _expanded
+                    ? [
+                        BoxShadow(
+                          color: context.colors.orchid.withOpacity(0.55),
+                          blurRadius: 18,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : const [],
+              ),
+              child: content,
+            ),
+          ),
         ),
       ),
     );
