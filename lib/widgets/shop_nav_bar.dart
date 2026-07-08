@@ -132,16 +132,73 @@ class ShopNavBar extends StatelessWidget {
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
-              _NavIconLabel(
-                icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                active: false,
-                isMobile: isMobile,
-                onTap: () => context.themeController.toggleTheme(),
-              ),
-              _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
       ],
     );
 
+    final mainPill = _GlassPill(
+      isMobile: isMobile,
+      child: isMobile
+          ? FittedBox(fit: BoxFit.scaleDown, child: row)
+          : row,
+    );
+
+    // Theme (light/dark) and language (EN/AR) toggles live in their own
+    // small pill, separate from the page-navigation icons — they don't
+    // navigate anywhere, so grouping them with Shop/Search/Services/etc.
+    // was mixing two different kinds of controls into one bar. Sitting
+    // right next to the main pill keeps them close at hand without
+    // crowding the nav icons.
+    final utilityRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _NavIconLabel(
+          icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+          active: false,
+          isMobile: isMobile,
+          onTap: () => context.themeController.toggleTheme(),
+        ),
+        _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
+      ],
+    );
+    final utilityPill = _GlassPill(isMobile: isMobile, child: utilityRow);
+
+    // Desktop has spare horizontal room, so the two pills sit
+    // side-by-side. Mobile doesn't — cramming both pills into one row
+    // was exactly what made the fit feel wrong (either pill got
+    // squeezed or the row overflowed). Stacking them instead only
+    // costs a little vertical space, which mobile has plenty of at
+    // the top of the screen.
+    return isMobile
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              mainPill,
+              const SizedBox(height: 8),
+              utilityPill,
+            ],
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: mainPill),
+              const SizedBox(width: 10),
+              utilityPill,
+            ],
+          );
+  }
+}
+
+/// Shared frosted-glass pill shell used by both the main nav bar and the
+/// separate theme/language utility bar, so the two look like one family
+/// of controls even though they're now two distinct pills.
+class _GlassPill extends StatelessWidget {
+  final Widget child;
+  final bool isMobile;
+
+  const _GlassPill({required this.child, required this.isMobile});
+
+  @override
+  Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(100),
       child: BackdropFilter(
@@ -156,14 +213,7 @@ class ShopNavBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: context.colors.cream.withOpacity(0.08)),
           ),
-          // On mobile the bar can be wider than the screen once every
-          // icon + stacked label + toggle is laid out side by side.
-          // FittedBox scales the whole pill down just enough to keep
-          // every item on screen at once, instead of letting the
-          // ClipRRect above silently clip the right edge off.
-          child: isMobile
-              ? FittedBox(fit: BoxFit.scaleDown, child: row)
-              : row,
+          child: child,
         ),
       ),
     );
