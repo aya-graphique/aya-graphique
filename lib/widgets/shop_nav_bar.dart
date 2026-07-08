@@ -340,45 +340,55 @@ class _NavIconLabelState extends State<_NavIconLabel> {
         child: GestureDetector(
           onTap: widget.onTap,
           child: Container(
+          // Margin only handles spacing between nav items now — it stays
+          // fixed so items don't shove each other around. Everything
+          // that visually grows (background box, shadow, icon, label)
+          // lives together inside the AnimatedScale below, so they all
+          // scale up and down as one single, proportioned unit instead
+          // of the icon ballooning past a background box that stayed
+          // put-size.
           margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 6 : 4)),
-          padding: EdgeInsets.symmetric(
-            horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
-            vertical: widget.stacked ? 6 : 6,
-          ),
-          decoration: BoxDecoration(
-            border: widget.stacked
-                ? null
-                : Border(
-                    bottom: BorderSide(
-                      color: widget.active ? context.colors.orchid : Colors.transparent,
-                      width: 2,
-                    ),
-                  ),
-            borderRadius: widget.stacked ? BorderRadius.circular(12) : null,
-            color: widget.stacked && widget.active
-                ? context.colors.orchid.withOpacity(0.14)
-                : null,
-          ),
-          // A tiny bit of extra breathing room around the icon so it has
-          // somewhere to grow into without visually colliding with its
-          // neighbours when it pops up.
           child: AnimatedScale(
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 2.6 : 1.35) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 3.0 : 1.35) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation
             // instead of a bounce racing a slower ease.
             duration: const Duration(milliseconds: 260),
             curve: Curves.easeOutCubic,
+            alignment: Alignment.center,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOut,
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(100)),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
+                vertical: widget.stacked ? 6 : 6,
+              ),
+              decoration: BoxDecoration(
+                border: widget.stacked
+                    ? null
+                    : Border(
+                        bottom: BorderSide(
+                          color: widget.active ? context.colors.orchid : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                borderRadius: BorderRadius.circular(widget.stacked ? 12 : 100),
+                color: widget.stacked && widget.active
+                    ? context.colors.orchid.withOpacity(0.16)
+                    : null,
+                boxShadow: _expanded
+                    ? [
+                        BoxShadow(
+                          color: context.colors.orchid.withOpacity(0.32),
+                          blurRadius: 22,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : const [],
               ),
               child: content,
             ),
