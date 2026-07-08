@@ -324,12 +324,19 @@ class _NavIconLabelState extends State<_NavIconLabel> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) => setState(() => _pressed = false),
-        onTapCancel: () => setState(() => _pressed = false),
-        child: Container(
+      child: Listener(
+        // Listener reports the raw finger/mouse down-and-up directly — it
+        // never enters the tap gesture arena, so it can't be delayed or
+        // cancelled the way GestureDetector's onTapDown/onTapUp sometimes
+        // were on touch, which is what made the grow effect unreliable on
+        // phones. The GestureDetector below still handles the actual tap
+        // (navigation) exactly as before.
+        onPointerDown: (_) => setState(() => _pressed = true),
+        onPointerUp: (_) => setState(() => _pressed = false),
+        onPointerCancel: (_) => setState(() => _pressed = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
           margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 6 : 4)),
           padding: EdgeInsets.symmetric(
             horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
@@ -375,6 +382,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
               child: content,
             ),
           ),
+        ),
         ),
       ),
     );

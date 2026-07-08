@@ -121,32 +121,16 @@ class _Gallery extends StatelessWidget {
         aspectRatio: isMobile ? 1 : 0.85,
         child: Container(
           decoration: BoxDecoration(gradient: context.colors.cardGradient),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Same softened, edge-to-edge copy of the photo as the
-              // product card backdrop — blends into any empty space left
-              // by .contain instead of showing a bare wall of color.
-              Opacity(
-                opacity: 0.45,
-                child: Image.network(
-                  product.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
-              ),
-              Image.network(
-                product.imageUrl,
-                // .contain so the full product photo is always visible,
-                // uncropped — .cover was slicing off part of the image
-                // whenever its proportions didn't match this fixed
-                // aspect-ratio frame.
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stack) => Center(
-                  child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
-                ),
-              ),
-            ],
+          child: Image.network(
+            product.imageUrl,
+            // .contain so the full product photo is always visible,
+            // uncropped — .cover was slicing off part of the image
+            // whenever its proportions didn't match this fixed
+            // aspect-ratio frame.
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stack) => Center(
+              child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
+            ),
           ),
         ),
       ),
