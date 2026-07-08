@@ -31,13 +31,11 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Image.network(
                     product.imageUrl,
-                    // .contain instead of .cover: the whole photo is
-                    // always visible, uncropped — .cover was slicing off
-                    // the top/bottom (or sides) of the image whenever its
-                    // proportions didn't exactly match the card's fixed
-                    // aspect ratio, which is what was cutting products off
-                    // on phones.
-                    fit: BoxFit.contain,
+                    // .cover fills the entire card area with no empty
+                    // gaps on the sides/top/bottom, cropping slightly
+                    // if the photo's proportions don't exactly match the
+                    // card's aspect ratio.
+                    fit: BoxFit.cover,
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(color: context.colors.surfaceRaised);

@@ -363,24 +363,22 @@ class _NavIconLabelState extends State<_NavIconLabel> {
           // somewhere to grow into without visually colliding with its
           // neighbours when it pops up.
           child: AnimatedScale(
-            scale: _expanded ? 1.35 : 1.0,
-            duration: Duration(milliseconds: _expanded ? 220 : 280),
-            curve: _expanded ? Curves.easeOutBack : Curves.easeOutCubic,
+            // Mobile gets a much bigger pop than desktop — the bar has
+            // more spare room stacked vertically per icon, so the active
+            // icon can grow a lot more without crowding its neighbours.
+            scale: _expanded ? (widget.isMobile ? 2.6 : 1.35) : 1.0,
+            // Same duration/curve whether growing or shrinking, so when
+            // one icon pops up the instant another settles back down,
+            // the two motions feel like one balanced, synced animation
+            // instead of a bounce racing a slower ease.
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOut,
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                boxShadow: _expanded
-                    ? [
-                        BoxShadow(
-                          color: context.colors.orchid.withOpacity(0.55),
-                          blurRadius: 18,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : const [],
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(100)),
               ),
               child: content,
             ),
