@@ -13,6 +13,7 @@ import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
 import 'admin_about_screen.dart';
+import 'admin_home_banners_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_services_screen.dart';
@@ -418,6 +419,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         elevation: 0,
         title: Text('Store admin', style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
         actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AdminHomeBannersScreen()),
+            ),
+            icon: Icon(Icons.view_carousel_outlined, color: context.colors.creamDim),
+            tooltip: 'Home banners',
+          ),
           IconButton(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AdminAboutScreen()),

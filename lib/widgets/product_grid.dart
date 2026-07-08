@@ -13,7 +13,8 @@ class ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final columns = AppBreakpoints.isMobile(width)
+    final isMobile = AppBreakpoints.isMobile(width);
+    final columns = isMobile
         ? 2
         : AppBreakpoints.isTablet(width)
             ? 3
@@ -22,12 +23,14 @@ class ProductGrid extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      // Tighter outer/inner gaps on mobile hand more of the screen width
+      // to each card, so the product photo inside it renders bigger.
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 24),
       itemCount: products.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
+        mainAxisSpacing: isMobile ? 14 : 20,
+        crossAxisSpacing: isMobile ? 14 : 20,
         childAspectRatio: 0.62,
       ),
       itemBuilder: (context, i) {

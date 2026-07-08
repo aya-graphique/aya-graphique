@@ -102,8 +102,8 @@ class _MainShellState extends State<MainShell> {
                     ),
                   Positioned(
                     top: 20,
-                    left: 0,
-                    right: 0,
+                    left: isMobile ? 10 : 0,
+                    right: isMobile ? 10 : 0,
                     child: Center(
                       child: ShopNavBar(active: _page, onTap: _goTo, isMobile: isMobile),
                     ),

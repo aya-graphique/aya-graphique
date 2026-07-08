@@ -342,6 +342,56 @@ create policy "Authenticated delete of about images"
   on storage.objects for delete
   using (bucket_id = 'about-images' and auth.role() = 'authenticated');
 
+-- The promotional banner strip shown near the top of the Home page (free
+-- shipping offers, seasonal promos, new drops). Same shape and same
+-- owner-managed pattern as `about_slides`.
+create table if not exists home_banners (
+  id          uuid primary key default gen_random_uuid(),
+  image_url   text not null,
+  sort_order  integer not null default 0,
+  created_at  timestamptz not null default now()
+);
+
+alter table home_banners enable row level security;
+
+create policy "Public read access to home_banners"
+  on home_banners for select
+  using (true);
+
+create policy "Authenticated write access to home_banners"
+  on home_banners for insert
+  with check (auth.role() = 'authenticated');
+
+create policy "Authenticated update access to home_banners"
+  on home_banners for update
+  using (auth.role() = 'authenticated');
+
+create policy "Authenticated delete access to home_banners"
+  on home_banners for delete
+  using (auth.role() = 'authenticated');
+
+-- Storage bucket for the Home page banner photos. Public to read (so the
+-- photos show up on the storefront), writable only when signed in.
+insert into storage.buckets (id, name, public)
+values ('home-banner-images', 'home-banner-images', true)
+on conflict (id) do nothing;
+
+create policy "Public read access to home banner images"
+  on storage.objects for select
+  using (bucket_id = 'home-banner-images');
+
+create policy "Authenticated upload of home banner images"
+  on storage.objects for insert
+  with check (bucket_id = 'home-banner-images' and auth.role() = 'authenticated');
+
+create policy "Authenticated update of home banner images"
+  on storage.objects for update
+  using (bucket_id = 'home-banner-images' and auth.role() = 'authenticated');
+
+create policy "Authenticated delete of home banner images"
+  on storage.objects for delete
+  using (bucket_id = 'home-banner-images' and auth.role() = 'authenticated');
+
 -- Owner-editable text/pricing for the "Services" page. The categories and
 -- items themselves stay fixed in the app's code (kServiceCategories) — this
 -- table only stores per-item overrides, keyed by "<categoryIndex>-<itemIndex>"

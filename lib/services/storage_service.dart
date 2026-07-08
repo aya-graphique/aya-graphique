@@ -14,6 +14,10 @@ class StorageService {
   /// `supabase/schema.sql` (search for "about-images").
   static const String aboutBucket = 'about-images';
 
+  /// Bucket for the promotional banner strip on the Home page. See
+  /// `supabase/schema.sql` (search for "home-banner-images").
+  static const String homeBannerBucket = 'home-banner-images';
+
   static Future<String> uploadProductImage(Uint8List bytes, String fileName) {
     return _upload(bucket, bytes, fileName);
   }
@@ -27,6 +31,10 @@ class StorageService {
 
   static Future<String> uploadAboutImage(Uint8List bytes, String fileName) {
     return _upload(aboutBucket, bytes, fileName);
+  }
+
+  static Future<String> uploadHomeBannerImage(Uint8List bytes, String fileName) {
+    return _upload(homeBannerBucket, bytes, fileName);
   }
 
   static Future<String> _upload(String bucketName, Uint8List bytes, String fileName) async {

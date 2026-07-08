@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
+import '../models/home_banner.dart';
 import '../models/product.dart';
 import '../services/categories_repository.dart';
+import '../services/home_banners_repository.dart';
 import '../theme/app_theme.dart';
+import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
@@ -39,11 +42,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // to that category's first product photo instead — see
   // _CategoryCircles._thumbFor.
   Map<String, String> _categoryImages = {};
+  List<HomeBanner> _banners = [];
 
   @override
   void initState() {
     super.initState();
     _loadCategoryImages();
+    _loadBanners();
   }
 
   Future<void> _loadCategoryImages() async {
@@ -55,6 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
           if (c.imageUrl.isNotEmpty) c.name: c.imageUrl,
       };
     });
+  }
+
+  Future<void> _loadBanners() async {
+    final banners = await HomeBannersRepository.fetchSlides();
+    if (!mounted) return;
+    setState(() => _banners = banners);
   }
 
   void _openProduct(Product product) {
@@ -94,6 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
             context.strings.marqueeBookmark,
             context.strings.marqueeStand,
           ]),
+          if (_banners.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            HomeBannerSlideshow(
+              banners: _banners,
+              height: widget.isMobile ? 190 : 340,
+            ),
+          ],
           const SizedBox(height: 56),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -313,11 +331,10 @@ class _CategoryCirclesState extends State<_CategoryCircles> {
   @override
   void initState() {
     super.initState();
-    // Auto-advances the row every 20 seconds, looping back to the start
-    // once it reaches the end — a slow, ambient motion rather than
-    // anything the shopper has to keep up with, so it never fights a
-    // manual swipe (a mid-flight timer tick just re-targets smoothly).
-    _timer = Timer.periodic(const Duration(seconds: 20), (_) => _autoAdvance());
+    // Auto-advances the row every 5 seconds, looping back to the start
+    // once it reaches the end — so it never fights a manual swipe (a
+    // mid-flight timer tick just re-targets smoothly).
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _autoAdvance());
   }
 
   @override

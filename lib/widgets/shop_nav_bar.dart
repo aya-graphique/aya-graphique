@@ -30,20 +30,9 @@ class ShopNavBar extends StatelessWidget {
     final isArabic = context.watch<LanguageController>().isArabic;
     final strings = context.strings;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: context.colors.surface.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: context.colors.cream.withOpacity(0.08)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
               // Logo/wordmark — just takes the shopper home. The EN/AR
               // switch lives further down this row; it only ever touches
               // the storefront (LanguageController + FontController) — the
@@ -134,8 +123,28 @@ class ShopNavBar extends StatelessWidget {
                 onTap: () => context.themeController.toggleTheme(),
               ),
               _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
-            ],
+      ],
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(100),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: context.colors.surface.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: context.colors.cream.withOpacity(0.08)),
           ),
+          // On mobile the bar can be wider than the screen once every
+          // icon + stacked label + toggle is laid out side by side.
+          // FittedBox scales the whole pill down just enough to keep
+          // every item on screen at once, instead of letting the
+          // ClipRRect above silently clip the right edge off.
+          child: isMobile
+              ? FittedBox(fit: BoxFit.scaleDown, child: row)
+              : row,
         ),
       ),
     );
