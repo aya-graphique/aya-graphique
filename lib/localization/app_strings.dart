@@ -19,7 +19,7 @@ class AppText {
   String get navShop => _t('Shop', 'المتجر');
   String get navSearch => _t('Search', 'بحث');
   String get navCart => _t('Cart', 'السلة');
-  String get navAbout => _t('Who am I', 'من أنا');
+  String get navAbout => _t('Portfolio', 'من أنا');
   String get navServices => _t('Services', 'الخدمات');
 
   // Home — hero
@@ -97,7 +97,7 @@ class AppText {
   String get noResults =>
       _t('Nothing matches those filters yet.', 'لا توجد نتائج تطابق هذه الفلاتر بعد.');
   String get searchHint =>
-      _t('Search notebooks, calendars, tags…', 'ابحث عن دفاتر، تقويمات، وسوم…');
+      _t('Search notebooks, calendars …', 'ابحث عن دفاتر، تقويمات، وسوم…');
 
   // Cart
   String get cartEyebrow => _t('YOUR CART', 'سلتك');
@@ -237,7 +237,7 @@ class AppText {
   // location and contact info all come from the admin dashboard as free
   // text, so they're shown exactly as the admin typed them (in whichever
   // language that was) — only the surrounding labels below are translated.
-  String get whoAmIEyebrow => _t('PORTFOLIO', 'من أنا');
+  String get whoAmIEyebrow => _t('WHO AM I?', 'من أنا');
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');
