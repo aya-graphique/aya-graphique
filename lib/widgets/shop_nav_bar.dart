@@ -59,7 +59,7 @@ class ShopNavBar extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 18 : 26),
+              SizedBox(width: isMobile ? 16 : 26),
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: Icons.storefront_rounded,
@@ -185,7 +185,7 @@ class _LanguageToggle extends StatelessWidget {
           child: Text(
             isArabic ? 'EN' : 'AR',
             style: AppFonts.label(
-              size: isMobile ? 13 : 15,
+              size: isMobile ? 14 : 15,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
@@ -229,7 +229,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
     final highlighted = widget.active || _hovered;
     final color = highlighted ? context.colors.cream : context.colors.creamDim;
 
-    final iconSize = widget.stacked ? 24.0 : 26.0;
+    final iconSize = widget.stacked ? 25.0 : 26.0;
 
     final iconWithBadge = Stack(
       clipBehavior: Clip.none,
@@ -273,7 +273,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 const SizedBox(height: 4),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 11.5, color: color, letterSpacing: 0.6)
+                  style: AppFonts.label(size: 12.5, color: color, letterSpacing: 0.6)
                       .copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
