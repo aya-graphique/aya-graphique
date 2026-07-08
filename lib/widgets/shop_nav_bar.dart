@@ -248,7 +248,7 @@ class _GlassPill extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 20 : 18,
+            horizontal: isMobile ? 22 : 20,
             vertical: isMobile ? 12 : 10,
           ),
           decoration: BoxDecoration(
@@ -282,7 +282,7 @@ class _MoreToggleButton extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          margin: const EdgeInsets.only(left: 4, right: 2),
           padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
