@@ -249,7 +249,10 @@ class _NavIconLabelState extends State<_NavIconLabel> {
   bool _hovered = false;
   bool _pressed = false;
 
-  bool get _expanded => _hovered || _pressed;
+  // Stays big for as long as this icon's own page is the one currently
+  // open — not just while a pointer happens to be hovering or pressing
+  // it. Hover/press still work too, for the icons that aren't active.
+  bool get _expanded => widget.active || _hovered || _pressed;
 
   @override
   Widget build(BuildContext context) {
