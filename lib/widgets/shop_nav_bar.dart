@@ -90,7 +90,7 @@ class _ShopNavBarState extends State<ShopNavBar> {
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 16 : 18),
+              SizedBox(width: isMobile ? 10 : 12),
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: Icons.storefront_rounded,
@@ -323,8 +323,8 @@ class _LanguageToggle extends StatelessWidget {
           context.fontController.toggleArabicMode();
         },
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 6),
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 13 : 12, vertical: isMobile ? 8 : 7),
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 7, vertical: isMobile ? 6 : 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: context.colors.creamDim.withOpacity(0.35)),
@@ -332,7 +332,7 @@ class _LanguageToggle extends StatelessWidget {
           child: Text(
             isArabic ? 'EN' : 'AR',
             style: AppFonts.label(
-              size: isMobile ? 14 : 12.5,
+              size: isMobile ? 13 : 12,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
@@ -483,7 +483,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 1.08 : 1.2) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 1.22 : 1.35) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation
