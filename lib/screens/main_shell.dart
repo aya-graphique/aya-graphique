@@ -24,6 +24,11 @@ class _MainShellState extends State<MainShell> {
   final ScrollController _homeScrollController = ScrollController();
   final ScrollController _aboutScrollController = ScrollController();
   late Future<List<Product>> _productsFuture;
+  // Only matters on mobile, where the theme/language utility pill opens
+  // *below* the main nav bar. When it's open, page content needs to
+  // shift down by the same amount so the pill sits over empty space
+  // instead of covering the top of the page.
+  bool _utilityOpen = false;
 
   @override
   void initState() {
@@ -82,30 +87,47 @@ class _MainShellState extends State<MainShell> {
                       child: CircularProgressIndicator(color: context.colors.orchid),
                     )
                   else
-                    IndexedStack(
-                      index: _page.index,
-                      children: [
-                        HomeScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          scrollController: _homeScrollController,
-                          onAdminReturn: _refreshProducts,
-                        ),
-                        SearchScreen(products: products, isMobile: isMobile),
-                        GraphicalServicesScreen(isMobile: isMobile),
-                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.home)),
-                        WhoAmIScreen(
-                          isMobile: isMobile,
-                          scrollController: _aboutScrollController,
-                        ),
-                      ],
+                    // On mobile, the utility pill drops down below the
+                    // main nav bar when opened. This padding grows to
+                    // match, pushing the page's own content down so the
+                    // pill has clear space to open into instead of
+                    // floating over the top of whatever's on screen.
+                    AnimatedPadding(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeOut,
+                      padding: EdgeInsets.only(
+                        top: (isMobile && _utilityOpen) ? 54 : 0,
+                      ),
+                      child: IndexedStack(
+                        index: _page.index,
+                        children: [
+                          HomeScreen(
+                            products: products,
+                            isMobile: isMobile,
+                            scrollController: _homeScrollController,
+                            onAdminReturn: _refreshProducts,
+                          ),
+                          SearchScreen(products: products, isMobile: isMobile),
+                          GraphicalServicesScreen(isMobile: isMobile),
+                          CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.home)),
+                          WhoAmIScreen(
+                            isMobile: isMobile,
+                            scrollController: _aboutScrollController,
+                          ),
+                        ],
+                      ),
                     ),
                   Positioned(
                     top: 20,
                     left: isMobile ? 10 : 0,
                     right: isMobile ? 10 : 0,
                     child: Center(
-                      child: ShopNavBar(active: _page, onTap: _goTo, isMobile: isMobile),
+                      child: ShopNavBar(
+                        active: _page,
+                        onTap: _goTo,
+                        isMobile: isMobile,
+                        onUtilityOpenChanged: (open) => setState(() => _utilityOpen = open),
+                      ),
                     ),
                   ),
                 ],

@@ -18,20 +18,44 @@ enum ShopPage { home, search, services, cart, about }
 /// touches (mobile) a single icon, that icon pops up a bit larger with a
 /// soft glow, then eases straight back to its normal size the instant the
 /// pointer leaves or lifts — the rest of the bar never moves.
-class ShopNavBar extends StatelessWidget {
+class ShopNavBar extends StatefulWidget {
   final ShopPage active;
   final ValueChanged<ShopPage> onTap;
   final bool isMobile;
+  /// Fires every time the theme/language utility pill opens or closes,
+  /// so the parent screen can make room for it (push its content down)
+  /// instead of letting the pill float on top and cover it.
+  final ValueChanged<bool>? onUtilityOpenChanged;
 
   const ShopNavBar({
     super.key,
     required this.active,
     required this.onTap,
     this.isMobile = false,
+    this.onUtilityOpenChanged,
   });
 
   @override
+  State<ShopNavBar> createState() => _ShopNavBarState();
+}
+
+class _ShopNavBarState extends State<ShopNavBar> {
+  // Whether the small theme/language utility pill is currently shown.
+  // Starts closed — it only appears once the shopper taps the "more"
+  // button, and tapping it again tucks it back away, so the main bar
+  // stays small and uncluttered by default.
+  bool _utilityOpen = false;
+
+  void _toggleUtility() {
+    setState(() => _utilityOpen = !_utilityOpen);
+    widget.onUtilityOpenChanged?.call(_utilityOpen);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final active = widget.active;
+    final onTap = widget.onTap;
+    final isMobile = widget.isMobile;
     final cartCount = context.watch<CartProvider>().itemCount;
     final isDark = context.watch<ThemeController>().isDark;
     final isArabic = context.watch<LanguageController>().isArabic;
@@ -132,6 +156,10 @@ class ShopNavBar extends StatelessWidget {
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
+              // "More" toggle — reveals/hides the theme + language pill.
+              // It doesn't navigate anywhere, so it never lights up like
+              // the page icons; it just flips open/closed.
+              _MoreToggleButton(open: _utilityOpen, onTap: _toggleUtility),
       ],
     );
 
@@ -143,11 +171,9 @@ class ShopNavBar extends StatelessWidget {
     );
 
     // Theme (light/dark) and language (EN/AR) toggles live in their own
-    // small pill, separate from the page-navigation icons — they don't
-    // navigate anywhere, so grouping them with Shop/Search/Services/etc.
-    // was mixing two different kinds of controls into one bar. Sitting
-    // right next to the main pill keeps them close at hand without
-    // crowding the nav icons.
+    // small pill, tucked away behind the "more" button above instead of
+    // always taking up space — they don't navigate anywhere, so they
+    // don't need to be on-screen permanently the way Shop/Search/etc do.
     final utilityRow = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -160,20 +186,37 @@ class ShopNavBar extends StatelessWidget {
         _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
       ],
     );
-    final utilityPill = _GlassPill(isMobile: isMobile, child: utilityRow);
+
+    // AnimatedSize + AnimatedOpacity gives the pill a soft grow/shrink and
+    // fade in/out as it's toggled, instead of just popping in and out.
+    final utilityPill = ClipRect(
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOut,
+        alignment: Alignment.center,
+        heightFactor: _utilityOpen ? 1.0 : 0.0,
+        widthFactor: isMobile ? 1.0 : (_utilityOpen ? 1.0 : 0.0),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: _utilityOpen ? 1.0 : 0.0,
+          child: _GlassPill(isMobile: isMobile, child: utilityRow),
+        ),
+      ),
+    );
 
     // Desktop has spare horizontal room, so the two pills sit
     // side-by-side. Mobile doesn't — cramming both pills into one row
     // was exactly what made the fit feel wrong (either pill got
     // squeezed or the row overflowed). Stacking them instead only
     // costs a little vertical space, which mobile has plenty of at
-    // the top of the screen.
+    // the top of the screen. Either way, the utility pill only takes
+    // up room while it's actually open.
     return isMobile
         ? Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               mainPill,
-              const SizedBox(height: 8),
+              if (_utilityOpen) const SizedBox(height: 8),
               utilityPill,
             ],
           )
@@ -181,7 +224,7 @@ class ShopNavBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(child: mainPill),
-              const SizedBox(width: 10),
+              if (_utilityOpen) const SizedBox(width: 10),
               utilityPill,
             ],
           );
@@ -214,6 +257,44 @@ class _GlassPill extends StatelessWidget {
             border: Border.all(color: context.colors.cream.withOpacity(0.08)),
           ),
           child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// The small "more" button at the end of the main pill. Tapping it shows
+/// or hides the theme/language utility pill — it never lights up like a
+/// page icon (it doesn't navigate anywhere), it just flips its own
+/// background between resting and "open" to hint at the toggle state.
+class _MoreToggleButton extends StatelessWidget {
+  final bool open;
+  final VoidCallback onTap;
+
+  const _MoreToggleButton({required this.open, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.all(7),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: open
+                ? context.colors.orchid.withOpacity(0.32)
+                : context.colors.orchid.withOpacity(0.14),
+          ),
+          child: Icon(
+            Icons.more_horiz_rounded,
+            size: 18,
+            color: open ? context.colors.cream : context.colors.creamDim,
+          ),
         ),
       ),
     );
@@ -353,7 +434,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 const SizedBox(height: 4),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 12.5, color: color, letterSpacing: 0.6)
+                  style: AppFonts.label(size: 13.5, color: color, letterSpacing: 0.6)
                       .copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
@@ -402,7 +483,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 1.45 : 1.3) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 1.3 : 1.2) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation
