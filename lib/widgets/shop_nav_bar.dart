@@ -156,10 +156,6 @@ class _ShopNavBarState extends State<ShopNavBar> {
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
-              // "More" toggle — reveals/hides the theme + language pill.
-              // It doesn't navigate anywhere, so it never lights up like
-              // the page icons; it just flips open/closed.
-              _MoreToggleButton(open: _utilityOpen, onTap: _toggleUtility),
       ],
     );
 
@@ -169,6 +165,13 @@ class _ShopNavBarState extends State<ShopNavBar> {
           ? FittedBox(fit: BoxFit.scaleDown, child: row)
           : row,
     );
+
+    // "More" toggle now lives as its own free-floating circle right next
+    // to the main pill instead of being squeezed inside it as the last
+    // item. Taking it out of the pill gives every page icon a bit more
+    // breathing room, and the circle can never get clipped by the pill's
+    // own rounded end cap since it isn't inside that shape anymore.
+    final moreButton = _MoreToggleButton(open: _utilityOpen, onTap: _toggleUtility);
 
     // Theme (light/dark) and language (EN/AR) toggles live in their own
     // small pill, tucked away behind the "more" button above instead of
@@ -215,7 +218,14 @@ class _ShopNavBarState extends State<ShopNavBar> {
         ? Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              mainPill,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(child: mainPill),
+                  const SizedBox(width: 8),
+                  moreButton,
+                ],
+              ),
               if (_utilityOpen) const SizedBox(height: 8),
               utilityPill,
             ],
@@ -224,6 +234,8 @@ class _ShopNavBarState extends State<ShopNavBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(child: mainPill),
+              const SizedBox(width: 8),
+              moreButton,
               if (_utilityOpen) const SizedBox(width: 10),
               utilityPill,
             ],
@@ -282,7 +294,7 @@ class _MoreToggleButton extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-          margin: const EdgeInsets.only(left: 4, right: 2),
+          margin: EdgeInsets.zero,
           padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
