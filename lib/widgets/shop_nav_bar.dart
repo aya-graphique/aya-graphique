@@ -352,7 +352,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 3.0 : 1.35) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 1.45 : 1.3) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation
