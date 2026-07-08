@@ -92,7 +92,6 @@ class _AboutSlideshowState extends State<AboutSlideshow> {
         width: double.infinity,
         child: Stack(
           children: [
-            Positioned.fill(child: Container(color: context.colors.surface)),
             ScrollConfiguration(
               behavior: const _DraggableScrollBehavior(),
               child: PageView.builder(
@@ -221,14 +220,14 @@ class _FramedPhoto extends StatelessWidget {
         // A plain darkened cover-fit copy gives the same "no dead space"
         // effect at far lower risk.
         Opacity(
-          opacity: 0.55,
+          opacity: 0.4,
           child: Image.network(
             imageUrl,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => const SizedBox.shrink(),
           ),
         ),
-        Positioned.fill(child: Container(color: Colors.black.withOpacity(0.35))),
+        Positioned.fill(child: Container(color: Colors.black.withOpacity(0.18))),
         Center(
           child: Padding(
             padding: const EdgeInsets.all(10),

@@ -156,9 +156,17 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
               // jump up/down under the fixed nav bar.
               SizedBox(height: widget.isMobile ? 120 : 150),
               RevealOnScroll(
-                child: AboutSlideshow(
-                  slides: slides,
-                  height: widget.isMobile ? 460 : 620,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Scales smoothly with the available width instead of
+                    // snapping between just two fixed heights, so tablet
+                    // widths (between the mobile and desktop breakpoints)
+                    // get a proportional size rather than either a cramped
+                    // mobile frame or an oversized desktop one.
+                    final width = constraints.maxWidth;
+                    final height = (width * 0.62).clamp(360.0, 620.0);
+                    return AboutSlideshow(slides: slides, height: height);
+                  },
                 ),
               ),
               const SizedBox(height: 40),

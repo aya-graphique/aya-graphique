@@ -52,14 +52,14 @@ class ShopNavBar extends StatelessWidget {
                 child: Text(
                   "Aya's",
                   style: AppFonts.display(
-                    size: 18,
+                    size: isMobile ? 20 : 23,
                     weight: FontWeight.w800,
                     color: context.colors.cream,
                     letterSpacing: 1.0,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isMobile ? 18 : 26),
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: Icons.storefront_rounded,
@@ -131,7 +131,10 @@ class ShopNavBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 30,
+            vertical: isMobile ? 12 : 18,
+          ),
           decoration: BoxDecoration(
             color: context.colors.surface.withOpacity(0.55),
             borderRadius: BorderRadius.circular(100),
@@ -173,8 +176,8 @@ class _LanguageToggle extends StatelessWidget {
           context.fontController.toggleArabicMode();
         },
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 6),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 9),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 13 : 16, vertical: isMobile ? 8 : 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: context.colors.creamDim.withOpacity(0.35)),
@@ -182,7 +185,7 @@ class _LanguageToggle extends StatelessWidget {
           child: Text(
             isArabic ? 'EN' : 'AR',
             style: AppFonts.label(
-              size: 12,
+              size: isMobile ? 13 : 15,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
@@ -226,26 +229,28 @@ class _NavIconLabelState extends State<_NavIconLabel> {
     final highlighted = widget.active || _hovered;
     final color = highlighted ? context.colors.cream : context.colors.creamDim;
 
+    final iconSize = widget.stacked ? 24.0 : 26.0;
+
     final iconWithBadge = Stack(
       clipBehavior: Clip.none,
       children: [
-        Icon(widget.icon, size: 20, color: color),
+        Icon(widget.icon, size: iconSize, color: color),
         if (widget.badge != null)
           Positioned(
-            top: -6,
-            right: -8,
+            top: -7,
+            right: -9,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 gradient: context.colors.violetGradient,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              constraints: const BoxConstraints(minWidth: 19, minHeight: 19),
               child: Text(
                 '${widget.badge}',
                 textAlign: TextAlign.center,
                 style: AppFonts.label(
-                  size: 10,
+                  size: 11.5,
                   weight: FontWeight.w700,
                   color: Colors.white,
                   letterSpacing: 0,
@@ -265,11 +270,11 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             children: [
               iconWithBadge,
               if (widget.label != null) ...[
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 9, color: color, letterSpacing: 0.6)
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style: AppFonts.label(size: 11.5, color: color, letterSpacing: 0.6)
+                      .copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ],
@@ -279,11 +284,11 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             children: [
               iconWithBadge,
               if (widget.label != null) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 12.5, color: color, letterSpacing: 1.2)
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style: AppFonts.label(size: 15.5, color: color, letterSpacing: 1.2)
+                      .copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ],
@@ -295,10 +300,10 @@ class _NavIconLabelState extends State<_NavIconLabel> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 3 : (widget.label != null ? 6 : 4)),
+          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 9 : 6)),
           padding: EdgeInsets.symmetric(
-            horizontal: widget.stacked ? 4 : (widget.label != null ? 8 : 6),
-            vertical: widget.stacked ? 4 : 6,
+            horizontal: widget.stacked ? 6 : (widget.label != null ? 12 : 9),
+            vertical: widget.stacked ? 6 : 9,
           ),
           decoration: BoxDecoration(
             border: widget.stacked
