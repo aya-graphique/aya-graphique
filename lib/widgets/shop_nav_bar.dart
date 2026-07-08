@@ -249,14 +249,14 @@ class _NavIconLabelState extends State<_NavIconLabel> {
   bool _hovered = false;
   bool _pressed = false;
 
-  // Stays big for as long as this icon's own page is the one currently
-  // open — not just while a pointer happens to be hovering or pressing
-  // it. Hover/press still work too, for the icons that aren't active.
-  bool get _expanded => widget.active || _hovered || _pressed;
+  // Only reacts to the icon's own page actually being open (i.e. it was
+  // clicked), plus a brief press-down feedback. Hovering the mouse over
+  // it on desktop no longer pops it up on its own.
+  bool get _expanded => widget.active || _pressed;
 
   @override
   Widget build(BuildContext context) {
-    final highlighted = widget.active || _hovered;
+    final highlighted = widget.active;
     final color = highlighted ? context.colors.cream : context.colors.creamDim;
 
     final iconSize = widget.isMobile ? 25.0 : 20.0;
@@ -378,14 +378,14 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                       ),
                 borderRadius: BorderRadius.circular(widget.stacked ? 12 : 100),
                 color: widget.stacked && widget.active
-                    ? context.colors.orchid.withOpacity(0.16)
+                    ? context.colors.orchid.withOpacity(0.10)
                     : null,
                 boxShadow: _expanded
                     ? [
                         BoxShadow(
-                          color: context.colors.orchid.withOpacity(0.32),
-                          blurRadius: 22,
-                          spreadRadius: 2,
+                          color: context.colors.orchid.withOpacity(0.18),
+                          blurRadius: 14,
+                          spreadRadius: 1,
                         ),
                       ]
                     : const [],
