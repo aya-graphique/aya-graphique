@@ -283,7 +283,7 @@ class _MoreToggleButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.all(7),
+          padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: open
@@ -292,7 +292,7 @@ class _MoreToggleButton extends StatelessWidget {
           ),
           child: Icon(
             Icons.more_horiz_rounded,
-            size: 18,
+            size: 22,
             color: open ? context.colors.cream : context.colors.creamDim,
           ),
         ),
@@ -483,7 +483,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 1.3 : 1.2) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 1.08 : 1.2) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation
@@ -508,14 +508,12 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                         ),
                       ),
                 borderRadius: BorderRadius.circular(widget.stacked ? 12 : 100),
-                color: widget.stacked && widget.active
-                    ? context.colors.orchid.withOpacity(0.10)
-                    : null,
-                boxShadow: _expanded
+                color: null,
+                boxShadow: widget.active
                     ? [
                         BoxShadow(
-                          color: context.colors.orchid.withOpacity(0.18),
-                          blurRadius: 14,
+                          color: context.colors.orchid.withOpacity(0.35),
+                          blurRadius: 16,
                           spreadRadius: 1,
                         ),
                       ]
