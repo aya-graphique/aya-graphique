@@ -87,34 +87,47 @@ class _ShopNavBarState extends State<ShopNavBar> {
                     weight: FontWeight.w800,
                     color: context.colors.cream,
                     letterSpacing: 1.0,
+                    // The wordmark is always Latin text and the nav bar is
+                    // meant to stay a fixed, compact size in either
+                    // language — don't let the Arabic-mode size boost
+                    // (meant for actual Arabic copy) inflate it.
+                    boostArabicSize: false,
                   ),
                 ),
               ),
               SizedBox(width: isMobile ? 10 : 12),
               if (!isMobile) ...[
                 _NavIconLabel(
-                  icon: Icons.storefront_rounded,
+                  icon: active == ShopPage.home
+                      ? Icons.storefront_rounded
+                      : Icons.storefront_outlined,
                   label: strings.navShop,
                   active: active == ShopPage.home,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.home),
                 ),
                 _NavIconLabel(
-                  icon: Icons.search_rounded,
+                  icon: active == ShopPage.search
+                      ? Icons.search_rounded
+                      : Icons.search_outlined,
                   label: strings.navSearch,
                   active: active == ShopPage.search,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.search),
                 ),
                 _NavIconLabel(
-                  icon: Icons.design_services_rounded,
+                  icon: active == ShopPage.services
+                      ? Icons.design_services_rounded
+                      : Icons.design_services_outlined,
                   label: strings.navServices,
                   active: active == ShopPage.services,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.services),
                 ),
                 _NavIconLabel(
-                  icon: Icons.person_outline_rounded,
+                  icon: active == ShopPage.about
+                      ? Icons.person_rounded
+                      : Icons.person_outline_rounded,
                   label: strings.navAbout,
                   active: active == ShopPage.about,
                   isMobile: isMobile,
@@ -122,7 +135,9 @@ class _ShopNavBarState extends State<ShopNavBar> {
                 ),
               ],
               _NavIconLabel(
-                icon: Icons.shopping_bag_rounded,
+                icon: active == ShopPage.cart
+                    ? Icons.shopping_bag_rounded
+                    : Icons.shopping_bag_outlined,
                 label: strings.navCart,
                 stacked: isMobile,
                 active: active == ShopPage.cart,
@@ -132,7 +147,9 @@ class _ShopNavBarState extends State<ShopNavBar> {
               ),
               if (isMobile) ...[
                 _NavIconLabel(
-                  icon: Icons.search_rounded,
+                  icon: active == ShopPage.search
+                      ? Icons.search_rounded
+                      : Icons.search_outlined,
                   label: strings.navSearch,
                   stacked: true,
                   active: active == ShopPage.search,
@@ -140,7 +157,9 @@ class _ShopNavBarState extends State<ShopNavBar> {
                   onTap: () => onTap(ShopPage.search),
                 ),
                 _NavIconLabel(
-                  icon: Icons.design_services_rounded,
+                  icon: active == ShopPage.services
+                      ? Icons.design_services_rounded
+                      : Icons.design_services_outlined,
                   label: strings.navServices,
                   stacked: true,
                   active: active == ShopPage.services,
@@ -148,7 +167,9 @@ class _ShopNavBarState extends State<ShopNavBar> {
                   onTap: () => onTap(ShopPage.services),
                 ),
                 _NavIconLabel(
-                  icon: Icons.person_outline_rounded,
+                  icon: active == ShopPage.about
+                      ? Icons.person_rounded
+                      : Icons.person_outline_rounded,
                   label: strings.navAbout,
                   stacked: true,
                   active: active == ShopPage.about,
@@ -343,11 +364,14 @@ class _LanguageToggle extends StatelessWidget {
           ),
           child: Text(
             isArabic ? 'EN' : 'AR',
+            // This label is always Latin ("EN"/"AR") — keep it a fixed
+            // size regardless of which language is active.
             style: AppFonts.label(
               size: isMobile ? 13 : 12,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
+              boostArabicSize: false,
             ),
           ),
         ),
@@ -392,10 +416,10 @@ class _NavIconLabelState extends State<_NavIconLabel> {
   bool _hovered = false;
   bool _pressed = false;
 
-  // Only reacts to the icon's own page actually being open (i.e. it was
-  // clicked), plus a brief press-down feedback. Hovering the mouse over
-  // it on desktop no longer pops it up on its own.
-  bool get _expanded => widget.active || _pressed;
+  // Active page, a brief press-down, or simply hovering (desktop) all
+  // grow the icon+label as one unit — active/inactive itself is shown
+  // by the icon's shape (filled vs. outline) instead, see build() below.
+  bool get _expanded => widget.active || _pressed || _hovered;
 
   @override
   Widget build(BuildContext context) {
@@ -445,8 +469,16 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 const SizedBox(height: 4),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 13.5, color: color, letterSpacing: 0.6)
-                      .copyWith(fontWeight: FontWeight.w700),
+                  // boostArabicSize: false — nav labels stay the same
+                  // compact size in Arabic as in English, matching the
+                  // bar's fixed footprint instead of growing with the
+                  // Arabic-mode font boost.
+                  style: AppFonts.label(
+                    size: 13.5,
+                    color: color,
+                    letterSpacing: 0.6,
+                    boostArabicSize: false,
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ],
@@ -459,8 +491,14 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 const SizedBox(width: 7),
                 Text(
                   widget.label!,
-                  style: AppFonts.label(size: 12.5, color: color, letterSpacing: 1.0)
-                      .copyWith(fontWeight: FontWeight.w600),
+                  // Same fix as the stacked (mobile) label above, for the
+                  // desktop side-by-side layout.
+                  style: AppFonts.label(
+                    size: 12.5,
+                    color: color,
+                    letterSpacing: 1.0,
+                    boostArabicSize: false,
+                  ).copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ],
