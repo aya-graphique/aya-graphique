@@ -260,7 +260,7 @@ class _GlassPill extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 22 : 20,
+            horizontal: isMobile ? 20 : 16,
             vertical: isMobile ? 12 : 10,
           ),
           decoration: BoxDecoration(
@@ -295,7 +295,7 @@ class _MoreToggleButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           margin: EdgeInsets.zero,
-          padding: const EdgeInsets.all(9),
+          padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: open
@@ -303,8 +303,8 @@ class _MoreToggleButton extends StatelessWidget {
                 : context.colors.orchid.withOpacity(0.14),
           ),
           child: Icon(
-            Icons.more_horiz_rounded,
-            size: 22,
+            Icons.more_vert_rounded,
+            size: 20,
             color: open ? context.colors.cream : context.colors.creamDim,
           ),
         ),
@@ -490,12 +490,12 @@ class _NavIconLabelState extends State<_NavIconLabel> {
           // scale up and down as one single, proportioned unit instead
           // of the icon ballooning past a background box that stayed
           // put-size.
-          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 6 : 4)),
+          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 4 : 3)),
           child: AnimatedScale(
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
             // icon can grow a lot more without crowding its neighbours.
-            scale: _expanded ? (widget.isMobile ? 1.22 : 1.35) : 1.0,
+            scale: _expanded ? (widget.isMobile ? 1.15 : 1.18) : 1.0,
             // Same duration/curve whether growing or shrinking, so when
             // one icon pops up the instant another settles back down,
             // the two motions feel like one balanced, synced animation

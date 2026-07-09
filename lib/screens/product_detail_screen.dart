@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
@@ -46,6 +47,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       icon: Icons.arrow_back_rounded,
                       onTap: () => Navigator.of(context).pop(),
                     ),
+                    const Spacer(),
+                    _CartHeaderBadge(onTap: () => Navigator.of(context).pop()),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -92,17 +95,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _addToCart(BuildContext context, CartProvider cart, Product product) {
     cart.add(product, quantity: _quantity);
     final colors = context.colorsRead;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1200),
-        backgroundColor: colors.surfaceRaised,
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-          context.strings.addedQtyToCart(_quantity, product.name),
-          style: AppFonts.body(size: 13, color: colors.cream),
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 2200),
+          backgroundColor: colors.surfaceRaised,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: colors.orchid.withOpacity(0.5), width: 1),
+          ),
+          content: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: colors.violetGradient,
+                ),
+                child: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  context.strings.addedQtyToCart(_quantity, product.name),
+                  style: AppFonts.body(size: 13, color: colors.cream),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -274,6 +300,57 @@ class _QuantityStepper extends StatelessWidget {
             onPressed: () => onChanged(quantity + 1),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CartHeaderBadge extends StatelessWidget {
+  final VoidCallback onTap;
+  const _CartHeaderBadge({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final count = context.watch<CartProvider>().itemCount;
+    return Material(
+      color: context.colors.surface.withOpacity(0.7),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(Icons.shopping_bag_rounded, size: 20, color: context.colors.cream),
+              if (count > 0)
+                Positioned(
+                  top: -6,
+                  right: -8,
+                  child: AnimatedScale(
+                    scale: 1,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutBack,
+                    child: Container(
+                      key: ValueKey(count),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        gradient: context.colors.violetGradient,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+                      child: Text(
+                        '$count',
+                        textAlign: TextAlign.center,
+                        style: AppFonts.label(size: 10.5, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
