@@ -399,8 +399,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
 
   @override
   Widget build(BuildContext context) {
-    final highlighted = widget.active;
-    final color = highlighted ? context.colors.cream : context.colors.creamDim;
+    final color = _expanded ? context.colors.cream : context.colors.creamDim;
 
     final iconSize = widget.isMobile ? 25.0 : 20.0;
 
@@ -510,27 +509,16 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
                 vertical: widget.stacked ? 6 : 6,
               ),
-              decoration: BoxDecoration(
-                border: widget.stacked
-                    ? null
-                    : Border(
+              decoration: widget.stacked
+                  ? null
+                  : BoxDecoration(
+                      border: Border(
                         bottom: BorderSide(
                           color: widget.active ? context.colors.orchid : Colors.transparent,
                           width: 2,
                         ),
                       ),
-                borderRadius: BorderRadius.circular(widget.stacked ? 12 : 100),
-                color: null,
-                boxShadow: widget.active
-                    ? [
-                        BoxShadow(
-                          color: context.colors.orchid.withOpacity(0.35),
-                          blurRadius: 16,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : const [],
-              ),
+                    ),
               child: content,
             ),
           ),
