@@ -84,11 +84,12 @@ class WhoAmIScreen extends StatefulWidget {
   final ScrollController? scrollController;
 
   /// When true, renders just the slideshow + profile content with no outer
-  /// scroll view, no scroll controller, and no top nav-bar offset — used to
-  /// drop this whole section straight into another scrollable page (see
-  /// HomeScreen, which embeds it after the shop grid). When false (the
-  /// standalone "About" tab), it wraps itself in its own
-  /// SingleChildScrollView using [scrollController], same as before.
+  /// scroll view, no scroll controller, and no top nav-bar offset — for
+  /// dropping this section straight into another scrollable page. Nothing
+  /// currently does that (Home used to, but "Who am I" is a standalone
+  /// tab now); kept around in case that's ever useful again. When false
+  /// (today's only real case, the standalone "About" tab), it wraps
+  /// itself in its own SingleChildScrollView using [scrollController].
   final bool embedded;
 
   const WhoAmIScreen({
@@ -276,7 +277,7 @@ class _Profile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(100),
                         // Was a flat white border — invisible against a white
                         // surface in light mode. Cream adapts per theme.
-                        border: Border.all(color: context.colors.cream.withOpacity(0.1)),
+                        border: Border.all(color: context.colors.border(0.1)),
                       ),
                       child: Text(
                         _capitalizeWords(s),
@@ -396,7 +397,7 @@ class _TimelineSection extends StatelessWidget {
           // above the text rather than beside it.
           if (i != entries.length - 1) ...[
             const SizedBox(height: 8),
-            Container(width: 2, height: 24, color: context.colors.cream.withOpacity(0.14)),
+            Container(width: 2, height: 24, color: context.colors.border(0.14)),
             const SizedBox(height: 8),
           ],
         ],
@@ -474,7 +475,7 @@ class _ContactButton extends StatelessWidget {
           color: filled ? null : context.colors.surface,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: filled ? Colors.transparent : context.colors.cream.withOpacity(0.12),
+            color: filled ? Colors.transparent : context.colors.border(0.12),
           ),
         ),
         child: Row(
@@ -508,7 +509,7 @@ class _EmptyProfileNotice extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.cream.withOpacity(0.1)),
+        border: Border.all(color: context.colors.border(0.1)),
       ),
       child: Column(
         children: [

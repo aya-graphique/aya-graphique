@@ -584,7 +584,7 @@ class _CategoryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceRaised.withOpacity(0.5),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.cream.withOpacity(isOpen ? 0.16 : 0.08)),
+        border: Border.all(color: colors.border(isOpen ? 0.16 : 0.08)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -724,7 +724,7 @@ class _ItemRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface.withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.cream.withOpacity(isOpen ? 0.14 : 0.06)),
+        border: Border.all(color: colors.border(isOpen ? 0.14 : 0.06)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -785,7 +785,7 @@ class _ItemRow extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(height: 1, color: colors.cream.withOpacity(0.08)),
+                        Container(height: 1, color: colors.border(0.08)),
                         const SizedBox(height: 14),
                         if (description != null) ...[
                           Text(

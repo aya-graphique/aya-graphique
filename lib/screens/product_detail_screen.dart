@@ -223,7 +223,7 @@ class _Details extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: context.colors.surface,
                         borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                        border: Border.all(color: context.colors.border(0.08)),
                       ),
                       child: Text('#$t',
                           style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 0.5, text: t)),
@@ -279,7 +279,7 @@ class _QuantityStepper extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+        border: Border.all(color: context.colors.border(0.08)),
       ),
       child: Row(
         children: [

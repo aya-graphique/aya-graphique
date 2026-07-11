@@ -36,6 +36,13 @@ class StorageService {
     return _upload(bucket, bytes, fileName);
   }
 
+  /// Same reasoning as [uploadCategoryImage] — the owner-managed
+  /// "Illustration & Art" circles reuse this same bucket rather than
+  /// getting one of their own.
+  static Future<String> uploadIllustrationArtImage(Uint8List bytes, String fileName) {
+    return _upload(bucket, bytes, fileName);
+  }
+
   static Future<String> uploadAboutImage(Uint8List bytes, String fileName) {
     return _upload(aboutBucket, bytes, fileName);
   }

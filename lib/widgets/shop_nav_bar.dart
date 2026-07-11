@@ -6,7 +6,7 @@ import '../providers/cart_provider.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 
-enum ShopPage { home, search, services, about, cart }
+enum ShopPage { home, shop, search, services, about, cart }
 
 /// The same frosted glass pill nav from the Aya's Graphique brand system,
 /// re-purposed for page navigation instead of scroll-to-section links, plus
@@ -80,12 +80,21 @@ class ShopNavBar extends StatelessWidget {
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: active == ShopPage.home
-                      ? Icons.storefront_rounded
-                      : Icons.storefront_outlined,
-                  label: strings.navShop,
+                      ? Icons.home_rounded
+                      : Icons.home_outlined,
+                  label: strings.navHome,
                   active: active == ShopPage.home,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.home),
+                ),
+                _NavIconLabel(
+                  icon: active == ShopPage.shop
+                      ? Icons.storefront_rounded
+                      : Icons.storefront_outlined,
+                  label: strings.navShop,
+                  active: active == ShopPage.shop,
+                  isMobile: isMobile,
+                  onTap: () => onTap(ShopPage.shop),
                 ),
                 _NavIconLabel(
                   icon: active == ShopPage.search
@@ -128,6 +137,16 @@ class ShopNavBar extends StatelessWidget {
               ),
               if (isMobile) ...[
                 _NavIconLabel(
+                  icon: active == ShopPage.shop
+                      ? Icons.storefront_rounded
+                      : Icons.storefront_outlined,
+                  label: strings.navShop,
+                  stacked: true,
+                  active: active == ShopPage.shop,
+                  isMobile: isMobile,
+                  onTap: () => onTap(ShopPage.shop),
+                ),
+                _NavIconLabel(
                   icon: active == ShopPage.search
                       ? Icons.search_rounded
                       : Icons.search_outlined,
@@ -164,7 +183,7 @@ class ShopNavBar extends StatelessWidget {
                 width: 1,
                 height: isMobile ? 22 : 18,
                 margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 5),
-                color: context.colors.creamDim.withOpacity(0.25),
+                color: context.colors.border(0.25),
               ),
               // Theme (light/dark) and language (EN/AR) toggles now live
               // right here in the main pill alongside the page icons,
@@ -310,11 +329,19 @@ class ShopNavDrawer extends StatelessWidget {
                   ),
                   _DrawerItem(
                     icon: active == ShopPage.home
+                        ? Icons.home_rounded
+                        : Icons.home_outlined,
+                    label: strings.navHome,
+                    active: active == ShopPage.home,
+                    onTap: () => go(ShopPage.home),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.shop
                         ? Icons.storefront_rounded
                         : Icons.storefront_outlined,
                     label: strings.navShop,
-                    active: active == ShopPage.home,
-                    onTap: () => go(ShopPage.home),
+                    active: active == ShopPage.shop,
+                    onTap: () => go(ShopPage.shop),
                   ),
                   _DrawerItem(
                     icon: active == ShopPage.search
@@ -352,7 +379,7 @@ class ShopNavDrawer extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     child: Divider(
-                      color: context.colors.creamDim.withOpacity(0.25),
+                      color: context.colors.border(0.25),
                       height: 1,
                     ),
                   ),
@@ -488,7 +515,7 @@ class _GlassPill extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colors.surface.withOpacity(0.55),
             borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+            border: Border.all(color: context.colors.border(0.08)),
           ),
           child: child,
         ),
@@ -523,7 +550,7 @@ class _LanguageToggle extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 7, vertical: isMobile ? 6 : 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: context.colors.creamDim.withOpacity(0.35)),
+            border: Border.all(color: context.colors.border(0.35)),
           ),
           child: Text(
             isArabic ? 'EN' : 'AR',

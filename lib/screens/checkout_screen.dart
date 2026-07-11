@@ -364,7 +364,7 @@ class _ShippingForm extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Form(
         key: formKey,
@@ -528,7 +528,7 @@ class _PaymentOption extends StatelessWidget {
           color: context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? context.colors.orchid : context.colors.cream.withOpacity(0.08),
+            color: selected ? context.colors.orchid : context.colors.border(0.08),
             width: selected ? 1.4 : 1,
           ),
         ),
@@ -617,7 +617,7 @@ class _OrderReview extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,7 +641,7 @@ class _OrderReview extends StatelessWidget {
               )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Divider(color: context.colors.cream.withOpacity(0.12), height: 1),
+            child: Divider(color: context.colors.border(0.12), height: 1),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

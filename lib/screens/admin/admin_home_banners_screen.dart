@@ -143,8 +143,11 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
             Text(
               'The photos that auto-advance in the banner strip near the '
               'top of the Home page, every 5 seconds. Drag to reorder. '
-              'Wide photos (roughly 3:1) look best — they fill the full '
-              'width of the strip.',
+              'The strip is always a 16:9 frame — on phone and on '
+              'desktop alike — so a 16:9 photo (e.g. 1920×1080) shows '
+              'the exact same crop everywhere. Keep the important part '
+              'of the photo centered, since narrower screens crop the '
+              'sides more than wide ones.',
               style: AppFonts.body(size: 13, color: context.colors.creamDim),
             ),
             const SizedBox(height: 20),
@@ -165,7 +168,7 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
                 decoration: BoxDecoration(
                   color: context.colors.surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                  border: Border.all(color: context.colors.border(0.08)),
                 ),
                 child: Text('No banners yet — add the first one below.',
                     style: AppFonts.body(size: 13, color: context.colors.creamDim)),
@@ -201,7 +204,7 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
                 decoration: BoxDecoration(
                   color: context.colors.surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: context.colors.cream.withOpacity(0.1)),
+                  border: Border.all(color: context.colors.border(0.1)),
                 ),
                 child: _uploadingSlide
                     ? SizedBox(
@@ -247,7 +250,7 @@ class _SlideRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

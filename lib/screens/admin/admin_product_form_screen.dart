@@ -228,7 +228,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                         decoration: BoxDecoration(
                           color: context.colors.surface,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: context.colors.cream.withOpacity(0.1)),
+                          border: Border.all(color: context.colors.border(0.1)),
                         ),
                         child: _uploadingImage
                             ? SizedBox(
@@ -414,7 +414,7 @@ class _CategoryChip extends StatelessWidget {
           color: selected ? null : context.colors.surface,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: selected ? Colors.transparent : context.colors.cream.withOpacity(0.1),
+            color: selected ? Colors.transparent : context.colors.border(0.1),
           ),
         ),
         child: Text(
@@ -461,7 +461,7 @@ class _TextField extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colors.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+            border: Border.all(color: context.colors.border(0.08)),
           ),
           child: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,

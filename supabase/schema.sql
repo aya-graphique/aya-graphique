@@ -463,3 +463,36 @@ create policy "Authenticated write access to service_category_images"
 create policy "Authenticated update access to service_category_images"
   on service_category_images for update
   using (auth.role() = 'authenticated');
+
+-- The owner-managed "Illustration & Art" circles row on the Home page —
+-- unlike the fixed 3-item Services row above, this is a fully open-ended
+-- list the owner adds/edits/deletes/reorders from the admin dashboard.
+-- Same shape and pattern as `home_banners`, just with a bilingual title
+-- alongside each photo.
+create table if not exists illustration_art_items (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null default '',
+  title_ar    text not null default '',
+  image_url   text not null,
+  sort_order  integer not null default 0,
+  created_at  timestamptz not null default now()
+);
+
+alter table illustration_art_items enable row level security;
+
+create policy "Public read access to illustration_art_items"
+  on illustration_art_items for select
+  using (true);
+
+create policy "Authenticated write access to illustration_art_items"
+  on illustration_art_items for insert
+  with check (auth.role() = 'authenticated');
+
+create policy "Authenticated update access to illustration_art_items"
+  on illustration_art_items for update
+  using (auth.role() = 'authenticated');
+
+create policy "Authenticated delete access to illustration_art_items"
+  on illustration_art_items for delete
+  using (auth.role() = 'authenticated');
+

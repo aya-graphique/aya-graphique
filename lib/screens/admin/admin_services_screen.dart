@@ -195,7 +195,7 @@ class _CategorySection extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: context.colors.surfaceRaised,
-                  border: Border.all(color: context.colors.cream.withOpacity(0.12)),
+                  border: Border.all(color: context.colors.border(0.12)),
                 ),
                 child: uploading
                     ? Center(
@@ -266,7 +266,7 @@ class _ItemTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+          border: Border.all(color: context.colors.border(0.06)),
         ),
         child: Row(
           children: [

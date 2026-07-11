@@ -16,6 +16,7 @@ class AppText {
   String _t(String en, String ar) => isArabic ? ar : en;
 
   // Nav bar
+  String get navHome => _t('Home', 'الرئيسية');
   String get navShop => _t('Shop', 'المتجر');
   String get navSearch => _t('Search', 'بحث');
   String get navCart => _t('Cart', 'السلة');
@@ -36,7 +37,6 @@ class AppText {
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
   String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
   String get marqueeStand => _t('CALENDAR STAND', 'حامل');
-  String get shopTheCollection => _t('SHOP THE COLLECTION', 'تسوق المجموعة');
 
   // Home — collection section
   String get collectionEyebrow => _t('THE COLLECTION', 'المجموعة');
@@ -53,6 +53,17 @@ class AppText {
   // Home — best sellers
   String get bestSellersEyebrow => _t('CUSTOMER FAVOURITES', 'الأكثر طلبًا');
   String get bestSellersTitle => _t('Best sellers', 'الأكثر مبيعًا');
+
+  // Home — "most requested" circles (below the "available for" card)
+  String get mostRequestedEyebrow => _t('MOST REQUESTED', 'الأكثر طلبًا');
+  String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الفنية');
+
+  // Home — service circles row
+  String get homeServicesEyebrow => _t('SERVICES', 'الخدمات');
+
+  // Home — illustration & art circles (owner-managed from the dashboard)
+  String get illustrationArtEyebrow => _t('ILLUSTRATION & ART', 'رسومات وفنون توضيحية');
+
 
   // Home — testimonials
   String get testimonialsEyebrow => _t('TESTIMONIALS', 'التوصيات');
@@ -245,13 +256,17 @@ class AppText {
   // the embedded Services section used to, links down to the full "Who am
   // I" section below.
   String get viewFullProfile => _t('View full profile', 'شاهد الملف الشخصي كاملاً');
-  // The 3 audience rows in that same card — each taps straight through to
-  // the matching category on the Services tab (see OwnerIntroCard).
+  // The audience circles in that same card — each taps straight through
+  // to the matching category on the Services tab (see OwnerIntroCard).
   String get availableForEyebrow => _t('AVAILABLE FOR', 'متاحة للعمل مع');
   String get restaurantOwnersLabel => _t('Restaurant owners', 'أصحاب المطاعم');
   String get hotelOwnersLabel => _t('Hotel owners', 'أصحاب الفنادق');
+  String get companyOwnersLabel => _t('Company owners', 'أصحاب الشركات');
+  String get brandingLabel => _t('Branding', 'الهوية التجارية');
+  String get illustrationClientsLabel => _t('Illustration', 'الرسوم التوضيحية');
   String get privateWorkshopIndividualsLabel =>
       _t('Individuals — private workshops', 'الأفراد — ورش فردية');
+  String get aspiringDesignersLabel => _t('Aspiring designers', 'المصممون الطموحون');
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');

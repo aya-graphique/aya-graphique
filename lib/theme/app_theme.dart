@@ -55,6 +55,20 @@ class AppColors {
     required this.cardGradient,
   });
 
+  /// True for the dark palette, where [cream] is a light hue used as a
+  /// near-white hairline on dark surfaces. False for the light palette,
+  /// where [cream] is a dark hue used for ink-colored borders/text.
+  bool get isDark => cream.computeLuminance() > 0.5;
+
+  /// Theme-aware border tone. In dark mode this stays a faint light
+  /// hairline (as [opacity] suggests). In light mode the same low opacity
+  /// would be nearly invisible against a white surface, so it's boosted
+  /// to read as a clearly visible dark border instead.
+  Color border(double opacity) {
+    if (isDark) return cream.withOpacity(opacity);
+    return cream.withOpacity((opacity * 3.2).clamp(0.0, 0.65));
+  }
+
   /// The original moody dark palette.
   static const AppColors dark = AppColors._(
     bgDeep: Color(0xFF0D0512),
@@ -113,9 +127,9 @@ class AppColors {
   /// but on soft lavender-white surfaces with dark ink text.
   static const AppColors light = AppColors._(
     bgDeep: Color(0xFFffffff),
-    bgPurple: Color(0xFFEEE0F7),
+    bgPurple: Color(0xFFE9D9F4),
     surface: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFF4EAFA),
+    surfaceRaised: Color(0xFFF0E1F9),
     ink: Color(0xFF1A0B26),
     violetDeep: Color(0xFF2C1240),
     violetMid: Color(0xFF5C3578),
@@ -133,8 +147,8 @@ class AppColors {
       colors: [
         Color(0xFFFBF8FD),
         Color(0xFFFFFFFF),
-        Color(0xFFEEE0F7),
-        Color(0xFFF4EAFA),
+        Color(0xFFE9D9F4),
+        Color(0xFFF0E1F9),
       ],
       stops: [0.0, 0.32, 0.68, 1.0],
     ),
@@ -159,7 +173,7 @@ class AppColors {
     cardGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFFF4EAFA), Color(0xFFFFFFFF), Color(0xFFFFFFFF)],
+      colors: [Color(0xFFF0E1F9), Color(0xFFFFFFFF), Color(0xFFFFFFFF)],
       stops: [0.0, 0.55, 1.0],
     ),
   );

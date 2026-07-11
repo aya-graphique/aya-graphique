@@ -163,7 +163,7 @@ class _AdminAboutScreenState extends State<AdminAboutScreen> {
                 decoration: BoxDecoration(
                   color: context.colors.surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                  border: Border.all(color: context.colors.border(0.08)),
                 ),
                 child: Text('No photos yet — add the first one below.',
                     style: AppFonts.body(size: 13, color: context.colors.creamDim)),
@@ -200,7 +200,7 @@ class _AdminAboutScreenState extends State<AdminAboutScreen> {
                 decoration: BoxDecoration(
                   color: context.colors.surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: context.colors.cream.withOpacity(0.1)),
+                  border: Border.all(color: context.colors.border(0.1)),
                 ),
                 child: _uploadingSlide
                     ? SizedBox(
@@ -247,7 +247,7 @@ class _SlideRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

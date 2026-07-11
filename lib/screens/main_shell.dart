@@ -12,6 +12,7 @@ import 'cart_screen.dart';
 import 'graphical_services_screen.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
+import 'shop_screen.dart';
 import 'who_am_i_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -22,19 +23,24 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  // Home is the site's main page now — it's the one that carries the
-  // sliders, Services, Shop, and Who am I sections all in one scroll, so
-  // it's what visitors should land on first (see HomeScreen).
+  // Home is the site's landing page — sliders, category/service teasers,
+  // and the owner intro, all in one scroll. The shop grid itself now
+  // lives on its own standalone Shop tab (see ShopScreen).
   ShopPage _page = ShopPage.home;
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
   // nav instead of a drawer.
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _homeScrollController = ScrollController();
+  final ScrollController _shopScrollController = ScrollController();
   // Lets Home's "service circles" row jump straight to a specific
   // category on the standalone Services tab (see _openServiceCategory
   // below and ServicesFocusController in graphical_services_screen.dart).
   final ServicesFocusController _servicesFocusController = ServicesFocusController();
+  // Lets Home's product category circles jump straight to a specific
+  // category on the standalone Shop tab (see _openShopCategory below and
+  // ShopFocusController in shop_screen.dart).
+  final ShopFocusController _shopFocusController = ShopFocusController();
   late Future<List<Product>> _productsFuture;
   // Kicked off here, at the same time as _productsFuture, instead of
   // inside HomeScreen's own initState — previously the banner fetch only
@@ -55,7 +61,9 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _homeScrollController.dispose();
+    _shopScrollController.dispose();
     _servicesFocusController.dispose();
+    _shopFocusController.dispose();
     super.dispose();
   }
 
@@ -66,6 +74,13 @@ class _MainShellState extends State<MainShell> {
   void _openServiceCategory(int index) {
     _goTo(ShopPage.services);
     _servicesFocusController.focusCategory(index);
+  }
+
+  // Called from Home's product category circles: switch to the Shop tab
+  // with that category already selected.
+  void _openShopCategory(String category) {
+    _goTo(ShopPage.shop);
+    _shopFocusController.focusCategory(category);
   }
 
   void _refreshProducts() {
@@ -126,18 +141,27 @@ class _MainShellState extends State<MainShell> {
                           onAdminReturn: _refreshProducts,
                           bannersFuture: _bannersFuture,
                           onServiceCategoryTap: _openServiceCategory,
+                          onShopTap: () => _goTo(ShopPage.shop),
+                          onCategoryTap: _openShopCategory,
+                          onViewProfileTap: () => _goTo(ShopPage.about),
+                        ),
+                        ShopScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          scrollController: _shopScrollController,
+                          focusController: _shopFocusController,
                         ),
                         SearchScreen(products: products, isMobile: isMobile),
                         GraphicalServicesScreen(
                           isMobile: isMobile,
                           focusController: _servicesFocusController,
                         ),
-                        // Standalone "Who am I" tab — same WhoAmIScreen
-                        // HomeScreen already embeds inline after the shop
-                        // grid, just not embedded here so it gets its own
-                        // scroll + top offset like every other tab.
+                        // Standalone "Who am I" tab — Home no longer
+                        // embeds this inline; the owner-intro card's
+                        // "View full profile" button jumps here instead
+                        // (see HomeScreen.onViewProfileTap).
                         WhoAmIScreen(isMobile: isMobile),
-                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.home)),
+                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
                       ],
                     ),
                   Positioned(

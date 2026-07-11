@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/testimonials.dart';
 import '../localization/app_strings.dart';
+import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import 'reveal_on_scroll.dart';
 import 'section_heading.dart';
@@ -36,7 +37,7 @@ class TestimonialsSection extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         SizedBox(
-          height: isMobile ? 210 : 190,
+          height: isMobile ? 225 : 205,
           child: ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
             scrollDirection: Axis.horizontal,
@@ -82,12 +83,12 @@ class _TestimonialCard extends StatelessWidget {
     final initial = name.trim().isNotEmpty ? name.trim()[0] : '?';
 
     return Container(
-      width: isMobile ? 260 : 320,
+      width: isMobile ? 280 : 340,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: colors.surfaceRaised.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.cream.withOpacity(0.08)),
+        border: Border.all(color: colors.border(0.16), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,8 +96,8 @@ class _TestimonialCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 42,
+                height: 42,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -104,10 +105,10 @@ class _TestimonialCard extends StatelessWidget {
                 ),
                 child: Text(
                   initial.toUpperCase(),
-                  style: AppFonts.label(color: colors.orchid, size: 14, letterSpacing: 0),
+                  style: AppFonts.label(color: colors.orchid, size: 16, letterSpacing: 0),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   name,
@@ -115,7 +116,7 @@ class _TestimonialCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppFonts.body(
                     color: colors.cream,
-                    size: 13,
+                    size: 15.5,
                     weight: FontWeight.w700,
                     text: name,
                     boostArabicSize: false,
@@ -129,7 +130,7 @@ class _TestimonialCard extends StatelessWidget {
             children: List.generate(5, (i) {
               return Icon(
                 i < rating ? Icons.star_rounded : Icons.star_border_rounded,
-                size: 14,
+                size: 16,
                 color: colors.orchid,
               );
             }),
@@ -142,7 +143,7 @@ class _TestimonialCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppFonts.body(
                 color: colors.creamDim,
-                size: 12.5,
+                size: 14,
                 text: quote,
                 boostArabicSize: false,
               ),

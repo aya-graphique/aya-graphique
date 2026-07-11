@@ -73,7 +73,7 @@ class _CartLineTile extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colors.cardGradient,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Row(
         children: [
@@ -157,7 +157,7 @@ class _Summary extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +169,7 @@ class _Summary extends StatelessWidget {
           _row(context, context.strings.shipping, formatPrice(cart.shipping)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Divider(color: context.colors.cream.withOpacity(0.12), height: 1),
+            child: Divider(color: context.colors.border(0.12), height: 1),
           ),
           _row(context, context.strings.total, formatPrice(cart.total), emphasize: true),
           const SizedBox(height: 20),

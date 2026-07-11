@@ -194,7 +194,7 @@ class _FilterChip extends StatelessWidget {
           color: selected ? null : context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: selected ? Colors.transparent : context.colors.cream.withOpacity(0.08),
+            color: selected ? Colors.transparent : context.colors.border(0.08),
           ),
         ),
         child: Text(
@@ -282,7 +282,7 @@ class _OrderTileState extends State<_OrderTile> {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: o.isCompleted ? context.colors.success.withOpacity(0.25) : context.colors.cream.withOpacity(0.06),
+          color: o.isCompleted ? context.colors.success.withOpacity(0.25) : context.colors.border(0.06),
         ),
       ),
       child: Opacity(
@@ -349,7 +349,7 @@ class _OrderTileState extends State<_OrderTile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Divider(color: context.colors.cream.withOpacity(0.12), height: 1),
+                    Divider(color: context.colors.border(0.12), height: 1),
                     const SizedBox(height: 12),
                     Text('Phone', style: AppFonts.label(color: context.colors.orchid, size: 10.5, letterSpacing: 1.2)),
                     const SizedBox(height: 4),
@@ -390,7 +390,7 @@ class _OrderTileState extends State<_OrderTile> {
                           ),
                         )),
                     const SizedBox(height: 8),
-                    Divider(color: context.colors.cream.withOpacity(0.12), height: 1),
+                    Divider(color: context.colors.border(0.12), height: 1),
                     const SizedBox(height: 8),
                     _summaryRow('Subtotal', formatPrice(o.subtotal)),
                     _summaryRow('Shipping', formatPrice(o.shipping)),
@@ -407,7 +407,7 @@ class _OrderTileState extends State<_OrderTile> {
                             color: o.isCompleted ? context.colors.surfaceRaised : null,
                             borderRadius: BorderRadius.circular(100),
                             border: o.isCompleted
-                                ? Border.all(color: context.colors.cream.withOpacity(0.1))
+                                ? Border.all(color: context.colors.border(0.1))
                                 : null,
                           ),
                           child: Center(

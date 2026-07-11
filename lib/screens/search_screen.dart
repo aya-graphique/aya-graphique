@@ -100,7 +100,7 @@ class _SearchField extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+        border: Border.all(color: context.colors.border(0.08)),
       ),
       child: TextField(
         controller: controller,
@@ -137,7 +137,7 @@ class _Chip extends StatelessWidget {
           color: selected ? null : context.colors.surface,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: selected ? Colors.transparent : context.colors.cream.withOpacity(0.08),
+            color: selected ? Colors.transparent : context.colors.border(0.08),
           ),
         ),
         child: Text(

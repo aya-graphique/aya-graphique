@@ -44,6 +44,19 @@ class _AnimatedBackdropState extends State<AnimatedBackdrop>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
+    // Light mode: plain, static background — no drifting orbs, no
+    // particles, no cursor glow. Dark mode keeps the full ambient scene.
+    if (!colors.isDark) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(color: colors.bgDeep),
+          if (widget.child != null) widget.child!,
+        ],
+      );
+    }
+
     return MouseRegion(
       onHover: (e) => setState(() => _pointer = e.position),
       onExit: (_) => setState(() => _pointer = null),

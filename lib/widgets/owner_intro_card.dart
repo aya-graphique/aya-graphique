@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'reveal_on_scroll.dart';
 
 /// Dropped into Home right where the embedded Services section used to sit
-/// (see HomeScreen): 3 tappable "available for" rows — restaurant owners,
-/// hotel owners, individuals after a private workshop — that jump straight
-/// to the matching category on the standalone Services tab, plus a button
-/// down to the full "Who am I" profile further below this same page.
+/// (see HomeScreen): tappable "available for" circles — restaurant owners,
+/// hotel owners, company owners, branding clients, illustration clients,
+/// individuals after a private workshop, and aspiring designers — that jump
+/// straight to the matching category on the standalone Services tab, plus a
+/// button that jumps to the standalone Portfolio ("Who am I") tab. A thin
+/// divider separates the circles from the "available for" eyebrow pill
+/// above them.
 class OwnerIntroCard extends StatelessWidget {
   final bool isMobile;
+  // Jumps to the standalone Portfolio/About tab — see
+  // MainShell._goTo / HomeScreen.onViewProfileTap.
   final VoidCallback onViewProfile;
   // Jumps to the Services tab and focuses category [index] there — see
   // MainShell._openServiceCategory / kServiceCategories.
@@ -25,7 +31,7 @@ class OwnerIntroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final crossAxis = isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+    const crossAxis = CrossAxisAlignment.center;
 
     final content = Column(
       crossAxisAlignment: crossAxis,
@@ -49,25 +55,57 @@ class OwnerIntroCard extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 18),
-        _AudienceRow(
-          icon: Icons.restaurant_rounded,
-          label: context.strings.restaurantOwnersLabel,
-          onTap: () => onAudienceTap(1),
+        const SizedBox(height: 26),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            _AudienceCircle(
+              icon: Icons.restaurant_rounded,
+              label: context.strings.restaurantOwnersLabel,
+              floatDelayIndex: 0,
+              onTap: () => onAudienceTap(1),
+            ),
+            _AudienceCircle(
+              icon: Icons.hotel_rounded,
+              label: context.strings.hotelOwnersLabel,
+              floatDelayIndex: 1,
+              onTap: () => onAudienceTap(1),
+            ),
+            _AudienceCircle(
+              icon: Icons.business_center_rounded,
+              label: context.strings.companyOwnersLabel,
+              floatDelayIndex: 2,
+              onTap: () => onAudienceTap(1),
+            ),
+            _AudienceCircle(
+              icon: Icons.branding_watermark_rounded,
+              label: context.strings.brandingLabel,
+              floatDelayIndex: 3,
+              onTap: () => onAudienceTap(1),
+            ),
+            _AudienceCircle(
+              icon: Icons.palette_rounded,
+              label: context.strings.illustrationClientsLabel,
+              floatDelayIndex: 4,
+              onTap: () => onAudienceTap(1),
+            ),
+            _AudienceCircle(
+              icon: Icons.school_rounded,
+              label: context.strings.privateWorkshopIndividualsLabel,
+              floatDelayIndex: 5,
+              onTap: () => onAudienceTap(2),
+            ),
+            _AudienceCircle(
+              icon: Icons.support_agent_rounded,
+              label: context.strings.aspiringDesignersLabel,
+              floatDelayIndex: 6,
+              onTap: () => onAudienceTap(0),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        _AudienceRow(
-          icon: Icons.hotel_rounded,
-          label: context.strings.hotelOwnersLabel,
-          onTap: () => onAudienceTap(1),
-        ),
-        const SizedBox(height: 8),
-        _AudienceRow(
-          icon: Icons.school_rounded,
-          label: context.strings.privateWorkshopIndividualsLabel,
-          onTap: () => onAudienceTap(2),
-        ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 26),
         GestureDetector(
           onTap: onViewProfile,
           child: Container(
@@ -83,17 +121,10 @@ class OwnerIntroCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.strings.viewFullProfile,
-                  style: AppFonts.label(size: 12.5, color: Colors.white, letterSpacing: 0.6)
-                      .copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_downward_rounded, size: 15, color: Colors.white),
-              ],
+            child: Text(
+              context.strings.viewFullProfile,
+              style: AppFonts.label(size: 12.5, color: Colors.white, letterSpacing: 0.6)
+                  .copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -106,7 +137,7 @@ class OwnerIntroCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceRaised.withOpacity(0.5),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.cream.withOpacity(0.08)),
+        border: Border.all(color: colors.border(0.08)),
       ),
       child: content,
     );
@@ -118,26 +149,30 @@ class OwnerIntroCard extends StatelessWidget {
   }
 }
 
-/// One tappable "available for" row inside [OwnerIntroCard] — an icon, a
-/// label, and a trailing chevron in the reading direction. Tapping jumps
-/// straight to the matching category on the Services tab.
-class _AudienceRow extends StatefulWidget {
+/// One tappable "available for" circle inside [OwnerIntroCard] — a round
+/// icon badge with its label underneath. Tapping jumps straight to the
+/// matching category on the Services tab.
+class _AudienceCircle extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final int floatDelayIndex;
 
-  const _AudienceRow({
+  const _AudienceCircle({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.floatDelayIndex = 0,
   });
 
   @override
-  State<_AudienceRow> createState() => _AudienceRowState();
+  State<_AudienceCircle> createState() => _AudienceCircleState();
 }
 
-class _AudienceRowState extends State<_AudienceRow> {
+class _AudienceCircleState extends State<_AudienceCircle> {
   bool _hovered = false;
+
+  static const double _circleSize = 132;
 
   @override
   Widget build(BuildContext context) {
@@ -149,41 +184,50 @@ class _AudienceRowState extends State<_AudienceRow> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: _hovered ? colors.violetPop.withOpacity(0.14) : colors.surface.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colors.cream.withOpacity(_hovered ? 0.16 : 0.08)),
-          ),
-          child: Row(
+        child: SizedBox(
+          width: 148,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 30,
-                height: 30,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: _circleSize,
+                height: _circleSize,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: colors.violetPop.withOpacity(0.16),
-                ),
-                child: Icon(widget.icon, size: 15, color: colors.orchid),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.label,
-                  style: AppFonts.body(
-                    color: colors.cream,
-                    size: 13.5,
-                    weight: FontWeight.w600,
-                    text: widget.label,
-                    boostArabicSize: false,
+                  color: _hovered ? colors.violetPop.withOpacity(0.24) : colors.violetPop.withOpacity(0.1),
+                  border: Border.all(
+                    color: _hovered ? colors.violetPop : colors.violetPop.withOpacity(0.55),
+                    width: _hovered ? 2.4 : 2,
                   ),
                 ),
+                child: Icon(widget.icon, size: 40, color: colors.violetPop),
+              )
+                  .animate(
+                    onPlay: (c) => c.repeat(reverse: true),
+                    delay: Duration(milliseconds: 90 * widget.floatDelayIndex),
+                  )
+                  .moveY(
+                    begin: 0,
+                    end: -9,
+                    duration: 1700.ms,
+                    curve: Curves.easeInOut,
+                  ),
+              const SizedBox(height: 12),
+              Text(
+                widget.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppFonts.body(
+                  color: colors.cream,
+                  size: 15,
+                  weight: FontWeight.w600,
+                  text: widget.label,
+                  boostArabicSize: false,
+                ),
               ),
-              Icon(Icons.chevron_right_rounded, size: 18, color: colors.creamDim),
             ],
           ),
         ),

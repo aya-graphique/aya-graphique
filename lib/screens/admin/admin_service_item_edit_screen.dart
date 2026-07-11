@@ -291,7 +291,7 @@ class _Field extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colors.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+            border: Border.all(color: context.colors.border(0.08)),
           ),
           child: TextField(
             controller: controller,

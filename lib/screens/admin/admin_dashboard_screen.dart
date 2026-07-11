@@ -14,6 +14,7 @@ import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
 import 'admin_about_screen.dart';
 import 'admin_home_banners_screen.dart';
+import 'admin_illustration_art_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_services_screen.dart';
@@ -441,6 +442,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             tooltip: 'Services',
           ),
           IconButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AdminIllustrationArtScreen()),
+            ),
+            icon: Icon(Icons.brush_outlined, color: context.colors.creamDim),
+            tooltip: 'Illustration & Art',
+          ),
+          IconButton(
             onPressed: _openOrders,
             icon: Stack(
               clipBehavior: Clip.none,
@@ -677,7 +685,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -728,7 +736,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                             decoration: BoxDecoration(
                               color: context.colors.surfaceRaised,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                              border: Border.all(color: context.colors.border(0.08)),
                             ),
                             child: TextField(
                               controller: widget.shippingController,
@@ -793,7 +801,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                             decoration: BoxDecoration(
                               color: context.colors.surfaceRaised,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                              border: Border.all(color: context.colors.border(0.08)),
                             ),
                             child: TextField(
                               controller: widget.notificationEmailController,
@@ -861,7 +869,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                             decoration: BoxDecoration(
                               color: context.colors.surfaceRaised,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                              border: Border.all(color: context.colors.border(0.08)),
                             ),
                             child: TextField(
                               controller: widget.ownerWhatsappController,
@@ -931,7 +939,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                             decoration: BoxDecoration(
                               color: context.colors.surfaceRaised,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                              border: Border.all(color: context.colors.border(0.08)),
                             ),
                             child: TextField(
                               controller: widget.paymentNumberController,
@@ -1001,7 +1009,7 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                             decoration: BoxDecoration(
                               color: context.colors.surfaceRaised,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                              border: Border.all(color: context.colors.border(0.08)),
                             ),
                             child: TextField(
                               controller: widget.instapayLinkController,
@@ -1105,7 +1113,7 @@ class _CategoryTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+        border: Border.all(color: context.colors.border(0.08)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1172,7 +1180,7 @@ class _ProductRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.cream.withOpacity(0.06)),
+        border: Border.all(color: context.colors.border(0.06)),
       ),
       child: Row(
         children: [
