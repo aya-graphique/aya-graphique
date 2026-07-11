@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'circle_carousel.dart';
 import 'reveal_on_scroll.dart';
 
 /// Dropped into Home right where the embedded Services section used to sit
-/// (see HomeScreen): tappable "available for" tiles — restaurant owners,
+/// (see HomeScreen): tappable "available for" circles — restaurant owners,
 /// hotel owners, company owners, branding clients, illustration clients,
 /// individuals after a private workshop, and aspiring designers — that jump
 /// straight to the matching category on the standalone Services tab, plus a
 /// button that jumps to the standalone Portfolio ("Who am I") tab.
 ///
-/// Unlike the previous version, this sits directly on the page background —
-/// no card/box wrapping the "available for" eyebrow + tiles + button, just
-/// the reveal-on-scroll animation and the page's own horizontal padding.
+/// This sits directly on the page background — no card/box wrapping the
+/// "available for" eyebrow + circles + button, just the reveal-on-scroll
+/// animation and the page's own horizontal padding. The circles themselves
+/// use the same Instagram-story gradient-ring look as every other circle
+/// row on the page (Services, Illustration Art, Most Requested).
 class OwnerIntroCard extends StatelessWidget {
   final bool isMobile;
   // Jumps to the standalone Portfolio/About tab — see
@@ -45,18 +48,18 @@ class OwnerIntroCard extends StatelessWidget {
       _AudienceSpec(Icons.support_agent_rounded, context.strings.aspiringDesignersLabel, () => onAudienceTap(0)),
     ];
 
-    final audienceTiles = isMobile
+    final audienceCircles = isMobile
         ? MobileCircleCarousel(
             itemCount: audiences.length,
             // Labels here can run to two lines ("Restaurant owners"), so
             // this row gets a taller label area than the plain one-line
-            // tiles elsewhere.
+            // circles elsewhere.
             labelAreaHeight: 62,
-            itemBuilder: (context, i, diameter) => _AudienceTile(
+            itemBuilder: (context, i, diameter) => _AudienceCircle(
               icon: audiences[i].icon,
               label: audiences[i].label,
-              size: diameter,
-              iconSize: diameter * 0.32,
+              diameter: diameter,
+              iconSize: diameter * 0.36,
               labelSize: (diameter * 0.12).clamp(10.0, 13.0),
               onTap: audiences[i].onTap,
             ),
@@ -67,9 +70,10 @@ class OwnerIntroCard extends StatelessWidget {
             runSpacing: 24,
             children: [
               for (var i = 0; i < audiences.length; i++)
-                _AudienceTile(
+                _AudienceCircle(
                   icon: audiences[i].icon,
                   label: audiences[i].label,
+                  floatDelayIndex: i,
                   onTap: audiences[i].onTap,
                 ),
             ],
@@ -98,7 +102,7 @@ class OwnerIntroCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 26),
-        audienceTiles,
+        audienceCircles,
         const SizedBox(height: 26),
         GestureDetector(
           onTap: onViewProfile,
@@ -136,9 +140,9 @@ class OwnerIntroCard extends StatelessWidget {
   }
 }
 
-/// A plain (icon, label, tap target) bundle for an audience tile — kept
+/// A plain (icon, label, tap target) bundle for an audience circle — kept
 /// separate from the built widget so the layout picked at build time
-/// (desktop Wrap vs. mobile carousel) can each size the tiles however
+/// (desktop Wrap vs. mobile carousel) can each size the circles however
 /// suits that layout.
 class _AudienceSpec {
   final IconData icon;
@@ -147,48 +151,49 @@ class _AudienceSpec {
   const _AudienceSpec(this.icon, this.label, this.onTap);
 }
 
-/// One tappable "available for" tile inside [OwnerIntroCard] — a rounded
-/// square (squircle) badge with a violet→orchid gradient fill, glowing
-/// softly, with its label underneath. Tapping jumps straight to the
-/// matching category on the Services tab.
-///
-/// Replaces the previous plain outlined circle: same role in the layout
-/// (built by [MobileCircleCarousel] on mobile, laid out in a [Wrap] on
-/// desktop) but a different look — solid gradient card instead of a
-/// bordered ring.
-class _AudienceTile extends StatefulWidget {
+/// One tappable "available for" circle inside [OwnerIntroCard] — same
+/// Instagram-story styling as the rest of the app's circle rows (Services,
+/// Illustration Art, Most Requested — see [_EyebrowCirclesSection] /
+/// [_MostRequestedCircles] in home_screen.dart, and their shared
+/// `_CategoryCircle`): a gradient ring always framing the icon, a gentle
+/// float loop, and a slight shrink on hover/tap instead of a glow. Tapping
+/// jumps straight to the matching category on the Services tab.
+class _AudienceCircle extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  // Desktop keeps its original fixed tile size and label size below — the
-  // mobile carousel passes its own smaller, width-fitted values.
-  final double size;
+  // Desktop keeps its original fixed circle size and label size below —
+  // the mobile carousel passes its own smaller, width-fitted values.
+  final double diameter;
   final double labelSize;
   final double iconSize;
+  // Staggers the float animation per-circle on desktop (see
+  // `_CategoryCircle.floatDelayIndex`) so a whole row doesn't bob in
+  // lockstep. Mobile leaves this at 0 since the carousel already staggers
+  // circles by swapping their positions.
+  final int floatDelayIndex;
 
-  const _AudienceTile({
+  const _AudienceCircle({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.size = 120,
+    this.diameter = 132,
     this.labelSize = 15,
-    this.iconSize = 38,
+    this.iconSize = 44,
+    this.floatDelayIndex = 0,
   });
 
   @override
-  State<_AudienceTile> createState() => _AudienceTileState();
+  State<_AudienceCircle> createState() => _AudienceCircleState();
 }
 
-class _AudienceTileState extends State<_AudienceTile> {
+class _AudienceCircleState extends State<_AudienceCircle> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tileSize = widget.size;
-    // Squircle-style corner radius: rounded enough to read as a "soft
-    // square" rather than a chip, without turning into a full circle.
-    final radius = tileSize * 0.32;
+    final diameter = widget.diameter;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -198,48 +203,64 @@ class _AudienceTileState extends State<_AudienceTile> {
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: SizedBox(
-          width: tileSize + 16,
+          width: diameter + 16,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedContainer(
+              AnimatedScale(
                 duration: const Duration(milliseconds: 150),
-                width: tileSize,
-                height: tileSize,
-                alignment: Alignment.center,
-                transform: Matrix4.identity()..scale(_hovered ? 1.04 : 1.0),
-                transformAlignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: _hovered
-                        ? [colors.violetPop, colors.orchid]
-                        : [colors.violetPop.withOpacity(0.85), colors.violetDeep],
+                curve: Curves.easeOut,
+                scale: _hovered ? 0.92 : 1.0,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: diameter,
+                  height: diameter,
+                  padding: const EdgeInsets.all(2.5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: colors.violetGradient,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.violetPop.withOpacity(0.3),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.violetPop.withOpacity(_hovered ? 0.45 : 0.28),
-                      blurRadius: _hovered ? 20 : 12,
-                      offset: const Offset(0, 6),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.surface,
+                      border: Border.all(color: colors.bgDeep, width: 2),
                     ),
-                  ],
+                    child: Center(
+                      child: Icon(widget.icon, size: widget.iconSize, color: colors.violetPop),
+                    ),
+                  ),
                 ),
-                child: Icon(widget.icon, size: widget.iconSize, color: Colors.white),
-              ),
-              const SizedBox(height: 12),
+              )
+                  .animate(
+                    onPlay: (c) => c.repeat(reverse: true),
+                    delay: Duration(milliseconds: 90 * widget.floatDelayIndex),
+                  )
+                  .moveY(
+                    begin: 0,
+                    end: -9,
+                    duration: 1700.ms,
+                    curve: Curves.easeInOut,
+                  ),
+              const SizedBox(height: 10),
               Text(
                 widget.label,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppFonts.body(
-                  color: colors.cream,
+                style: AppFonts.label(
                   size: widget.labelSize,
                   weight: FontWeight.w600,
+                  color: colors.cream,
+                  letterSpacing: 0.6,
                   text: widget.label,
-                  boostArabicSize: false,
                 ),
               ),
             ],
