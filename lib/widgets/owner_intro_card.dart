@@ -6,19 +6,21 @@ import 'reveal_on_scroll.dart';
 /// Dropped into Home right where the embedded Services section used to sit
 /// (see HomeScreen): a tappable "available for" list — restaurant owners,
 /// hotel owners, company owners, branding clients, illustration clients,
-/// individuals after a private workshop, and aspiring designers — that jump
-/// straight to the matching category on the standalone Services tab, plus a
-/// button that jumps to the standalone Portfolio ("Who am I") tab.
+/// individuals after a private workshop, aspiring designers, and content
+/// creators — that jump straight to the matching category on the
+/// standalone Services tab.
 ///
 /// This sits on a soft full-bleed background band (not a bordered/rounded
 /// card) — enough to set it apart from the Services/Illustration Art/Most
 /// Requested rows above and below. Unlike those, this section deliberately
 /// breaks from the Instagram-story circle look: each audience is a plain
-/// vertical list row (small rounded-square icon chip + name).
+/// vertical list row (rounded-square icon chip + name), grouped into 3
+/// columns of 3 on desktop.
 class OwnerIntroCard extends StatelessWidget {
   final bool isMobile;
-  // Jumps to the standalone Portfolio/About tab — see
-  // MainShell._goTo / HomeScreen.onViewProfileTap.
+  // No longer rendered here (the "View full profile" button was removed),
+  // but kept on the constructor so call sites (HomeScreen/MainShell) don't
+  // need to change — MainShell still passes its Portfolio-tab jump here.
   final VoidCallback onViewProfile;
   // Jumps to the Services tab and focuses category [index] there — see
   // MainShell._openServiceCategory / kServiceCategories.
@@ -42,51 +44,71 @@ class OwnerIntroCard extends StatelessWidget {
       _AudienceSpec(Icons.business_center_rounded, context.strings.companyOwnersLabel, () => onAudienceTap(1)),
       _AudienceSpec(Icons.branding_watermark_rounded, context.strings.brandingLabel, () => onAudienceTap(1)),
       _AudienceSpec(Icons.palette_rounded, context.strings.illustrationClientsLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.lightbulb_rounded, context.strings.creativityLabel, () => onAudienceTap(1)),
       _AudienceSpec(Icons.school_rounded, context.strings.privateWorkshopIndividualsLabel, () => onAudienceTap(2)),
       _AudienceSpec(Icons.support_agent_rounded, context.strings.aspiringDesignersLabel, () => onAudienceTap(0)),
+      _AudienceSpec(Icons.video_camera_front_rounded, context.strings.contentCreatorsLabel, () => onAudienceTap(1)),
     ];
 
     // Mobile stays a plain single-column list (full width rows). Desktop
-    // switches to a centered 2-column grid instead of one narrow column —
-    // a single 420px-wide list looked lost in all the leftover space on a
-    // wide screen.
-    const desktopColumns = 2;
-    const desktopMaxWidth = 720.0;
-    const desktopGap = 16.0;
-    final desktopItemWidth = (desktopMaxWidth - desktopGap * (desktopColumns - 1)) / desktopColumns;
+    // now splits into 3 columns of 3 (9 audiences total) instead of 2
+    // columns of 4 — first third filling the left column top-to-bottom,
+    // next third the middle, last third the right — with a clear gap
+    // between each column group (not spaceBetween/edge-to-edge) and
+    // capped + centered so it stays tidy on very wide screens.
+    const desktopItemWidth = 380.0;
+    const desktopColumnGap = 36.0;
+    const desktopColumns = 3;
+    final desktopPerColumn = (audiences.length / desktopColumns).ceil();
+    final desktopColumnsList = [
+      for (var c = 0; c < desktopColumns; c++)
+        audiences.sublist(
+          c * desktopPerColumn,
+          ((c + 1) * desktopPerColumn).clamp(0, audiences.length),
+        ),
+    ];
 
-    final audienceCircles = ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : desktopMaxWidth),
-      child: isMobile
-          ? Column(
-              children: [
-                for (var i = 0; i < audiences.length; i++) ...[
-                  if (i != 0) const SizedBox(height: 10),
-                  _AudienceListItem(
-                    icon: audiences[i].icon,
-                    label: audiences[i].label,
-                    onTap: audiences[i].onTap,
-                  ),
+    Widget desktopColumn(List<_AudienceSpec> items) => Column(
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i != 0) const SizedBox(height: 14),
+              _AudienceListItem(
+                icon: items[i].icon,
+                label: items[i].label,
+                onTap: items[i].onTap,
+              ),
+            ],
+          ],
+        );
+
+    final audienceCircles = isMobile
+        ? Column(
+            children: [
+              for (var i = 0; i < audiences.length; i++) ...[
+                if (i != 0) const SizedBox(height: 12),
+                _AudienceListItem(
+                  icon: audiences[i].icon,
+                  label: audiences[i].label,
+                  onTap: audiences[i].onTap,
+                ),
+              ],
+            ],
+          )
+        : Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var c = 0; c < desktopColumnsList.length; c++) ...[
+                    if (c != 0) const SizedBox(width: desktopColumnGap),
+                    SizedBox(width: desktopItemWidth, child: desktopColumn(desktopColumnsList[c])),
+                  ],
                 ],
-              ],
-            )
-          : Wrap(
-              alignment: WrapAlignment.center,
-              spacing: desktopGap,
-              runSpacing: 12,
-              children: [
-                for (var i = 0; i < audiences.length; i++)
-                  SizedBox(
-                    width: desktopItemWidth,
-                    child: _AudienceListItem(
-                      icon: audiences[i].icon,
-                      label: audiences[i].label,
-                      onTap: audiences[i].onTap,
-                    ),
-                  ),
-              ],
+              ),
             ),
-    );
+          );
 
     final content = Column(
       crossAxisAlignment: crossAxis,
@@ -128,29 +150,6 @@ class OwnerIntroCard extends StatelessWidget {
         ),
         const SizedBox(height: 26),
         audienceCircles,
-        const SizedBox(height: 26),
-        GestureDetector(
-          onTap: onViewProfile,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: colors.violetGradient,
-              borderRadius: BorderRadius.circular(100),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.violetPop.withOpacity(0.35),
-                  blurRadius: 14,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Text(
-              context.strings.viewFullProfile,
-              style: AppFonts.label(size: 12.5, color: Colors.white, letterSpacing: 0.6)
-                  .copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
       ],
     );
 
@@ -217,10 +216,10 @@ class _AudienceListItemState extends State<_AudienceListItem> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
             color: _hovered ? colors.violetPop.withOpacity(0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: colors.border(0.12)),
           ),
           child: Row(
@@ -228,29 +227,29 @@ class _AudienceListItemState extends State<_AudienceListItem> {
               // Icon chip — rounded square with the same violet-gradient
               // border treatment as the circle rings elsewhere.
               Container(
-                width: 44,
-                height: 44,
+                width: 56,
+                height: 56,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(13),
+                  borderRadius: BorderRadius.circular(16),
                   gradient: colors.violetGradient,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: BorderRadius.circular(14),
                     color: colors.surface,
                   ),
                   child: Center(
-                    child: Icon(widget.icon, size: 20, color: colors.violetPop),
+                    child: Icon(widget.icon, size: 25, color: colors.violetPop),
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   widget.label,
                   style: AppFonts.label(
-                    size: 14.5,
+                    size: 17,
                     weight: FontWeight.w600,
                     color: colors.cream,
                     letterSpacing: 0.3,
@@ -260,7 +259,7 @@ class _AudienceListItemState extends State<_AudienceListItem> {
               ),
               Icon(
                 Icons.chevron_left_rounded,
-                size: 20,
+                size: 24,
                 color: colors.cream.withOpacity(0.35),
               ),
             ],

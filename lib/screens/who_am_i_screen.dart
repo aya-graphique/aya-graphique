@@ -8,10 +8,14 @@ import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/shimmer_text.dart';
 
-/// A standalone bio/portfolio page: photo slideshow up top, then the
-/// owner's own words underneath. Meant to be sent (or its link shared) as
-/// part of a proposal when pitching for other design work — everything on
-/// it is editable from the admin dashboard, no code changes needed.
+/// A standalone bio/portfolio page — the owner's own words, organized into
+/// clear labelled sections (stats, bio, skills, experience, education,
+/// contact). Meant to be sent (or its link shared) as part of a proposal
+/// when pitching for other design work — the admin-editable fields
+/// (name/headline/bio/skills/contact/location) are set from the admin
+/// dashboard, no code changes needed. Deliberately photo-free — an
+/// initials avatar stands in for a portrait (see [_InitialsAvatar]) rather
+/// than wiring up owner photo uploads here.
 
 /// Static content — not wired to the dashboard on purpose. Edit these
 /// lists directly in code whenever the experience/education changes.
@@ -28,6 +32,17 @@ List<_TimelineEntry> kExperience(bool isArabic) => [
                 'وحتى الملفات الجاهزة للإنتاج.'
             : 'Leading brand identity, packaging and print design projects '
                 'end to end, from concept to production-ready files.',
+        highlights: isArabic
+            ? const [
+                'تصميم أكثر من 30 هوية بصرية كاملة لعملاء محليين وعرب',
+                'إدارة علاقة العميل من أول جلسة الاستماع وحتى تسليم الملفات',
+                'إشراف على مطبوعات المتجر: الدفاتر والتقويمات والمنتجات الورقية',
+              ]
+            : const [
+                'Delivered 30+ full brand identities for local and regional clients',
+                'Owned the client relationship end to end, from discovery to handoff',
+                "Art-directed the store's own print line — notebooks, calendars, stationery",
+              ],
       ),
       _TimelineEntry(
         title: isArabic ? 'مصممة جرافيك' : 'Graphic Designer',
@@ -38,6 +53,28 @@ List<_TimelineEntry> kExperience(bool isArabic) => [
                 'لمجموعة من العملاء المحليين.'
             : 'Designed marketing collateral, social content and '
                 'print layouts for a range of local clients.',
+        highlights: isArabic
+            ? const [
+                'تصميم محتوى سوشيال ميديا شهري لأكثر من 15 عميل',
+                'تجهيز ملفات طباعة جاهزة للمطابع مع ضبط الألوان والقياسات',
+              ]
+            : const [
+                'Produced monthly social content for 15+ client accounts',
+                'Prepared print-ready files with accurate color and bleed setup',
+              ],
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'متدربة تصميم جرافيك' : 'Graphic Design Intern',
+        subtitle: isArabic ? 'وكالة إعلانية' : 'Advertising Agency',
+        period: '2018 — 2019',
+        description: isArabic
+            ? 'أول خطوة احترافية — دعم فريق التصميم في الحملات الإعلانية '
+                'وتنفيذ التعديلات السريعة تحت ضغط المواعيد.'
+            : 'First professional step — supported the design team on ad '
+                'campaigns and turned around quick revisions under deadline.',
+        highlights: isArabic
+            ? const ['المشاركة في تنفيذ حملتين إعلانيتين كاملتين']
+            : const ['Contributed to two full ad campaign rollouts'],
       ),
     ];
 
@@ -48,6 +85,14 @@ List<_TimelineEntry> kEducation(bool isArabic) => [
             ? 'كلية الفنون التطبيقية، جامعة حلوان'
             : 'Faculty of Applied Arts, Helwan University',
         period: '2015 — 2019',
+        description: isArabic
+            ? 'تخرجت بمشروع تخرج في تصميم الهوية البصرية، بتقدير امتياز.'
+            : 'Graduated with a brand-identity thesis project, with honors.',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'شهادة احترافية في الـ UI/UX' : 'UI/UX Design Certificate',
+        subtitle: isArabic ? 'منصة تدريب أونلاين' : 'Online Training Platform',
+        period: '2020',
         description: '',
       ),
     ];
@@ -57,13 +102,33 @@ class _TimelineEntry {
   final String subtitle;
   final String period;
   final String description;
+  // A few bullet-point specifics under the description — optional, empty
+  // by default so short entries (like the education ones above) don't
+  // need to supply any.
+  final List<String> highlights;
   const _TimelineEntry({
     required this.title,
     required this.subtitle,
     required this.period,
     this.description = '',
+    this.highlights = const [],
   });
 }
+
+/// A quick-read row of career stats under the headline — plain static
+/// numbers (not admin-editable, same as [kExperience]/[kEducation] above)
+/// meant to be tweaked directly in code as the real figures change.
+class _StatItem {
+  final String value;
+  final String label;
+  const _StatItem(this.value, this.label);
+}
+
+List<_StatItem> kStats(bool isArabic) => [
+      _StatItem('5+', isArabic ? 'سنوات خبرة' : 'Years experience'),
+      _StatItem('30+', isArabic ? 'مشروع هوية بصرية' : 'Brand projects'),
+      _StatItem('98%', isArabic ? 'رضا العملاء' : 'Client satisfaction'),
+    ];
 
 /// Capitalizes the first letter of each word, leaving the rest of the word
 /// untouched (so acronyms like "UI/UX" survive) and Arabic text untouched
@@ -210,9 +275,29 @@ class _Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.isArabicLanguage;
+    final bio = profile.bioFor(isArabic);
+    final skills = profile.skillsFor(isArabic);
+    final experience = kExperience(isArabic);
+    final education = kEducation(isArabic);
+    final hasContact = profile.whatsapp.isNotEmpty ||
+        profile.email.isNotEmpty ||
+        profile.phone.isNotEmpty ||
+        profile.portfolioUrl.isNotEmpty ||
+        profile.cvUrl.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Initials avatar — a plain lettered badge (same gradient-ring
+        // family as the audience/service circles elsewhere), not a photo.
+        // "Who am I" intentionally stays photo-free; the admin dashboard's
+        // photo slideshow, if ever re-enabled, is a separate concern from
+        // this text profile.
+        if (profile.fullName.isNotEmpty) ...[
+          _InitialsAvatar(name: profile.fullName),
+          const SizedBox(height: 22),
+        ],
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -238,130 +323,177 @@ class _Profile extends StatelessWidget {
               text: profile.fullName,
             ),
           ),
-        if (profile.headlineFor(context.isArabicLanguage).isNotEmpty) ...[
+        if (profile.headlineFor(isArabic).isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(
-            profile.headlineFor(context.isArabicLanguage),
+            profile.headlineFor(isArabic),
             textAlign: TextAlign.center,
             style: AppFonts.label(
               color: context.colors.violetLight,
               size: 15,
               letterSpacing: 1.4,
-              text: profile.headlineFor(context.isArabicLanguage),
+              text: profile.headlineFor(isArabic),
             ),
           ),
         ],
-        if (profile.bioFor(context.isArabicLanguage).isNotEmpty) ...[
+        // Quick-read career stats — static figures (see kStats), kept
+        // separate from the admin-editable fields above so they're easy
+        // to tweak in code as the real numbers change.
+        const SizedBox(height: 28),
+        _StatsRow(stats: kStats(isArabic)),
+        if (bio.isNotEmpty) ...[
+          const SizedBox(height: 34),
+          _SectionDivider(),
           const SizedBox(height: 26),
           Text(
-            profile.bioFor(context.isArabicLanguage),
+            bio,
             textAlign: TextAlign.center,
             style: AppFonts.body(
               color: context.colors.creamDim,
               size: isMobile ? 17 : 18.5,
-              text: profile.bioFor(context.isArabicLanguage),
+              height: 1.55,
+              text: bio,
             ),
           ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
         ],
-        if (profile.skillsFor(context.isArabicLanguage).isNotEmpty) ...[
-          const SizedBox(height: 26),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
-            children: profile.skillsFor(context.isArabicLanguage)
-                .map((s) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: context.colors.surface,
-                        borderRadius: BorderRadius.circular(100),
-                        // Was a flat white border — invisible against a white
-                        // surface in light mode. Cream adapts per theme.
-                        border: Border.all(color: context.colors.border(0.1)),
-                      ),
-                      child: Text(
-                        _capitalizeWords(s),
-                        style: AppFonts.body(
-                          size: isMobile ? 17 : 18.5,
-                          weight: FontWeight.w600,
-                          color: context.colors.cream,
-                          text: s,
-                          boostArabicSize: false,
-                        ),
-                      ),
-                    ))
-                .toList(),
+        if (skills.isNotEmpty) ...[
+          const SizedBox(height: 40),
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _MiniSectionHeader(label: context.strings.skillsLabel),
+                const SizedBox(height: 20),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: skills
+                      .map((s) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: context.colors.surface,
+                              borderRadius: BorderRadius.circular(100),
+                              // Was a flat white border — invisible against a
+                              // white surface in light mode. Cream adapts per
+                              // theme.
+                              border: Border.all(color: context.colors.border(0.1)),
+                            ),
+                            child: Text(
+                              _capitalizeWords(s),
+                              style: AppFonts.body(
+                                size: isMobile ? 16 : 17,
+                                weight: FontWeight.w600,
+                                color: context.colors.cream,
+                                text: s,
+                                boostArabicSize: false,
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
           ),
         ],
-        Builder(builder: (context) {
-          final experience = kExperience(context.isArabicLanguage);
-          final education = kEducation(context.isArabicLanguage);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (experience.isNotEmpty || education.isNotEmpty) const SizedBox(height: 46),
-              if (experience.isNotEmpty)
-                _TimelineSection(eyebrow: context.strings.experienceLabel, entries: experience),
-              if (experience.isNotEmpty && education.isNotEmpty) const SizedBox(height: 40),
-              if (education.isNotEmpty)
-                _TimelineSection(eyebrow: context.strings.educationLabel, entries: education),
-            ],
-          );
-        }),
-        const SizedBox(height: 46),
-        SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              if (profile.whatsapp.isNotEmpty)
-                _ContactButton(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: context.strings.whatsappLabel,
-                  filled: true,
-                  onTap: () => onOpenWhatsapp(profile.whatsapp),
-                ),
-              if (profile.email.isNotEmpty)
-                _ContactButton(
-                  icon: Icons.mail_outline_rounded,
-                  label: context.strings.emailLabel,
-                  onTap: () => onOpenEmail(profile.email),
-                ),
-              if (profile.phone.isNotEmpty)
-                _ContactButton(
-                  icon: Icons.call_outlined,
-                  label: profile.phone,
-                  onTap: () {},
-                ),
-              if (profile.portfolioUrl.isNotEmpty)
-                _ContactButton(
-                  icon: Icons.link_rounded,
-                  label: context.strings.portfolioLabel,
-                  onTap: () => onOpenUrl(profile.portfolioUrl),
-                ),
-              if (profile.cvUrl.isNotEmpty)
-                _ContactButton(
-                  icon: Icons.description_outlined,
-                  label: context.strings.cvLabel,
-                  onTap: () => onOpenUrl(profile.cvUrl),
-                ),
-            ],
-          ),
-        ),
-        if (profile.location.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
+        if (experience.isNotEmpty) ...[
+          const SizedBox(height: 32),
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.place_outlined, size: 16, color: context.colors.creamDim),
-                const SizedBox(width: 6),
-                Text(profile.location,
-                    style: AppFonts.body(size: 15.5, color: context.colors.creamDim, text: profile.location)),
+                Center(child: _MiniSectionHeader(label: context.strings.experienceLabel)),
+                const SizedBox(height: 22),
+                for (var i = 0; i < experience.length; i++) ...[
+                  if (i != 0) const SizedBox(height: 14),
+                  _TimelineCard(entry: experience[i]),
+                ],
+              ],
+            ),
+          ),
+        ],
+        if (education.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(child: _MiniSectionHeader(label: context.strings.educationLabel)),
+                const SizedBox(height: 22),
+                for (var i = 0; i < education.length; i++) ...[
+                  if (i != 0) const SizedBox(height: 14),
+                  _TimelineCard(entry: education[i]),
+                ],
+              ],
+            ),
+          ),
+        ],
+        if (hasContact || profile.location.isNotEmpty) ...[
+          const SizedBox(height: 32),
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _MiniSectionHeader(label: context.strings.getInTouchLabel),
+                const SizedBox(height: 22),
+                if (hasContact)
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        if (profile.whatsapp.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.chat_bubble_outline_rounded,
+                            label: context.strings.whatsappLabel,
+                            filled: true,
+                            onTap: () => onOpenWhatsapp(profile.whatsapp),
+                          ),
+                        if (profile.email.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.mail_outline_rounded,
+                            label: context.strings.emailLabel,
+                            onTap: () => onOpenEmail(profile.email),
+                          ),
+                        if (profile.phone.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.call_outlined,
+                            label: profile.phone,
+                            onTap: () {},
+                          ),
+                        if (profile.portfolioUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.link_rounded,
+                            label: context.strings.portfolioLabel,
+                            onTap: () => onOpenUrl(profile.portfolioUrl),
+                          ),
+                        if (profile.cvUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.description_outlined,
+                            label: context.strings.cvLabel,
+                            onTap: () => onOpenUrl(profile.cvUrl),
+                          ),
+                      ],
+                    ),
+                  ),
+                if (profile.location.isNotEmpty) ...[
+                  if (hasContact) const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Icon(Icons.place_outlined, size: 16, color: context.colors.creamDim),
+                        const SizedBox(width: 6),
+                        Text(profile.location,
+                            style: AppFonts.body(size: 15.5, color: context.colors.creamDim, text: profile.location)),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -371,82 +503,225 @@ class _Profile extends StatelessWidget {
   }
 }
 
-class _TimelineSection extends StatelessWidget {
-  final String eyebrow;
-  final List<_TimelineEntry> entries;
-  const _TimelineSection({required this.eyebrow, required this.entries});
+/// Lettered avatar badge used in place of an owner photo — up to two
+/// initials from [name] inside the same violet-gradient ring treatment as
+/// the audience/service circles elsewhere on the storefront.
+class _InitialsAvatar extends StatelessWidget {
+  final String name;
+  const _InitialsAvatar({required this.name});
+
+  String get _initials {
+    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '?';
+    if (words.length == 1) return words.first.substring(0, 1).toUpperCase();
+    return (words.first.substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 22, height: 2, color: context.colors.orchid),
-            const SizedBox(width: 10),
-            Text(eyebrow, style: AppFonts.label(color: context.colors.orchid, size: 14.5)),
-          ],
+    final colors = context.colors;
+    return Container(
+      width: 96,
+      height: 96,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(shape: BoxShape.circle, gradient: colors.violetGradient),
+      child: Container(
+        decoration: BoxDecoration(shape: BoxShape.circle, color: colors.surface),
+        child: Center(
+          child: Text(
+            _initials,
+            style: AppFonts.display(color: colors.orchid, size: 34, weight: FontWeight.w800),
+          ),
         ),
-        const SizedBox(height: 22),
-        for (var i = 0; i < entries.length; i++) ...[
-          _TimelineRow(entry: entries[i]),
-          // A short connecting line between entries instead of the old
-          // full-height line — simpler to center now that the dot sits
-          // above the text rather than beside it.
-          if (i != entries.length - 1) ...[
-            const SizedBox(height: 8),
-            Container(width: 2, height: 24, color: context.colors.border(0.14)),
-            const SizedBox(height: 8),
-          ],
+      ),
+    );
+  }
+}
+
+/// Thin centered gradient rule — same treatment used under the eyebrow
+/// pills elsewhere (Services/Illustration Art/Available For) — dropped in
+/// wherever this page needs a plain visual break between blocks.
+class _SectionDivider extends StatelessWidget {
+  const _SectionDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1,
+      width: 60,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.transparent, context.colors.border(0.14), Colors.transparent],
+        ),
+      ),
+    );
+  }
+}
+
+/// A bordered, softly-tinted container wrapped around each labelled block
+/// (Skills / Experience / Education / Get in touch) so the page reads as a
+/// set of distinct sections instead of one long run-on column of text.
+class _SectionCard extends StatelessWidget {
+  final Widget child;
+  const _SectionCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceRaised.withOpacity(context.colors.isDark ? 0.35 : 0.5),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.colors.border(0.08)),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// The small bar-plus-label header used at the top of each [_SectionCard]
+/// (and, before this redesign, inline in the timeline) — pulled out once
+/// so every section title looks identical.
+class _MiniSectionHeader extends StatelessWidget {
+  final String label;
+  const _MiniSectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(width: 22, height: 2, color: context.colors.orchid),
+        const SizedBox(width: 10),
+        Text(label, style: AppFonts.label(color: context.colors.orchid, size: 14.5)),
+      ],
+    );
+  }
+}
+
+/// A row of quick-read career numbers (see [kStats]) — separated by thin
+/// vertical dividers on desktop, wrapping onto its own line per item on
+/// narrow phones instead of ever squeezing three columns into one row.
+class _StatsRow extends StatelessWidget {
+  final List<_StatItem> stats;
+  const _StatsRow({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      runAlignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 28,
+      runSpacing: 16,
+      children: [
+        for (var i = 0; i < stats.length; i++) ...[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(stats[i].value,
+                  style: AppFonts.display(color: colors.cream, size: 26, weight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Text(
+                stats[i].label,
+                style: AppFonts.label(color: colors.creamDim, size: 11.5, letterSpacing: 0.6),
+              ),
+            ],
+          ),
+          if (i != stats.length - 1) Container(width: 1, height: 34, color: colors.border(0.14)),
         ],
       ],
     );
   }
 }
 
-class _TimelineRow extends StatelessWidget {
+/// One experience/education entry, styled as a plain left-aligned card
+/// (title + a period pill on the trailing side, subtitle, description, and
+/// optional bullet highlights) — reads like a real CV line item, instead
+/// of the old centered dot-and-line timeline.
+class _TimelineCard extends StatelessWidget {
   final _TimelineEntry entry;
-  const _TimelineRow({required this.entry});
+  const _TimelineCard({required this.entry});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: context.colors.violetPop,
-            shape: BoxShape.circle,
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colors.surface.withOpacity(colors.isDark ? 0.4 : 0.7),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.border(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  entry.title,
+                  style: AppFonts.body(
+                    size: 18.5,
+                    weight: FontWeight.w700,
+                    color: colors.cream,
+                    text: entry.title,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: colors.violetPop.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  entry.period,
+                  style: AppFonts.label(size: 12, color: colors.orchid, letterSpacing: 0.4),
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(entry.title,
-            textAlign: TextAlign.center,
-            style: AppFonts.body(
-              size: 20,
-              weight: FontWeight.w700,
-              color: context.colors.cream,
-              text: entry.title,
-            )),
-        const SizedBox(height: 4),
-        Text(entry.subtitle,
-            textAlign: TextAlign.center,
-            style: AppFonts.body(size: 17, color: context.colors.violetLight, text: entry.subtitle)),
-        const SizedBox(height: 4),
-        Text(entry.period,
-            textAlign: TextAlign.center,
-            style: AppFonts.label(size: 14, color: context.colors.creamDim, letterSpacing: 0.8)),
-        if (entry.description.isNotEmpty) ...[
-          const SizedBox(height: 9),
-          Text(entry.description,
-              textAlign: TextAlign.center,
-              style: AppFonts.body(size: 17, color: context.colors.creamDim, text: entry.description)),
+          const SizedBox(height: 4),
+          Text(entry.subtitle,
+              style: AppFonts.body(size: 15.5, color: colors.violetLight, text: entry.subtitle)),
+          if (entry.description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(entry.description,
+                style: AppFonts.body(size: 15.5, height: 1.5, color: colors.creamDim, text: entry.description)),
+          ],
+          if (entry.highlights.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final h in entry.highlights)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 7),
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(color: colors.orchid, shape: BoxShape.circle),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(h,
+                          style: AppFonts.body(size: 14.5, height: 1.45, color: colors.creamDim, text: h)),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

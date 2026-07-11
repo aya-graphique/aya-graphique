@@ -118,6 +118,10 @@ class _HomeBannerSlideshowState extends State<HomeBannerSlideshow> {
                   return Image.network(
                     banner.imageUrl,
                     fit: BoxFit.cover,
+                    // Decode at roughly the size it's actually shown —
+                    // matters most for banners uploaded before this was
+                    // added, which may still be full camera resolution.
+                    cacheWidth: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio).round(),
                     errorBuilder: (_, __, ___) => Container(
                       color: context.colors.surfaceRaised,
                       alignment: Alignment.center,

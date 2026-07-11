@@ -16,10 +16,13 @@ import '../widgets/circle_carousel.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/owner_intro_card.dart';
+import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
+import '../widgets/section_heading.dart';
 import '../widgets/testimonials_section.dart';
 import 'admin/admin_login_screen.dart';
 import 'graphical_services_screen.dart';
+import 'product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Product> products;
@@ -134,6 +137,15 @@ class _HomeScreenState extends State<HomeScreen> {
             context.strings.marqueeStand,
           ]),
           const SizedBox(height: 48),
+          // "Available for" moved up here, right after the marquee — it
+          // answers "is this place for me?" before the visitor has to
+          // scroll past Services/Illustration/Most Requested to find out.
+          OwnerIntroCard(
+            isMobile: widget.isMobile,
+            onViewProfile: widget.onViewProfileTap,
+            onAudienceTap: widget.onServiceCategoryTap,
+          ),
+          const SizedBox(height: 48),
           _ServicesSection(
             serviceCategoryImages: _serviceCategoryImages,
             isMobile: widget.isMobile,
@@ -148,28 +160,17 @@ class _HomeScreenState extends State<HomeScreen> {
               return _IllustrationArtSection(items: items, isMobile: widget.isMobile);
             },
           ),
-          const SizedBox(height: 88),
-          _MostRequestedCircles(
-            isMobile: widget.isMobile,
-            onPrivateWorkshopTap: () => widget.onServiceCategoryTap(2),
-            onArtisticProductsTap: widget.onShopTap,
-          ),
-          // Services now lives on its own tab (see MainShell) — the
-          // circles above still jump straight there. In its old spot, a
-          // compact "available for" card instead: restaurant owners,
-          // hotel owners, and individuals after a private workshop, each
-          // tappable straight through to that category on Services.
-          //
-          // No spacer here on purpose: both this and OwnerIntroCard paint
-          // their own full-bleed background band, so a gap between them
-          // would show a strip of the raw page background instead of one
-          // continuous wash. They're visually split by OwnerIntroCard's
-          // own eyebrow pill instead.
-          OwnerIntroCard(
-            isMobile: widget.isMobile,
-            onViewProfile: widget.onViewProfileTap,
-            onAudienceTap: widget.onServiceCategoryTap,
-          ),
+          if (widget.products.isNotEmpty) ...[
+            const SizedBox(height: 88),
+            _ShopPreviewSection(
+              products: widget.products,
+              isMobile: widget.isMobile,
+              onProductTap: (product) => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+              ),
+              onShopTap: widget.onShopTap,
+            ),
+          ],
           const SizedBox(height: 40),
           TestimonialsSection(isMobile: widget.isMobile),
           const SizedBox(height: 60),
@@ -324,6 +325,85 @@ class _IllustrationArtSection extends StatelessWidget {
   }
 }
 
+/// Teases the shop from Home: a handful of products in a grid, followed by
+/// a "Shop the collection" pill button that hands off to the standalone
+/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
+/// and best-sellers section all live over there now (see ShopScreen).
+/// Capped at 8 products so Home stays a teaser rather than a second full
+/// listing.
+class _ShopPreviewSection extends StatelessWidget {
+  final List<Product> products;
+  final bool isMobile;
+  final ValueChanged<Product> onProductTap;
+  final VoidCallback onShopTap;
+
+  const _ShopPreviewSection({
+    required this.products,
+    required this.isMobile,
+    required this.onProductTap,
+    required this.onShopTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final preview = products.take(8).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: RevealOnScroll(
+              child: SectionHeading(
+                eyebrow: context.strings.mostRequestedEyebrow,
+                title: context.strings.artisticProductsLabel,
+                titleSize: isMobile ? 24 : 30,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Padding(
+          // Matches ShopScreen's outer horizontal inset (ProductGrid adds
+          // its own inner padding on top of this in both places) so the
+          // grid ends up the same effective width — and the cards the
+          // same size — on both Home and the Shop tab.
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
+          child: ProductGrid(products: preview, onProductTap: onProductTap),
+        ),
+        const SizedBox(height: 32),
+        Center(
+          child: GestureDetector(
+            onTap: onShopTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 44, vertical: 20),
+              decoration: BoxDecoration(
+                gradient: colors.violetGradient,
+                borderRadius: BorderRadius.circular(100),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.violetPop.withOpacity(0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Text(
+                context.strings.shopTheCollection,
+                style: AppFonts.label(size: 17, color: Colors.white, letterSpacing: 0.6)
+                    .copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Shared eyebrow-pill + divider + centered circle row, used by both
 /// [_ServicesSection] and [_IllustrationArtSection] so they stay visually
 /// identical (same treatment as the "AVAILABLE FOR" / "MOST REQUESTED"
@@ -354,6 +434,10 @@ class _EyebrowCirclesSection extends StatelessWidget {
     final circlesArea = isMobile
         ? MobileCircleCarousel(
             itemCount: specs.length,
+            // Titles can wrap onto a second line (see _CategoryCircle's
+            // maxLines: 2), so reserve extra height below the circle for
+            // it instead of the default single-line allowance.
+            labelAreaHeight: 60,
             itemBuilder: (context, i, diameter) => _CategoryCircle(
               label: specs[i].label,
               imageUrl: specs[i].imageUrl,
@@ -557,7 +641,7 @@ class _CategoryCircleState extends State<_CategoryCircle> {
               const SizedBox(height: 10),
               Text(
                 widget.label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: AppFonts.label(
@@ -576,127 +660,6 @@ class _CategoryCircleState extends State<_CategoryCircle> {
   }
 }
 
-/// A compact card dropped right under [OwnerIntroCard]: an "AVAILABLE FOR"
-/// -style eyebrow pill reading "MOST REQUESTED", a divider, then two fixed
-/// promo circles — "Private Workshop" (jumps to that Services category) and
-/// "Artistic Products" (jumps to the Shop tab) — same visual language as
-/// the audience circles above it. No longer tied to individual product
-/// sales data; these are always-on shortcuts rather than a live bestseller
-/// list.
-class _MostRequestedCircles extends StatelessWidget {
-  final bool isMobile;
-  final VoidCallback onPrivateWorkshopTap;
-  final VoidCallback onArtisticProductsTap;
-
-  const _MostRequestedCircles({
-    required this.isMobile,
-    required this.onPrivateWorkshopTap,
-    required this.onArtisticProductsTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isArabic = context.watch<LanguageController>().isArabic;
-    const crossAxis = CrossAxisAlignment.center;
-
-    final content = Column(
-      crossAxisAlignment: crossAxis,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          decoration: BoxDecoration(
-            color: colors.violetPop.withOpacity(0.14),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: colors.orchid.withOpacity(0.3)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.local_fire_department_rounded, size: 17, color: colors.orchid),
-              const SizedBox(width: 10),
-              Text(
-                context.strings.mostRequestedEyebrow,
-                style: AppFonts.label(color: colors.orchid, size: 16),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Divider — separates the eyebrow pill from the promo circles,
-        // same treatment as the one under OwnerIntroCard's own pill.
-        Container(
-          height: 1,
-          width: 60,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.transparent,
-                colors.border(0.14),
-                Colors.transparent,
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 22),
-        isMobile
-            ? MobileCircleCarousel(
-                itemCount: 2,
-                sizeReferenceCount: kServiceCategories.length,
-                itemBuilder: (context, i, diameter) => i == 0
-                    ? _CategoryCircle(
-                        label: kServiceCategories[2].title.t(isArabic),
-                        icon: kServiceCategories[2].icon,
-                        diameter: diameter,
-                        labelSize: (diameter * 0.15).clamp(13.0, 16.0),
-                        selected: true,
-                        onTap: onPrivateWorkshopTap,
-                      )
-                    : _CategoryCircle(
-                        label: context.strings.artisticProductsLabel,
-                        icon: Icons.auto_awesome_rounded,
-                        diameter: diameter,
-                        labelSize: (diameter * 0.15).clamp(13.0, 16.0),
-                        selected: true,
-                        onTap: onArtisticProductsTap,
-                      ),
-              )
-            : Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 24,
-                runSpacing: 24,
-                children: [
-                  _CategoryCircle(
-                    label: kServiceCategories[2].title.t(isArabic),
-                    icon: kServiceCategories[2].icon,
-                    diameter: 180,
-                    selected: true,
-                    onTap: onPrivateWorkshopTap,
-                  ),
-                  _CategoryCircle(
-                    label: context.strings.artisticProductsLabel,
-                    icon: Icons.auto_awesome_rounded,
-                    diameter: 180,
-                    selected: true,
-                    floatDelayIndex: 1,
-                    onTap: onArtisticProductsTap,
-                  ),
-                ],
-              ),
-      ],
-    );
-
-    // Plain transparent padding — no background band. A colored band here
-    // (tried earlier to hide AnimatedBackdrop's dark-mode orb glow) ended
-    // up reading as its own stray light-purple rectangle in light mode,
-    // which looked worse than the problem it solved. See AnimatedBackdrop
-    // for the real fix to the dark-mode glow instead.
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60, vertical: isMobile ? 8 : 12),
-      child: RevealOnScroll(child: content),
-    );
-  }
-}
 
 class _Footer extends StatelessWidget {
   final bool isMobile;
@@ -734,6 +697,7 @@ class _Footer extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             context.strings.footerTagline,
+            textAlign: TextAlign.center,
             style: AppFonts.body(color: context.colors.creamDim, size: 13),
           ),
           const SizedBox(height: 6),

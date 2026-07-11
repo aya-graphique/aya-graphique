@@ -37,6 +37,13 @@ dependencies:
   # Lets the admin dashboard upload product photos straight from disk
   file_picker: ^8.1.2
 
+  # Pure-Dart resize/re-encode so banner photos (often multi-MB, full
+  # camera resolution) get shrunk before upload instead of hitting
+  # Supabase Storage — and every visitor's phone — at full size. Pure
+  # Dart (no platform channels), so it works on web too, unlike
+  # flutter_image_compress.
+  image: ^4.2.0
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

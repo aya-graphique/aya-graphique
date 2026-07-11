@@ -122,6 +122,13 @@ create table if not exists order_items (
   quantity    integer not null check (quantity > 0)
 );
 
+-- Postgres does NOT automatically index foreign key columns (only primary
+-- keys get that). Without this, deleting an order has to full-scan
+-- order_items to find the rows to cascade-delete, and AdminOrdersScreen's
+-- `select('*, order_items(*)')` join has to full-scan it too — both get
+-- slower as order_items grows. Safe to re-run on an existing project.
+create index if not exists order_items_order_id_idx on order_items (order_id);
+
 -- Atomically bumps products.sales_count for everything in an order, called
 -- once from the checkout flow right after order_items is written (see
 -- OrdersRepository._incrementSalesCounts in the app). `items` looks like

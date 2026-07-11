@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:image/image.dart' as img;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_service.dart';
 
@@ -48,7 +49,27 @@ class StorageService {
   }
 
   static Future<String> uploadHomeBannerImage(Uint8List bytes, String fileName) {
-    return _upload(homeBannerBucket, bytes, fileName);
+    return _upload(homeBannerBucket, _shrinkForBanner(bytes), fileName);
+  }
+
+  // Banner photos come straight off a phone camera (often 3000px+ wide,
+  // several MB) but only ever display at a fraction of that size in the
+  // banner strip — see HomeBannerSlideshow. Uploading them full-size is
+  // what made both the upload itself and every later page load of the
+  // banner strip slow. This caps width at 1600px (plenty for even a large
+  // desktop hero) and re-encodes as JPEG at quality 85, which is usually a
+  // 5-10x size drop for a typical photo with no visible quality loss.
+  // Falls back to the original bytes if decoding fails for any reason
+  // (e.g. an unusual format) so a bad image never blocks the upload.
+  static Uint8List _shrinkForBanner(Uint8List bytes) {
+    try {
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return bytes;
+      final resized = decoded.width > 1600 ? img.copyResize(decoded, width: 1600) : decoded;
+      return Uint8List.fromList(img.encodeJpg(resized, quality: 85));
+    } catch (_) {
+      return bytes;
+    }
   }
 
   static Future<String> _upload(String bucketName, Uint8List bytes, String fileName) async {

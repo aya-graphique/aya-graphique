@@ -256,6 +256,10 @@ class AppText {
   // the embedded Services section used to, links down to the full "Who am
   // I" section below.
   String get viewFullProfile => _t('View full profile', 'شاهد الملف الشخصي كاملاً');
+
+  // Home — shop preview section (teases the collection, hands off to the
+  // standalone Shop tab)
+  String get shopTheCollection => _t('Shop the collection', 'تسوق المجموعة');
   // The audience circles in that same card — each taps straight through
   // to the matching category on the Services tab (see OwnerIntroCard).
   String get availableForEyebrow => _t('AVAILABLE FOR', 'متاحة للعمل مع');
@@ -264,11 +268,15 @@ class AppText {
   String get companyOwnersLabel => _t('Company owners', 'أصحاب الشركات');
   String get brandingLabel => _t('Branding', 'الهوية التجارية');
   String get illustrationClientsLabel => _t('Illustration', 'الرسوم التوضيحية');
+  String get creativityLabel => _t('Creativity', 'الإبداع');
   String get privateWorkshopIndividualsLabel =>
       _t('Individuals — private workshops', 'الأفراد — ورش فردية');
   String get aspiringDesignersLabel => _t('Aspiring designers', 'المصممون الطموحون');
+  String get contentCreatorsLabel => _t('Content creators', 'صناع المحتوى');
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
+  String get skillsLabel => _t('SKILLS', 'المهارات');
+  String get getInTouchLabel => _t('GET IN TOUCH', 'تواصل معايا');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');
   String get emailLabel => _t('Email', 'البريد الإلكتروني');
   String get portfolioLabel => _t('Portfolio', 'أعمالي');
