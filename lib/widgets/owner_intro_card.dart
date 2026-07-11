@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
+import 'circle_carousel.dart';
 import 'reveal_on_scroll.dart';
 
 /// Dropped into Home right where the embedded Services section used to sit
@@ -33,6 +34,47 @@ class OwnerIntroCard extends StatelessWidget {
     final colors = context.colors;
     const crossAxis = CrossAxisAlignment.center;
 
+    final audiences = <_AudienceSpec>[
+      _AudienceSpec(Icons.restaurant_rounded, context.strings.restaurantOwnersLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.hotel_rounded, context.strings.hotelOwnersLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.business_center_rounded, context.strings.companyOwnersLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.branding_watermark_rounded, context.strings.brandingLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.palette_rounded, context.strings.illustrationClientsLabel, () => onAudienceTap(1)),
+      _AudienceSpec(Icons.school_rounded, context.strings.privateWorkshopIndividualsLabel, () => onAudienceTap(2)),
+      _AudienceSpec(Icons.support_agent_rounded, context.strings.aspiringDesignersLabel, () => onAudienceTap(0)),
+    ];
+
+    final audienceCircles = isMobile
+        ? MobileCircleCarousel(
+            itemCount: audiences.length,
+            // Labels here can run to two lines ("Restaurant owners"), so
+            // this row gets a taller label area than the plain one-line
+            // circles elsewhere.
+            labelAreaHeight: 62,
+            itemBuilder: (context, i, diameter) => _AudienceCircle(
+              icon: audiences[i].icon,
+              label: audiences[i].label,
+              diameter: diameter,
+              iconSize: diameter * 0.3,
+              labelSize: (diameter * 0.12).clamp(10.0, 13.0),
+              onTap: audiences[i].onTap,
+            ),
+          )
+        : Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 24,
+            runSpacing: 24,
+            children: [
+              for (var i = 0; i < audiences.length; i++)
+                _AudienceCircle(
+                  icon: audiences[i].icon,
+                  label: audiences[i].label,
+                  floatDelayIndex: i,
+                  onTap: audiences[i].onTap,
+                ),
+            ],
+          );
+
     final content = Column(
       crossAxisAlignment: crossAxis,
       children: [
@@ -56,55 +98,7 @@ class OwnerIntroCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 26),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 24,
-          runSpacing: 24,
-          children: [
-            _AudienceCircle(
-              icon: Icons.restaurant_rounded,
-              label: context.strings.restaurantOwnersLabel,
-              floatDelayIndex: 0,
-              onTap: () => onAudienceTap(1),
-            ),
-            _AudienceCircle(
-              icon: Icons.hotel_rounded,
-              label: context.strings.hotelOwnersLabel,
-              floatDelayIndex: 1,
-              onTap: () => onAudienceTap(1),
-            ),
-            _AudienceCircle(
-              icon: Icons.business_center_rounded,
-              label: context.strings.companyOwnersLabel,
-              floatDelayIndex: 2,
-              onTap: () => onAudienceTap(1),
-            ),
-            _AudienceCircle(
-              icon: Icons.branding_watermark_rounded,
-              label: context.strings.brandingLabel,
-              floatDelayIndex: 3,
-              onTap: () => onAudienceTap(1),
-            ),
-            _AudienceCircle(
-              icon: Icons.palette_rounded,
-              label: context.strings.illustrationClientsLabel,
-              floatDelayIndex: 4,
-              onTap: () => onAudienceTap(1),
-            ),
-            _AudienceCircle(
-              icon: Icons.school_rounded,
-              label: context.strings.privateWorkshopIndividualsLabel,
-              floatDelayIndex: 5,
-              onTap: () => onAudienceTap(2),
-            ),
-            _AudienceCircle(
-              icon: Icons.support_agent_rounded,
-              label: context.strings.aspiringDesignersLabel,
-              floatDelayIndex: 6,
-              onTap: () => onAudienceTap(0),
-            ),
-          ],
-        ),
+        audienceCircles,
         const SizedBox(height: 26),
         GestureDetector(
           onTap: onViewProfile,
@@ -149,6 +143,17 @@ class OwnerIntroCard extends StatelessWidget {
   }
 }
 
+/// A plain (icon, label, tap target) bundle for an audience circle — kept
+/// separate from the built widget so the layout picked at build time
+/// (desktop Wrap vs. mobile carousel) can each size the circles however
+/// suits that layout.
+class _AudienceSpec {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _AudienceSpec(this.icon, this.label, this.onTap);
+}
+
 /// One tappable "available for" circle inside [OwnerIntroCard] — a round
 /// icon badge with its label underneath. Tapping jumps straight to the
 /// matching category on the Services tab.
@@ -157,12 +162,20 @@ class _AudienceCircle extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
   final int floatDelayIndex;
+  // Desktop keeps its original fixed circle size and label size below —
+  // the mobile carousel passes its own smaller, width-fitted values.
+  final double diameter;
+  final double labelSize;
+  final double iconSize;
 
   const _AudienceCircle({
     required this.icon,
     required this.label,
     required this.onTap,
     this.floatDelayIndex = 0,
+    this.diameter = 132,
+    this.labelSize = 15,
+    this.iconSize = 40,
   });
 
   @override
@@ -172,11 +185,10 @@ class _AudienceCircle extends StatefulWidget {
 class _AudienceCircleState extends State<_AudienceCircle> {
   bool _hovered = false;
 
-  static const double _circleSize = 132;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final circleSize = widget.diameter;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
@@ -185,14 +197,14 @@ class _AudienceCircleState extends State<_AudienceCircle> {
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: SizedBox(
-          width: 148,
+          width: circleSize + 16,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                width: _circleSize,
-                height: _circleSize,
+                width: circleSize,
+                height: circleSize,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -202,7 +214,7 @@ class _AudienceCircleState extends State<_AudienceCircle> {
                     width: _hovered ? 2.4 : 2,
                   ),
                 ),
-                child: Icon(widget.icon, size: 40, color: colors.violetPop),
+                child: Icon(widget.icon, size: widget.iconSize, color: colors.violetPop),
               )
                   .animate(
                     onPlay: (c) => c.repeat(reverse: true),
@@ -222,7 +234,7 @@ class _AudienceCircleState extends State<_AudienceCircle> {
                 overflow: TextOverflow.ellipsis,
                 style: AppFonts.body(
                   color: colors.cream,
-                  size: 15,
+                  size: widget.labelSize,
                   weight: FontWeight.w600,
                   text: widget.label,
                   boostArabicSize: false,

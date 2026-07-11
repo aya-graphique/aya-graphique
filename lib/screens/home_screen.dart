@@ -12,6 +12,7 @@ import '../services/categories_repository.dart';
 import '../services/illustration_art_repository.dart';
 import '../services/service_categories_repository.dart';
 import '../theme/app_theme.dart';
+import '../widgets/circle_carousel.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/owner_intro_card.dart';
@@ -342,9 +343,22 @@ class _EyebrowCirclesSection extends StatelessWidget {
     // so it stays the plain centered Wrap it always was. On mobile that
     // same size wraps one-per-line (see the old screenshot this was
     // fixed from), so instead it's a single horizontal row of smaller
-    // circles that periodically swap places — see _MobileCircleCarousel.
+    // circles that periodically swap places — see MobileCircleCarousel.
     final circlesArea = isMobile
-        ? _MobileCircleCarousel(specs: specs)
+        ? MobileCircleCarousel(
+            itemCount: specs.length,
+            itemBuilder: (context, i, diameter) => _CategoryCircle(
+              label: specs[i].label,
+              imageUrl: specs[i].imageUrl,
+              icon: specs[i].icon,
+              diameter: diameter,
+              // Smaller circles need a smaller label to still read as one
+              // tidy line under each — desktop keeps its own value below.
+              labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+              selected: true,
+              onTap: specs[i].onTap,
+            ),
+          )
         : Wrap(
             alignment: WrapAlignment.center,
             spacing: 24,
@@ -425,93 +439,6 @@ class _CircleSpec {
   });
 }
 
-/// Mobile-only replacement for the plain Wrap: lays every circle out in a
-/// single horizontal row (shrinking them to fit, same look as the desktop
-/// row just smaller) and, every 10 seconds, rotates which slot each circle
-/// sits in — they smoothly glide past each other and swap places, rather
-/// than sitting static or wrapping onto their own line each.
-class _MobileCircleCarousel extends StatefulWidget {
-  final List<_CircleSpec> specs;
-
-  const _MobileCircleCarousel({required this.specs});
-
-  @override
-  State<_MobileCircleCarousel> createState() => _MobileCircleCarouselState();
-}
-
-class _MobileCircleCarouselState extends State<_MobileCircleCarousel> {
-  Timer? _timer;
-  int _rotation = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.specs.length > 1) {
-      _timer = Timer.periodic(const Duration(seconds: 10), (_) {
-        if (!mounted) return;
-        setState(() => _rotation = (_rotation + 1) % widget.specs.length);
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final n = widget.specs.length;
-    if (n == 0) return const SizedBox.shrink();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Shrink circles to whatever fits n-across in the available width,
-        // clamped so they never get too tiny or too big.
-        final diameter = ((constraints.maxWidth / n) - 20).clamp(60.0, 130.0);
-        final itemWidth = diameter + 16;
-        final rowHeight = diameter + 46;
-        final naturalWidth = itemWidth * n;
-        final needsScroll = naturalWidth > constraints.maxWidth;
-        final rowWidth = needsScroll ? naturalWidth : constraints.maxWidth;
-        final slotWidth = rowWidth / n;
-
-        final stack = SizedBox(
-          height: rowHeight,
-          width: rowWidth,
-          child: Stack(
-            children: [
-              for (var i = 0; i < n; i++)
-                AnimatedPositioned(
-                  key: ValueKey(i),
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.easeInOutCubic,
-                  left: ((i + _rotation) % n) * slotWidth + (slotWidth - itemWidth) / 2,
-                  top: 0,
-                  width: itemWidth,
-                  height: rowHeight,
-                  child: _CategoryCircle(
-                    label: widget.specs[i].label,
-                    imageUrl: widget.specs[i].imageUrl,
-                    icon: widget.specs[i].icon,
-                    diameter: diameter,
-                    selected: true,
-                    onTap: widget.specs[i].onTap,
-                  ),
-                ),
-            ],
-          ),
-        );
-
-        return needsScroll
-            ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: stack)
-            : Center(child: stack);
-      },
-    );
-  }
-}
-
 class _CategoryCircle extends StatefulWidget {
   final String label;
   final String? imageUrl;
@@ -520,6 +447,10 @@ class _CategoryCircle extends StatefulWidget {
   final bool selected;
   final int floatDelayIndex;
   final VoidCallback onTap;
+  // Font size for the label under the circle — defaults to the original
+  // fixed desktop size; the mobile carousel passes a smaller value scaled
+  // to its (smaller) diameter instead.
+  final double labelSize;
 
   const _CategoryCircle({
     required this.label,
@@ -529,6 +460,7 @@ class _CategoryCircle extends StatefulWidget {
     required this.selected,
     this.floatDelayIndex = 0,
     required this.onTap,
+    this.labelSize = 17,
   });
 
   @override
@@ -622,7 +554,7 @@ class _CategoryCircleState extends State<_CategoryCircle> {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: AppFonts.label(
-                  size: 17,
+                  size: widget.labelSize,
                   weight: FontWeight.w700,
                   color: selected ? context.colors.cream : context.colors.creamDim,
                   letterSpacing: 0.6,
@@ -701,19 +633,25 @@ class _MostRequestedCircles extends StatelessWidget {
         ),
         const SizedBox(height: 22),
         isMobile
-            ? _MobileCircleCarousel(
-                specs: [
-                  _CircleSpec(
-                    label: kServiceCategories[2].title.t(isArabic),
-                    icon: kServiceCategories[2].icon,
-                    onTap: onPrivateWorkshopTap,
-                  ),
-                  _CircleSpec(
-                    label: context.strings.artisticProductsLabel,
-                    icon: Icons.auto_awesome_rounded,
-                    onTap: onArtisticProductsTap,
-                  ),
-                ],
+            ? MobileCircleCarousel(
+                itemCount: 2,
+                itemBuilder: (context, i, diameter) => i == 0
+                    ? _CategoryCircle(
+                        label: kServiceCategories[2].title.t(isArabic),
+                        icon: kServiceCategories[2].icon,
+                        diameter: diameter,
+                        labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+                        selected: true,
+                        onTap: onPrivateWorkshopTap,
+                      )
+                    : _CategoryCircle(
+                        label: context.strings.artisticProductsLabel,
+                        icon: Icons.auto_awesome_rounded,
+                        diameter: diameter,
+                        labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+                        selected: true,
+                        onTap: onArtisticProductsTap,
+                      ),
               )
             : Wrap(
                 alignment: WrapAlignment.center,
