@@ -266,20 +266,17 @@ class _ServicesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageController>().isArabic;
-    final diameter = isMobile ? 138.0 : 188.0;
     return _EyebrowCirclesSection(
       icon: Icons.design_services_outlined,
       eyebrow: context.strings.homeServicesEyebrow,
       isMobile: isMobile,
-      circles: [
+      desktopDiameter: 188,
+      specs: [
         for (var i = 0; i < kServiceCategories.length; i++)
-          _CategoryCircle(
+          _CircleSpec(
             label: kServiceCategories[i].title.t(isArabic),
             imageUrl: serviceCategoryImages[i],
             icon: kServiceCategories[i].icon,
-            diameter: diameter,
-            selected: true,
-            floatDelayIndex: i,
             onTap: () => onServiceCategoryTap(i),
           ),
       ],
@@ -302,19 +299,16 @@ class _IllustrationArtSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageController>().isArabic;
-    final diameter = isMobile ? 138.0 : 188.0;
     return _EyebrowCirclesSection(
       icon: Icons.palette_outlined,
       eyebrow: context.strings.illustrationArtEyebrow,
       isMobile: isMobile,
-      circles: [
+      desktopDiameter: 188,
+      specs: [
         for (var i = 0; i < items.length; i++)
-          _CategoryCircle(
+          _CircleSpec(
             label: items[i].title(isArabic),
             imageUrl: items[i].imageUrl,
-            diameter: diameter,
-            selected: true,
-            floatDelayIndex: i,
             onTap: () {},
           ),
       ],
@@ -330,18 +324,45 @@ class _EyebrowCirclesSection extends StatelessWidget {
   final IconData icon;
   final String eyebrow;
   final bool isMobile;
-  final List<Widget> circles;
+  final List<_CircleSpec> specs;
+  final double desktopDiameter;
 
   const _EyebrowCirclesSection({
     required this.icon,
     required this.eyebrow,
     required this.isMobile,
-    required this.circles,
+    required this.specs,
+    required this.desktopDiameter,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // On desktop there's room for every circle side by side at full size,
+    // so it stays the plain centered Wrap it always was. On mobile that
+    // same size wraps one-per-line (see the old screenshot this was
+    // fixed from), so instead it's a single horizontal row of smaller
+    // circles that periodically swap places — see _MobileCircleCarousel.
+    final circlesArea = isMobile
+        ? _MobileCircleCarousel(specs: specs)
+        : Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 24,
+            runSpacing: 24,
+            children: [
+              for (var i = 0; i < specs.length; i++)
+                _CategoryCircle(
+                  label: specs[i].label,
+                  imageUrl: specs[i].imageUrl,
+                  icon: specs[i].icon,
+                  diameter: desktopDiameter,
+                  selected: true,
+                  floatDelayIndex: i,
+                  onTap: specs[i].onTap,
+                ),
+            ],
+          );
+
     final content = Column(
       children: [
         Container(
@@ -375,18 +396,118 @@ class _EyebrowCirclesSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 26),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 24,
-          runSpacing: 24,
-          children: circles,
-        ),
+        circlesArea,
       ],
     );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
       child: RevealOnScroll(child: content),
+    );
+  }
+}
+
+/// A plain (label, image/icon, tap target) bundle for a category circle —
+/// used instead of a built _CategoryCircle widget so the layout picked at
+/// build time (desktop Wrap vs. mobile carousel) can each size the circles
+/// however suits that layout, rather than inheriting one fixed diameter.
+class _CircleSpec {
+  final String label;
+  final String? imageUrl;
+  final IconData? icon;
+  final VoidCallback onTap;
+
+  const _CircleSpec({
+    required this.label,
+    this.imageUrl,
+    this.icon,
+    required this.onTap,
+  });
+}
+
+/// Mobile-only replacement for the plain Wrap: lays every circle out in a
+/// single horizontal row (shrinking them to fit, same look as the desktop
+/// row just smaller) and, every 10 seconds, rotates which slot each circle
+/// sits in — they smoothly glide past each other and swap places, rather
+/// than sitting static or wrapping onto their own line each.
+class _MobileCircleCarousel extends StatefulWidget {
+  final List<_CircleSpec> specs;
+
+  const _MobileCircleCarousel({required this.specs});
+
+  @override
+  State<_MobileCircleCarousel> createState() => _MobileCircleCarouselState();
+}
+
+class _MobileCircleCarouselState extends State<_MobileCircleCarousel> {
+  Timer? _timer;
+  int _rotation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.specs.length > 1) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+        if (!mounted) return;
+        setState(() => _rotation = (_rotation + 1) % widget.specs.length);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = widget.specs.length;
+    if (n == 0) return const SizedBox.shrink();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Shrink circles to whatever fits n-across in the available width,
+        // clamped so they never get too tiny or too big.
+        final diameter = ((constraints.maxWidth / n) - 20).clamp(60.0, 130.0);
+        final itemWidth = diameter + 16;
+        final rowHeight = diameter + 46;
+        final naturalWidth = itemWidth * n;
+        final needsScroll = naturalWidth > constraints.maxWidth;
+        final rowWidth = needsScroll ? naturalWidth : constraints.maxWidth;
+        final slotWidth = rowWidth / n;
+
+        final stack = SizedBox(
+          height: rowHeight,
+          width: rowWidth,
+          child: Stack(
+            children: [
+              for (var i = 0; i < n; i++)
+                AnimatedPositioned(
+                  key: ValueKey(i),
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeInOutCubic,
+                  left: ((i + _rotation) % n) * slotWidth + (slotWidth - itemWidth) / 2,
+                  top: 0,
+                  width: itemWidth,
+                  height: rowHeight,
+                  child: _CategoryCircle(
+                    label: widget.specs[i].label,
+                    imageUrl: widget.specs[i].imageUrl,
+                    icon: widget.specs[i].icon,
+                    diameter: diameter,
+                    selected: true,
+                    onTap: widget.specs[i].onTap,
+                  ),
+                ),
+            ],
+          ),
+        );
+
+        return needsScroll
+            ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: stack)
+            : Center(child: stack);
+      },
     );
   }
 }
@@ -579,28 +700,43 @@ class _MostRequestedCircles extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 24,
-          runSpacing: 24,
-          children: [
-            _CategoryCircle(
-              label: kServiceCategories[2].title.t(isArabic),
-              icon: kServiceCategories[2].icon,
-              diameter: 180,
-              selected: true,
-              onTap: onPrivateWorkshopTap,
-            ),
-            _CategoryCircle(
-              label: context.strings.artisticProductsLabel,
-              icon: Icons.auto_awesome_rounded,
-              diameter: 180,
-              selected: true,
-              floatDelayIndex: 1,
-              onTap: onArtisticProductsTap,
-            ),
-          ],
-        ),
+        isMobile
+            ? _MobileCircleCarousel(
+                specs: [
+                  _CircleSpec(
+                    label: kServiceCategories[2].title.t(isArabic),
+                    icon: kServiceCategories[2].icon,
+                    onTap: onPrivateWorkshopTap,
+                  ),
+                  _CircleSpec(
+                    label: context.strings.artisticProductsLabel,
+                    icon: Icons.auto_awesome_rounded,
+                    onTap: onArtisticProductsTap,
+                  ),
+                ],
+              )
+            : Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 24,
+                runSpacing: 24,
+                children: [
+                  _CategoryCircle(
+                    label: kServiceCategories[2].title.t(isArabic),
+                    icon: kServiceCategories[2].icon,
+                    diameter: 180,
+                    selected: true,
+                    onTap: onPrivateWorkshopTap,
+                  ),
+                  _CategoryCircle(
+                    label: context.strings.artisticProductsLabel,
+                    icon: Icons.auto_awesome_rounded,
+                    diameter: 180,
+                    selected: true,
+                    floatDelayIndex: 1,
+                    onTap: onArtisticProductsTap,
+                  ),
+                ],
+              ),
       ],
     );
 
