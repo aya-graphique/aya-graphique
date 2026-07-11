@@ -275,10 +275,14 @@ class _AdminServiceItemEditScreenState extends State<AdminServiceItemEditScreen>
 class _Field extends StatelessWidget {
   final String label;
   final TextEditingController controller;
-  final int maxLines;
+  // null = auto-grow: wraps onto new lines as the text gets long instead
+  // of scrolling sideways in a fixed single line (which used to hide half
+  // of what you'd typed). Fields that truly want a hard cap (e.g. exactly
+  // N lines for "one per line" inputs) still pass an explicit number.
+  final int? maxLines;
   final String? hint;
 
-  const _Field({required this.label, required this.controller, this.maxLines = 1, this.hint});
+  const _Field({required this.label, required this.controller, this.maxLines, this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -295,7 +299,10 @@ class _Field extends StatelessWidget {
           ),
           child: TextField(
             controller: controller,
+            minLines: 1,
             maxLines: maxLines,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
             style: AppFonts.body(size: 14, color: context.colors.cream),
             cursorColor: context.colors.orchid,
             decoration: InputDecoration(

@@ -112,6 +112,10 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
           children: [
             TextField(
               controller: enController,
+              minLines: 1,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               style: AppFonts.body(size: 14, color: context.colors.cream),
               decoration: InputDecoration(
                 labelText: 'Title (English)',
@@ -121,6 +125,10 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
             const SizedBox(height: 12),
             TextField(
               controller: arController,
+              minLines: 1,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               style: AppFonts.body(size: 14, color: context.colors.cream),
               decoration: InputDecoration(
                 labelText: 'Title (Arabic)',

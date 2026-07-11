@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'circle_carousel.dart';
@@ -73,7 +72,6 @@ class OwnerIntroCard extends StatelessWidget {
                 _AudienceCircle(
                   icon: audiences[i].icon,
                   label: audiences[i].label,
-                  floatDelayIndex: i,
                   onTap: audiences[i].onTap,
                 ),
             ],
@@ -83,7 +81,7 @@ class OwnerIntroCard extends StatelessWidget {
       crossAxisAlignment: crossAxis,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           decoration: BoxDecoration(
             color: colors.violetPop.withOpacity(0.14),
             borderRadius: BorderRadius.circular(100),
@@ -92,13 +90,29 @@ class OwnerIntroCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome_rounded, size: 13, color: colors.orchid),
-              const SizedBox(width: 8),
+              Icon(Icons.auto_awesome_rounded, size: 17, color: colors.orchid),
+              const SizedBox(width: 10),
               Text(
                 context.strings.availableForEyebrow,
-                style: AppFonts.label(color: colors.orchid, size: 12.5),
+                style: AppFonts.label(color: colors.orchid, size: 16),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Divider — same treatment as the one under the Services/
+        // Illustration Art/Most Requested eyebrow pills.
+        Container(
+          height: 1,
+          width: 60,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.transparent,
+                colors.border(0.14),
+                Colors.transparent,
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 26),
@@ -155,9 +169,11 @@ class _AudienceSpec {
 /// Instagram-story styling as the rest of the app's circle rows (Services,
 /// Illustration Art, Most Requested — see [_EyebrowCirclesSection] /
 /// [_MostRequestedCircles] in home_screen.dart, and their shared
-/// `_CategoryCircle`): a gradient ring always framing the icon, a gentle
-/// float loop, and a slight shrink on hover/tap instead of a glow. Tapping
-/// jumps straight to the matching category on the Services tab.
+/// `_CategoryCircle`): a gradient ring always framing the icon, sized to
+/// match the Services row (188px on desktop), with a slight shrink on
+/// hover/tap. Unlike those other rows, this one holds still — no floating
+/// bob animation. Tapping jumps straight to the matching category on the
+/// Services tab.
 class _AudienceCircle extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -166,21 +182,18 @@ class _AudienceCircle extends StatefulWidget {
   // the mobile carousel passes its own smaller, width-fitted values.
   final double diameter;
   final double labelSize;
-  final double iconSize;
-  // Staggers the float animation per-circle on desktop (see
-  // `_CategoryCircle.floatDelayIndex`) so a whole row doesn't bob in
-  // lockstep. Mobile leaves this at 0 since the carousel already staggers
-  // circles by swapping their positions.
-  final int floatDelayIndex;
+  // If omitted, sized proportionally to [diameter] (same 0.36 ratio the
+  // Services/Illustration Art/Most Requested circles use) so this row
+  // matches their icon-to-circle proportion at any size.
+  final double? iconSize;
 
   const _AudienceCircle({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.diameter = 132,
+    this.diameter = 188,
     this.labelSize = 15,
-    this.iconSize = 44,
-    this.floatDelayIndex = 0,
+    this.iconSize,
   });
 
   @override
@@ -194,6 +207,7 @@ class _AudienceCircleState extends State<_AudienceCircle> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final diameter = widget.diameter;
+    final iconSize = widget.iconSize ?? diameter * 0.36;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -234,21 +248,11 @@ class _AudienceCircleState extends State<_AudienceCircle> {
                       border: Border.all(color: colors.bgDeep, width: 2),
                     ),
                     child: Center(
-                      child: Icon(widget.icon, size: widget.iconSize, color: colors.violetPop),
+                      child: Icon(widget.icon, size: iconSize, color: colors.violetPop),
                     ),
                   ),
                 ),
-              )
-                  .animate(
-                    onPlay: (c) => c.repeat(reverse: true),
-                    delay: Duration(milliseconds: 90 * widget.floatDelayIndex),
-                  )
-                  .moveY(
-                    begin: 0,
-                    end: -9,
-                    duration: 1700.ms,
-                    curve: Curves.easeInOut,
-                  ),
+              ),
               const SizedBox(height: 10),
               Text(
                 widget.label,
