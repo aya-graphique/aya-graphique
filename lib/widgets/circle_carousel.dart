@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 /// Mobile-only replacement for wrapping a row of circles onto their own
 /// lines: lays every circle out in a single horizontal row (shrinking them
-/// to fit the available width) and, every 10 seconds, rotates which slot
+/// to fit the available width) and, every 15 seconds, rotates which slot
 /// each one sits in — they smoothly glide past each other and swap places
 /// instead of sitting static.
 ///
@@ -44,7 +44,7 @@ class _MobileCircleCarouselState extends State<MobileCircleCarousel> {
   void initState() {
     super.initState();
     if (widget.itemCount > 1) {
-      _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _timer = Timer.periodic(const Duration(seconds: 15), (_) {
         if (!mounted) return;
         setState(() => _rotation = (_rotation + 1) % widget.itemCount);
       });

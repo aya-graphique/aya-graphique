@@ -354,7 +354,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
               diameter: diameter,
               // Smaller circles need a smaller label to still read as one
               // tidy line under each — desktop keeps its own value below.
-              labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+              labelSize: (diameter * 0.15).clamp(13.0, 16.0),
               selected: true,
               onTap: specs[i].onTap,
             ),
@@ -460,7 +460,7 @@ class _CategoryCircle extends StatefulWidget {
     required this.selected,
     this.floatDelayIndex = 0,
     required this.onTap,
-    this.labelSize = 17,
+    this.labelSize = 19,
   });
 
   @override
@@ -497,7 +497,7 @@ class _CategoryCircleState extends State<_CategoryCircle> {
                   duration: const Duration(milliseconds: 200),
                   width: diameter,
                   height: diameter,
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(2.5),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: context.colors.violetGradient,
@@ -513,7 +513,7 @@ class _CategoryCircleState extends State<_CategoryCircle> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: context.colors.surface,
-                      border: Border.all(color: context.colors.bgDeep, width: 4),
+                      border: Border.all(color: context.colors.bgDeep, width: 2),
                     ),
                     child: ClipOval(
                       child: widget.imageUrl != null
@@ -555,11 +555,11 @@ class _CategoryCircleState extends State<_CategoryCircle> {
                 textAlign: TextAlign.center,
                 style: AppFonts.label(
                   size: widget.labelSize,
-                  weight: FontWeight.w700,
+                  weight: FontWeight.w600,
                   color: selected ? context.colors.cream : context.colors.creamDim,
                   letterSpacing: 0.6,
                   text: widget.label,
-                ).copyWith(fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
+                ).copyWith(fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
               ),
             ],
           ),
@@ -640,7 +640,7 @@ class _MostRequestedCircles extends StatelessWidget {
                         label: kServiceCategories[2].title.t(isArabic),
                         icon: kServiceCategories[2].icon,
                         diameter: diameter,
-                        labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+                        labelSize: (diameter * 0.15).clamp(13.0, 16.0),
                         selected: true,
                         onTap: onPrivateWorkshopTap,
                       )
@@ -648,7 +648,7 @@ class _MostRequestedCircles extends StatelessWidget {
                         label: context.strings.artisticProductsLabel,
                         icon: Icons.auto_awesome_rounded,
                         diameter: diameter,
-                        labelSize: (diameter * 0.13).clamp(11.0, 14.0),
+                        labelSize: (diameter * 0.15).clamp(13.0, 16.0),
                         selected: true,
                         onTap: onArtisticProductsTap,
                       ),

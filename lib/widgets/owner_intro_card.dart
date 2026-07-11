@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'circle_carousel.dart';
@@ -69,7 +68,6 @@ class OwnerIntroCard extends StatelessWidget {
                 _AudienceCircle(
                   icon: audiences[i].icon,
                   label: audiences[i].label,
-                  floatDelayIndex: i,
                   onTap: audiences[i].onTap,
                 ),
             ],
@@ -161,7 +159,6 @@ class _AudienceCircle extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final int floatDelayIndex;
   // Desktop keeps its original fixed circle size and label size below —
   // the mobile carousel passes its own smaller, width-fitted values.
   final double diameter;
@@ -172,7 +169,6 @@ class _AudienceCircle extends StatefulWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.floatDelayIndex = 0,
     this.diameter = 132,
     this.labelSize = 15,
     this.iconSize = 40,
@@ -215,17 +211,7 @@ class _AudienceCircleState extends State<_AudienceCircle> {
                   ),
                 ),
                 child: Icon(widget.icon, size: widget.iconSize, color: colors.violetPop),
-              )
-                  .animate(
-                    onPlay: (c) => c.repeat(reverse: true),
-                    delay: Duration(milliseconds: 90 * widget.floatDelayIndex),
-                  )
-                  .moveY(
-                    begin: 0,
-                    end: -9,
-                    duration: 1700.ms,
-                    curve: Curves.easeInOut,
-                  ),
+              ),
               const SizedBox(height: 12),
               Text(
                 widget.label,
