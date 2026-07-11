@@ -295,9 +295,7 @@ const List<ServiceCategory> kServiceCategories = [
 /// The stable id an item's owner-editable override is stored under. Safe
 /// to compute from position because categories/items are fixed in code —
 /// only their copy and pricing can change from the dashboard.
-String serviceItemKey(int categoryIndex, int itemIndex) => '$categoryIndex-$itemIndex';
-
-/// Merges a saved [ServiceOverride] on top of an item's original hardcoded
+String serviceItemKey(int categoryIndex, int itemIndex) => '$categoryIndex-$itemIndex';/// Merges a saved [ServiceOverride] on top of an item's original hardcoded
 /// copy. Each field is swapped in only once the owner has actually typed
 /// something into it — an override that only fills in a new price, say,
 /// leaves the title/description/highlights showing their original text.
@@ -333,10 +331,41 @@ ServiceItem applyServiceOverride(ServiceItem base, ServiceOverride? o) {
   );
 }
 
+/// Lets another widget elsewhere on the page (HomeScreen's little "service
+/// circles" row, styled just like its shop category circles) ask this
+/// section to open one specific category and scroll it into view — e.g.
+/// tapping "Designing" jumps straight down to that category card, already
+/// expanded.
+class ServicesFocusController extends ChangeNotifier {
+  int? _requestedIndex;
+  int? get requestedIndex => _requestedIndex;
+
+  void focusCategory(int index) {
+    _requestedIndex = index;
+    notifyListeners();
+  }
+}
+
 class GraphicalServicesScreen extends StatefulWidget {
   final bool isMobile;
 
-  const GraphicalServicesScreen({super.key, required this.isMobile});
+  /// When true, renders just the section's own content (heading + category
+  /// cards) with no outer scroll view or top nav-bar offset — used to drop
+  /// this whole section straight into another scrollable page (see
+  /// HomeScreen, which embeds it between the sliders and the shop grid).
+  /// When false (the standalone "Services" tab), it wraps itself in its
+  /// own SingleChildScrollView with the usual page padding, same as before.
+  final bool embedded;
+
+  /// Optional remote control — see [ServicesFocusController].
+  final ServicesFocusController? focusController;
+
+  const GraphicalServicesScreen({
+    super.key,
+    required this.isMobile,
+    this.embedded = false,
+    this.focusController,
+  });
 
   @override
   State<GraphicalServicesScreen> createState() => _GraphicalServicesScreenState();
@@ -351,11 +380,46 @@ class _GraphicalServicesScreenState extends State<GraphicalServicesScreen> {
   int? _openCategory = 0;
   String? _openItemKey;
 
+  // One key per category card, so a focus request (see
+  // ServicesFocusController) can scroll straight to that card even though
+  // it's just sitting further down the same page (when embedded) rather
+  // than in its own scroll view.
+  final List<GlobalKey> _categoryKeys =
+      List.generate(kServiceCategories.length, (_) => GlobalKey());
+
   @override
   void initState() {
     super.initState();
     _loadWhatsapp();
     _loadOverrides();
+    widget.focusController?.addListener(_onFocusRequest);
+  }
+
+  @override
+  void dispose() {
+    widget.focusController?.removeListener(_onFocusRequest);
+    super.dispose();
+  }
+
+  void _onFocusRequest() {
+    final index = widget.focusController?.requestedIndex;
+    if (index == null || index < 0 || index >= _categoryKeys.length) return;
+    setState(() {
+      _openCategory = index;
+      _openItemKey = null;
+    });
+    // Wait one frame so the card is actually expanded (and has its final
+    // height) before measuring where to scroll to.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _categoryKeys[index].currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+        alignment: 0.08,
+      );
+    });
   }
 
   Future<void> _loadWhatsapp() async {
@@ -427,44 +491,54 @@ class _GraphicalServicesScreenState extends State<GraphicalServicesScreen> {
     final isMobile = widget.isMobile;
     final isArabic = context.watch<LanguageController>().isArabic;
 
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeading(
+          eyebrow: context.strings.servicesEyebrow,
+          title: context.strings.servicesTitle,
+          subtitle: context.strings.servicesSubtitle,
+          boostArabicSize: false,
+        ),
+        const SizedBox(height: 44),
+        Column(
+          children: [
+            for (var i = 0; i < kServiceCategories.length; i++) ...[
+              RevealOnScroll(
+                key: _categoryKeys[i],
+                child: _CategoryCard(
+                  index: i,
+                  category: kServiceCategories[i],
+                  items: [
+                    for (var j = 0; j < kServiceCategories[i].items.length; j++)
+                      applyServiceOverride(kServiceCategories[i].items[j], _overrides[serviceItemKey(i, j)]),
+                  ],
+                  isMobile: isMobile,
+                  isArabic: isArabic,
+                  isOpen: _openCategory == i,
+                  openItemKey: _openItemKey,
+                  onToggle: () => _toggleCategory(i),
+                  onToggleItem: _toggleItem,
+                  onBook: _bookService,
+                ),
+              ),
+              if (i != kServiceCategories.length - 1) const SizedBox(height: 20),
+            ],
+          ],
+        ),
+      ],
+    );
+
+    if (widget.embedded) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
+        child: content,
+      );
+    }
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(isMobile ? 20 : 60, isMobile ? 120 : 150, isMobile ? 20 : 60, 60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionHeading(
-            eyebrow: context.strings.servicesEyebrow,
-            title: context.strings.servicesTitle,
-            subtitle: context.strings.servicesSubtitle,
-            boostArabicSize: false,
-          ),
-          const SizedBox(height: 44),
-          Column(
-            children: [
-              for (var i = 0; i < kServiceCategories.length; i++) ...[
-                RevealOnScroll(
-                  child: _CategoryCard(
-                    index: i,
-                    category: kServiceCategories[i],
-                    items: [
-                      for (var j = 0; j < kServiceCategories[i].items.length; j++)
-                        applyServiceOverride(kServiceCategories[i].items[j], _overrides[serviceItemKey(i, j)]),
-                    ],
-                    isMobile: isMobile,
-                    isArabic: isArabic,
-                    isOpen: _openCategory == i,
-                    openItemKey: _openItemKey,
-                    onToggle: () => _toggleCategory(i),
-                    onToggleItem: _toggleItem,
-                    onBook: _bookService,
-                  ),
-                ),
-                if (i != kServiceCategories.length - 1) const SizedBox(height: 20),
-              ],
-            ],
-          ),
-        ],
-      ),
+      child: content,
     );
   }
 }

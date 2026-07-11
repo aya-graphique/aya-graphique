@@ -31,13 +31,12 @@ class AppText {
         'مجموعة صغيرة ومختارة بعناية من الدفاتر والتقويمات — أغلفة داكنة， '
         'ورق فاتح، وتجليد يدوم أطول من الأفكار التي تكتبها فيه.',
       );
-  String get shopTheCollection => _t('Shop the collection', 'تسوّق المجموعة');
-
   // Home — marquee
   String get marqueeNotebooks => _t('NOTEBOOKS', 'دفاتر');
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
   String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
   String get marqueeStand => _t('CALENDAR STAND', 'حامل');
+  String get shopTheCollection => _t('SHOP THE COLLECTION', 'تسوق المجموعة');
 
   // Home — collection section
   String get collectionEyebrow => _t('THE COLLECTION', 'المجموعة');
@@ -54,6 +53,10 @@ class AppText {
   // Home — best sellers
   String get bestSellersEyebrow => _t('CUSTOMER FAVOURITES', 'الأكثر طلبًا');
   String get bestSellersTitle => _t('Best sellers', 'الأكثر مبيعًا');
+
+  // Home — testimonials
+  String get testimonialsEyebrow => _t('TESTIMONIALS', 'التوصيات');
+  String get testimonialsTitle => _t('What people say', 'ماذا يقول الناس');
 
   // Home — footer
   String get footerTagline =>
@@ -238,6 +241,17 @@ class AppText {
   // text, so they're shown exactly as the admin typed them (in whichever
   // language that was) — only the surrounding labels below are translated.
   String get whoAmIEyebrow => _t('WHO AM I?', 'من أنا');
+  // Home's compact "available for" card (see OwnerIntroCard) — sits where
+  // the embedded Services section used to, links down to the full "Who am
+  // I" section below.
+  String get viewFullProfile => _t('View full profile', 'شاهد الملف الشخصي كاملاً');
+  // The 3 audience rows in that same card — each taps straight through to
+  // the matching category on the Services tab (see OwnerIntroCard).
+  String get availableForEyebrow => _t('AVAILABLE FOR', 'متاحة للعمل مع');
+  String get restaurantOwnersLabel => _t('Restaurant owners', 'أصحاب المطاعم');
+  String get hotelOwnersLabel => _t('Hotel owners', 'أصحاب الفنادق');
+  String get privateWorkshopIndividualsLabel =>
+      _t('Individuals — private workshops', 'الأفراد — ورش فردية');
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');

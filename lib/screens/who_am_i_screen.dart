@@ -6,8 +6,6 @@ import '../models/about_me.dart';
 import '../providers/language_controller.dart';
 import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
-import '../widgets/about_slideshow.dart';
-import '../widgets/reveal_on_scroll.dart';
 import '../widgets/shimmer_text.dart';
 
 /// A standalone bio/portfolio page: photo slideshow up top, then the
@@ -83,12 +81,21 @@ String _capitalizeWords(String input) {
 
 class WhoAmIScreen extends StatefulWidget {
   final bool isMobile;
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
+
+  /// When true, renders just the slideshow + profile content with no outer
+  /// scroll view, no scroll controller, and no top nav-bar offset — used to
+  /// drop this whole section straight into another scrollable page (see
+  /// HomeScreen, which embeds it after the shop grid). When false (the
+  /// standalone "About" tab), it wraps itself in its own
+  /// SingleChildScrollView using [scrollController], same as before.
+  final bool embedded;
 
   const WhoAmIScreen({
     super.key,
     required this.isMobile,
-    required this.scrollController,
+    this.scrollController,
+    this.embedded = false,
   });
 
   @override
@@ -96,7 +103,7 @@ class WhoAmIScreen extends StatefulWidget {
 }
 
 class _WhoAmIScreenState extends State<WhoAmIScreen> {
-  late Future<(AboutMe, List<AboutSlide>)> _future;
+  late Future<AboutMe> _future;
 
   @override
   void initState() {
@@ -105,10 +112,7 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
   }
 
   void _load() {
-    _future = Future.wait([
-      AboutRepository.fetchProfile(),
-      AboutRepository.fetchSlides(),
-    ]).then((results) => (results[0] as AboutMe, results[1] as List<AboutSlide>));
+    _future = AboutRepository.fetchProfile();
   }
 
   Future<void> _openUrl(String raw) async {
@@ -137,39 +141,24 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<(AboutMe, List<AboutSlide>)>(
+    return FutureBuilder<AboutMe>(
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator(color: context.colors.orchid));
         }
-        final profile = snapshot.data?.$1 ?? const AboutMe();
-        final slides = snapshot.data?.$2 ?? const [];
+        final profile = snapshot.data ?? const AboutMe();
 
-        return SingleChildScrollView(
-          controller: widget.scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        final content = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
               // Same top offset as every other tab (home, search, services,
               // cart) so switching tabs doesn't cause the page content to
-              // jump up/down under the fixed nav bar.
-              SizedBox(height: widget.isMobile ? 120 : 150),
-              RevealOnScroll(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    // Scales smoothly with the available width instead of
-                    // snapping between just two fixed heights, so tablet
-                    // widths (between the mobile and desktop breakpoints)
-                    // get a proportional size rather than either a cramped
-                    // mobile frame or an oversized desktop one.
-                    final width = constraints.maxWidth;
-                    final height = (width * 0.62).clamp(360.0, 620.0);
-                    return AboutSlideshow(slides: slides, height: height);
-                  },
-                ),
-              ),
-              const SizedBox(height: 40),
+              // jump up/down under the fixed nav bar. Skipped when embedded
+              // — the page embedding this section (HomeScreen) already
+              // handles its own single top offset up at the sliders.
+              if (!widget.embedded) SizedBox(height: widget.isMobile ? 120 : 150),
+              const SizedBox(height: 12),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
                 child: Align(
@@ -190,7 +179,13 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
               ),
               const SizedBox(height: 60),
             ],
-          ),
+        );
+
+        if (widget.embedded) return content;
+
+        return SingleChildScrollView(
+          controller: widget.scrollController,
+          child: content,
         );
       },
     );

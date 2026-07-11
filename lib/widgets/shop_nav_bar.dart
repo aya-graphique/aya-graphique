@@ -6,7 +6,7 @@ import '../providers/cart_provider.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 
-enum ShopPage { home, search, services, cart, about }
+enum ShopPage { home, search, services, about, cart }
 
 /// The same frosted glass pill nav from the Aya's Graphique brand system,
 /// re-purposed for page navigation instead of scroll-to-section links, plus
@@ -18,44 +18,25 @@ enum ShopPage { home, search, services, cart, about }
 /// touches (mobile) a single icon, that icon pops up a bit larger with a
 /// soft glow, then eases straight back to its normal size the instant the
 /// pointer leaves or lifts — the rest of the bar never moves.
-class ShopNavBar extends StatefulWidget {
+///
+/// The theme (light/dark) and language (EN/AR) toggles live directly in
+/// this same pill now, right after the page icons — they used to hide
+/// behind a separate "more" button/pill that had to be opened first, but
+/// they're common enough controls that they belong in the bar itself.
+class ShopNavBar extends StatelessWidget {
   final ShopPage active;
   final ValueChanged<ShopPage> onTap;
   final bool isMobile;
-  /// Fires every time the theme/language utility pill opens or closes,
-  /// so the parent screen can make room for it (push its content down)
-  /// instead of letting the pill float on top and cover it.
-  final ValueChanged<bool>? onUtilityOpenChanged;
 
   const ShopNavBar({
     super.key,
     required this.active,
     required this.onTap,
     this.isMobile = false,
-    this.onUtilityOpenChanged,
   });
 
   @override
-  State<ShopNavBar> createState() => _ShopNavBarState();
-}
-
-class _ShopNavBarState extends State<ShopNavBar> {
-  // Whether the small theme/language utility pill is currently shown.
-  // Starts closed — it only appears once the shopper taps the "more"
-  // button, and tapping it again tucks it back away, so the main bar
-  // stays small and uncluttered by default.
-  bool _utilityOpen = false;
-
-  void _toggleUtility() {
-    setState(() => _utilityOpen = !_utilityOpen);
-    widget.onUtilityOpenChanged?.call(_utilityOpen);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final active = widget.active;
-    final onTap = widget.onTap;
-    final isMobile = widget.isMobile;
     final cartCount = context.watch<CartProvider>().itemCount;
     final isDark = context.watch<ThemeController>().isDark;
     final isArabic = context.watch<LanguageController>().isArabic;
@@ -177,90 +158,310 @@ class _ShopNavBarState extends State<ShopNavBar> {
                   onTap: () => onTap(ShopPage.about),
                 ),
               ],
+              // Small divider so the theme/language toggles read as their
+              // own group instead of blending into the page icons.
+              Container(
+                width: 1,
+                height: isMobile ? 22 : 18,
+                margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 5),
+                color: context.colors.creamDim.withOpacity(0.25),
+              ),
+              // Theme (light/dark) and language (EN/AR) toggles now live
+              // right here in the main pill alongside the page icons,
+              // instead of behind a separate "more" button that had to be
+              // opened first.
+              _NavIconLabel(
+                icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                active: false,
+                isMobile: isMobile,
+                onTap: () => context.themeController.toggleTheme(),
+              ),
+              _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
       ],
     );
 
-    final mainPill = _GlassPill(
+    return _GlassPill(
       isMobile: isMobile,
       child: isMobile
           ? FittedBox(fit: BoxFit.scaleDown, child: row)
           : row,
     );
+  }
+}
 
-    // "More" toggle now lives as its own free-floating circle right next
-    // to the main pill instead of being squeezed inside it as the last
-    // item. Taking it out of the pill gives every page icon a bit more
-    // breathing room, and the circle can never get clipped by the pill's
-    // own rounded end cap since it isn't inside that shape anymore.
-    final moreButton = _MoreToggleButton(open: _utilityOpen, onTap: _toggleUtility);
+/// Compact top bar shown on mobile in place of the full pill nav — just a
+/// menu button that opens the [ShopNavDrawer], the wordmark, and a cart
+/// shortcut with its live item-count badge. Cart stays one tap away even
+/// though the rest of the nav (Shop/Search/Services + theme/language) has
+/// moved into the drawer, since jumping straight to the cart is common
+/// enough on a storefront to deserve its own spot in the bar.
+class ShopMobileTopBar extends StatelessWidget {
+  final ShopPage active;
+  final ValueChanged<ShopPage> onTap;
+  final VoidCallback onMenuTap;
 
-    // Theme (light/dark) and language (EN/AR) toggles live in their own
-    // small pill, tucked away behind the "more" button above instead of
-    // always taking up space — they don't navigate anywhere, so they
-    // don't need to be on-screen permanently the way Shop/Search/etc do.
-    final utilityRow = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _NavIconLabel(
-          icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-          active: false,
-          isMobile: isMobile,
-          onTap: () => context.themeController.toggleTheme(),
-        ),
-        _LanguageToggle(isArabic: isArabic, isMobile: isMobile),
-      ],
+  const ShopMobileTopBar({
+    super.key,
+    required this.active,
+    required this.onTap,
+    required this.onMenuTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cartCount = context.watch<CartProvider>().itemCount;
+
+    return _GlassPill(
+      isMobile: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _NavIconLabel(
+            icon: Icons.menu_rounded,
+            active: false,
+            isMobile: true,
+            onTap: onMenuTap,
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => onTap(ShopPage.home),
+            // Same plain, solid-colored wordmark as the full pill — see the
+            // note in ShopNavBar.build() about ShaderMask + BackdropFilter
+            // not playing nicely together on Flutter Web.
+            child: Text(
+              "Aya's",
+              style: AppFonts.display(
+                size: 20,
+                weight: FontWeight.w800,
+                color: context.colors.cream,
+                letterSpacing: 1.0,
+                boostArabicSize: false,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _NavIconLabel(
+            icon: active == ShopPage.cart
+                ? Icons.shopping_bag_rounded
+                : Icons.shopping_bag_outlined,
+            active: active == ShopPage.cart,
+            isMobile: true,
+            badge: cartCount > 0 ? cartCount : null,
+            onTap: () => onTap(ShopPage.cart),
+          ),
+        ],
+      ),
     );
+  }
+}
 
-    // AnimatedSize + AnimatedOpacity gives the pill a soft grow/shrink and
-    // fade in/out as it's toggled, instead of just popping in and out.
-    final utilityPill = ClipRect(
-      child: AnimatedAlign(
-        duration: const Duration(milliseconds: 240),
-        curve: Curves.easeOut,
-        alignment: Alignment.center,
-        heightFactor: _utilityOpen ? 1.0 : 0.0,
-        widthFactor: isMobile ? 1.0 : (_utilityOpen ? 1.0 : 0.0),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          opacity: _utilityOpen ? 1.0 : 0.0,
-          child: _GlassPill(isMobile: isMobile, child: utilityRow),
+/// Slide-out nav drawer that replaces the full pill nav on mobile. Holds
+/// the same page links (Shop, Search, Services, Cart) plus the theme and
+/// language toggles that used to live in the pill — laid out as a vertical
+/// list here since a phone screen is too narrow to fit all of them in one
+/// bar without shrinking every icon down to the point of being fiddly to
+/// tap. Opens from the side Directionality puts first (left in English,
+/// right in Arabic), which Flutter's Drawer handles automatically.
+class ShopNavDrawer extends StatelessWidget {
+  final ShopPage active;
+  final ValueChanged<ShopPage> onTap;
+
+  const ShopNavDrawer({super.key, required this.active, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cartCount = context.watch<CartProvider>().itemCount;
+    final isDark = context.watch<ThemeController>().isDark;
+    final isArabic = context.watch<LanguageController>().isArabic;
+    final strings = context.strings;
+
+    // Closes the drawer first, then navigates — otherwise the drawer stays
+    // open (or its close animation visibly races the page swap) instead of
+    // reading as one clean "pick a page" tap.
+    void go(ShopPage page) {
+      Navigator.of(context).pop();
+      onTap(page);
+    }
+
+    return Drawer(
+      backgroundColor: Colors.transparent,
+      width: 280,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            color: context.colors.surface.withOpacity(0.94),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 22),
+                    child: Text(
+                      "Aya's",
+                      style: AppFonts.display(
+                        size: 26,
+                        weight: FontWeight.w800,
+                        color: context.colors.cream,
+                        letterSpacing: 1.0,
+                        boostArabicSize: false,
+                      ),
+                    ),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.home
+                        ? Icons.storefront_rounded
+                        : Icons.storefront_outlined,
+                    label: strings.navShop,
+                    active: active == ShopPage.home,
+                    onTap: () => go(ShopPage.home),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.search
+                        ? Icons.search_rounded
+                        : Icons.search_outlined,
+                    label: strings.navSearch,
+                    active: active == ShopPage.search,
+                    onTap: () => go(ShopPage.search),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.services
+                        ? Icons.design_services_rounded
+                        : Icons.design_services_outlined,
+                    label: strings.navServices,
+                    active: active == ShopPage.services,
+                    onTap: () => go(ShopPage.services),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.about
+                        ? Icons.person_rounded
+                        : Icons.person_outline_rounded,
+                    label: strings.navAbout,
+                    active: active == ShopPage.about,
+                    onTap: () => go(ShopPage.about),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.cart
+                        ? Icons.shopping_bag_rounded
+                        : Icons.shopping_bag_outlined,
+                    label: strings.navCart,
+                    active: active == ShopPage.cart,
+                    badge: cartCount > 0 ? cartCount : null,
+                    onTap: () => go(ShopPage.cart),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    child: Divider(
+                      color: context.colors.creamDim.withOpacity(0.25),
+                      height: 1,
+                    ),
+                  ),
+                  _DrawerItem(
+                    icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                    label: isDark
+                        ? (isArabic ? 'الوضع الفاتح' : 'Light mode')
+                        : (isArabic ? 'الوضع الداكن' : 'Dark mode'),
+                    active: false,
+                    onTap: () => context.themeController.toggleTheme(),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.translate_rounded,
+                    label: isArabic ? 'English' : 'العربية',
+                    active: false,
+                    onTap: () {
+                      context.languageController.toggleLanguage();
+                      context.fontController.toggleArabicMode();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
+  }
+}
 
-    // Desktop has spare horizontal room, so the two pills sit
-    // side-by-side. Mobile doesn't — cramming both pills into one row
-    // was exactly what made the fit feel wrong (either pill got
-    // squeezed or the row overflowed). Stacking them instead only
-    // costs a little vertical space, which mobile has plenty of at
-    // the top of the screen. Either way, the utility pill only takes
-    // up room while it's actually open.
-    return isMobile
-        ? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(child: mainPill),
-                  const SizedBox(width: 8),
-                  moreButton,
-                ],
+/// A single tappable row in [ShopNavDrawer] — an icon, a label, and (for
+/// the active page) a filled violet-gradient pill background so the
+/// current page reads clearly at a glance down the list.
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final int? badge;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? Colors.white : context.colors.creamDim;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: active ? context.colors.violetGradient : null,
+        ),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, size: 22, color: color),
+                if (badge != null)
+                  Positioned(
+                    top: -6,
+                    right: -9,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        gradient: context.colors.violetGradient,
+                        shape: BoxShape.circle,
+                        border: active ? Border.all(color: Colors.white, width: 1.2) : null,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                      child: Text(
+                        '$badge',
+                        textAlign: TextAlign.center,
+                        style: AppFonts.label(
+                          size: 10.5,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: AppFonts.label(
+                  size: 15,
+                  color: color,
+                  letterSpacing: 0.4,
+                ).copyWith(fontWeight: active ? FontWeight.w700 : FontWeight.w600),
               ),
-              if (_utilityOpen) const SizedBox(height: 8),
-              utilityPill,
-            ],
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(child: mainPill),
-              const SizedBox(width: 8),
-              moreButton,
-              if (_utilityOpen) const SizedBox(width: 10),
-              utilityPill,
-            ],
-          );
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -290,44 +491,6 @@ class _GlassPill extends StatelessWidget {
             border: Border.all(color: context.colors.cream.withOpacity(0.08)),
           ),
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-/// The small "more" button at the end of the main pill. Tapping it shows
-/// or hides the theme/language utility pill — it never lights up like a
-/// page icon (it doesn't navigate anywhere), it just flips its own
-/// background between resting and "open" to hint at the toggle state.
-class _MoreToggleButton extends StatelessWidget {
-  final bool open;
-  final VoidCallback onTap;
-
-  const _MoreToggleButton({required this.open, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          margin: EdgeInsets.zero,
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: open
-                ? context.colors.orchid.withOpacity(0.32)
-                : context.colors.orchid.withOpacity(0.14),
-          ),
-          child: Icon(
-            Icons.more_vert_rounded,
-            size: 20,
-            color: open ? context.colors.cream : context.colors.creamDim,
-          ),
         ),
       ),
     );
@@ -547,16 +710,6 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
                 vertical: widget.stacked ? 6 : 6,
               ),
-              decoration: widget.stacked
-                  ? null
-                  : BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: widget.active ? context.colors.orchid : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
               child: content,
             ),
           ),

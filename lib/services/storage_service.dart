@@ -29,6 +29,13 @@ class StorageService {
     return _upload(bucket, bytes, fileName);
   }
 
+  /// Same reasoning as [uploadCategoryImage] — the three fixed service
+  /// category thumbnails (Mentoring / Designing / Private Workshop) reuse
+  /// this same bucket rather than getting one of their own.
+  static Future<String> uploadServiceCategoryImage(Uint8List bytes, String fileName) {
+    return _upload(bucket, bytes, fileName);
+  }
+
   static Future<String> uploadAboutImage(Uint8List bytes, String fileName) {
     return _upload(aboutBucket, bytes, fileName);
   }

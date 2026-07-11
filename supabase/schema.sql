@@ -434,3 +434,32 @@ create policy "Authenticated update access to service_content"
 create policy "Authenticated delete access to service_content"
   on service_content for delete
   using (auth.role() = 'authenticated');
+
+-- Owner-uploaded thumbnail for each of the three fixed service categories
+-- (Mentoring / Designing / Private Workshop), shown on the storefront's
+-- category-circles row on Home instead of the generic icon. Keyed by the
+-- category's fixed index in kServiceCategories (0, 1, 2) — one row per
+-- category, same stable-key idea as service_content above but per
+-- category instead of per item. No row (or a blank image_url) just means
+-- "keep showing the icon" — see ServiceCategoriesRepository /
+-- HomeScreen's _CategoryCircles.
+create table if not exists service_category_images (
+  category_index integer primary key,
+  image_url      text not null default '',
+  updated_at     timestamptz not null default now()
+);
+
+alter table service_category_images enable row level security;
+
+-- Storefront needs to read these to show them on the Home page circles.
+create policy "Public read access to service_category_images"
+  on service_category_images for select
+  using (true);
+
+create policy "Authenticated write access to service_category_images"
+  on service_category_images for insert
+  with check (auth.role() = 'authenticated');
+
+create policy "Authenticated update access to service_category_images"
+  on service_category_images for update
+  using (auth.role() = 'authenticated');

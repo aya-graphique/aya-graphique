@@ -27,8 +27,21 @@ class _DraggableScrollBehavior extends MaterialScrollBehavior {
 class HomeBannerSlideshow extends StatefulWidget {
   final List<HomeBanner> banners;
   final double height;
+  // When false, the dot indicators are not drawn on top of the slides —
+  // used when the caller wants to render its own dot row elsewhere (e.g.
+  // underneath a button below the hero) instead of overlaid on the photo.
+  final bool showDots;
+  // Notified on every page change so a caller that hid the built-in dots
+  // (showDots: false) can drive its own external dot row from this.
+  final ValueChanged<int>? onPageChanged;
 
-  const HomeBannerSlideshow({super.key, required this.banners, this.height = 220});
+  const HomeBannerSlideshow({
+    super.key,
+    required this.banners,
+    this.height = 220,
+    this.showDots = true,
+    this.onPageChanged,
+  });
 
   @override
   State<HomeBannerSlideshow> createState() => _HomeBannerSlideshowState();
@@ -96,7 +109,10 @@ class _HomeBannerSlideshowState extends State<HomeBannerSlideshow> {
                 // A manual swipe re-targets the very next timer tick
                 // smoothly instead of fighting it, same as the category
                 // circles row.
-                onPageChanged: (i) => setState(() => _page = i),
+                onPageChanged: (i) {
+                  setState(() => _page = i);
+                  widget.onPageChanged?.call(i);
+                },
                 itemBuilder: (context, i) {
                   final banner = widget.banners[i];
                   return Image.network(
@@ -112,7 +128,7 @@ class _HomeBannerSlideshowState extends State<HomeBannerSlideshow> {
               ),
             ),
           ),
-          if (widget.banners.length > 1)
+          if (widget.showDots && widget.banners.length > 1)
             Positioned(
               left: 0,
               right: 0,

@@ -2,26 +2,40 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/home_banner.dart';
 import '../models/product.dart';
+import '../providers/language_controller.dart';
 import '../services/categories_repository.dart';
-import '../services/home_banners_repository.dart';
+import '../services/service_categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
+import '../widgets/owner_intro_card.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
-import '../widgets/shimmer_text.dart';
 import 'admin/admin_login_screen.dart';
+import 'graphical_services_screen.dart';
 import 'product_detail_screen.dart';
+import 'who_am_i_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Product> products;
   final bool isMobile;
   final ScrollController scrollController;
   final VoidCallback? onAdminReturn;
+  // Started earlier, in MainShell's initState, at the same time as the
+  // products fetch — see the comment there for why. HomeScreen just
+  // awaits it instead of kicking off its own fetch after mounting.
+  final Future<List<HomeBanner>> bannersFuture;
+  // Services no longer lives on Home — it's its own tab now (see
+  // MainShell). The little "service circles" row below still appears
+  // here, though: tapping one calls this to jump to the Services tab
+  // and land on (and scroll to) that specific category there — see
+  // MainShell._openServiceCategory.
+  final ValueChanged<int> onServiceCategoryTap;
 
   const HomeScreen({
     super.key,
@@ -29,6 +43,8 @@ class HomeScreen extends StatefulWidget {
     required this.isMobile,
     required this.scrollController,
     this.onAdminReturn,
+    required this.bannersFuture,
+    required this.onServiceCategoryTap,
   });
 
   @override
@@ -42,13 +58,47 @@ class _HomeScreenState extends State<HomeScreen> {
   // to that category's first product photo instead — see
   // _CategoryCircles._thumbFor.
   Map<String, String> _categoryImages = {};
-  List<HomeBanner> _banners = [];
+  // Owner-set thumbnails for the 3 fixed service circles (Mentoring /
+  // Designing / Private Workshop), keyed by their index in
+  // kServiceCategories. No entry falls back to that category's icon —
+  // see _CategoryCircles below.
+  Map<int, String> _serviceCategoryImages = {};
+  // Lets the new owner-intro card's "View full profile" button scroll
+  // straight down to the full "Who am I" section further down this same
+  // page (see build() below and OwnerIntroCard).
+  final GlobalKey _whoAmIKey = GlobalKey();
+  // Lets the hero's "Shop the collection" button scroll straight down to
+  // the products section further down this same page (see build() below
+  // and _Hero).
+  final GlobalKey _collectionKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _loadCategoryImages();
-    _loadBanners();
+    _loadServiceCategoryImages();
+  }
+
+  void _scrollToProfile() {
+    final ctx = _whoAmIKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 550),
+      curve: Curves.easeInOutCubic,
+      alignment: 0.05,
+    );
+  }
+
+  void _scrollToCollection() {
+    final ctx = _collectionKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 550),
+      curve: Curves.easeInOutCubic,
+      alignment: 0.05,
+    );
   }
 
   Future<void> _loadCategoryImages() async {
@@ -62,10 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _loadBanners() async {
-    final banners = await HomeBannersRepository.fetchSlides();
+  Future<void> _loadServiceCategoryImages() async {
+    final images = await ServiceCategoriesRepository.fetchImages();
     if (!mounted) return;
-    setState(() => _banners = banners);
+    setState(() => _serviceCategoryImages = images);
   }
 
   void _openProduct(Product product) {
@@ -91,13 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           SizedBox(height: widget.isMobile ? 120 : 150),
-          _Hero(isMobile: widget.isMobile, onShopNow: () {
-            widget.scrollController.animateTo(
-              widget.isMobile ? 520 : 600,
-              duration: const Duration(milliseconds: 650),
-              curve: Curves.easeInOutCubic,
-            );
-          }),
+          FutureBuilder<List<HomeBanner>>(
+            future: widget.bannersFuture,
+            builder: (context, snapshot) {
+              return _Hero(
+                isMobile: widget.isMobile,
+                banners: snapshot.data ?? const [],
+                onShopTap: _scrollToCollection,
+              );
+            },
+          ),
           const SizedBox(height: 40),
           MarqueeStrip(words: [
             context.strings.marqueeNotebooks,
@@ -105,70 +158,104 @@ class _HomeScreenState extends State<HomeScreen> {
             context.strings.marqueeBookmark,
             context.strings.marqueeStand,
           ]),
-          if (_banners.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            HomeBannerSlideshow(
-              banners: _banners,
-              height: widget.isMobile ? 190 : 340,
-            ),
-          ],
-          const SizedBox(height: 56),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: RevealOnScroll(
-                child: SectionHeading(
-                  eyebrow: context.strings.collectionEyebrow,
-                  title: context.strings.collectionTitle,
-                  subtitle: context.strings.collectionSubtitle,
-                  titleSize: widget.isMobile ? 28 : 34,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 40),
           _CategoryCircles(
             products: widget.products,
             categories: categories,
             categoryImages: _categoryImages,
+            serviceCategoryImages: _serviceCategoryImages,
             active: _activeCategory,
             isMobile: widget.isMobile,
             onSelect: (c) => setState(() => _activeCategory = c),
+            onServiceCategoryTap: widget.onServiceCategoryTap,
+          ),
+          // Services now lives on its own tab (see MainShell) — the
+          // circles above still jump straight there. In its old spot, a
+          // compact "available for" card instead: restaurant owners,
+          // hotel owners, and individuals after a private workshop, each
+          // tappable straight through to that category on Services.
+          const SizedBox(height: 56),
+          OwnerIntroCard(
+            isMobile: widget.isMobile,
+            onViewProfile: _scrollToProfile,
+            onAudienceTap: widget.onServiceCategoryTap,
           ),
           const SizedBox(height: 40),
-          if (_activeCategory != null)
-            // A category circle is selected: just show that category's
-            // products, full width, no extra headings needed since the
-            // circle itself already shows which one is active.
-            ProductGrid(products: filtered, onProductTap: _openProduct)
-          else ...[
-            // Nothing selected: instead of one mixed grid, each category
-            // gets its own labelled section — plus a "Best sellers" section
-            // up top, built from real sales_count totals (see Product
-            // model / OrdersRepository), when at least one product has
-            // actually sold.
-            if (bestSellers.isNotEmpty) ...[
-              _ProductSection(
-                isMobile: widget.isMobile,
-                eyebrow: context.strings.bestSellersEyebrow,
-                title: context.strings.bestSellersTitle,
-                products: bestSellers,
-                onProductTap: _openProduct,
+          // Title + subtitle live right above the shop grid now — the
+          // heading for the products themselves, not the page overall.
+          // The whole thing — heading plus every product section below it
+          // (categories, best sellers) — sits inside one shared card now,
+          // so "the collection" visually contains the products rather than
+          // the heading floating separately above a full-width grid.
+          Padding(
+            key: _collectionKey,
+            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
+            child: RevealOnScroll(
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  vertical: widget.isMobile ? 24 : 36,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceRaised.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: context.colors.cream.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 32),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: SectionHeading(
+                          eyebrow: context.strings.collectionEyebrow,
+                          title: context.strings.collectionTitle,
+                          subtitle: context.strings.collectionSubtitle,
+                          titleSize: widget.isMobile ? 28 : 34,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    if (_activeCategory != null)
+                      // A category circle is selected: just show that
+                      // category's products, full width, no extra headings
+                      // needed since the circle itself already shows which
+                      // one is active.
+                      ProductGrid(products: filtered, onProductTap: _openProduct)
+                    else ...[
+                      // Nothing selected: instead of one mixed grid, each
+                      // category gets its own labelled section — plus a
+                      // "Best sellers" section at the end, built from real
+                      // sales_count totals (see Product model /
+                      // OrdersRepository), when at least one product has
+                      // actually sold.
+                      for (var i = 0; i < categories.length; i++) ...[
+                        _ProductSection(
+                          isMobile: widget.isMobile,
+                          eyebrow: null,
+                          title: categories[i],
+                          products: widget.products.where((p) => p.category == categories[i]).toList(),
+                          onProductTap: _openProduct,
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                      if (bestSellers.isNotEmpty)
+                        _ProductSection(
+                          isMobile: widget.isMobile,
+                          eyebrow: context.strings.bestSellersEyebrow,
+                          title: context.strings.bestSellersTitle,
+                          products: bestSellers,
+                          onProductTap: _openProduct,
+                        ),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 48),
-            ],
-            for (var i = 0; i < categories.length; i++) ...[
-              _ProductSection(
-                isMobile: widget.isMobile,
-                eyebrow: null,
-                title: categories[i],
-                products: widget.products.where((p) => p.category == categories[i]).toList(),
-                onProductTap: _openProduct,
-              ),
-              if (i != categories.length - 1) const SizedBox(height: 48),
-            ],
-          ],
+            ),
+          ),
+          const SizedBox(height: 64),
+          WhoAmIScreen(key: _whoAmIKey, isMobile: widget.isMobile, embedded: true),
           const SizedBox(height: 60),
           _Footer(isMobile: widget.isMobile, onAdminReturn: widget.onAdminReturn),
         ],
@@ -227,69 +314,107 @@ class _ProductSection extends StatelessWidget {
   }
 }
 
-class _Hero extends StatelessWidget {
+class _Hero extends StatefulWidget {
   final bool isMobile;
-  final VoidCallback onShopNow;
-  const _Hero({required this.isMobile, required this.onShopNow});
+  final List<HomeBanner> banners;
+  final VoidCallback onShopTap;
+  const _Hero({required this.isMobile, required this.banners, required this.onShopTap});
+
+  @override
+  State<_Hero> createState() => _HeroState();
+}
+
+class _HeroState extends State<_Hero> {
+  // Drives the dot row directly under the slideshow — the slideshow
+  // itself no longer draws dots over the photo (showDots: false below),
+  // so this is the only thing tracking which slide is active.
+  int _bannerPage = 0;
+
+  bool get isMobile => widget.isMobile;
+  List<HomeBanner> get banners => widget.banners;
 
   @override
   Widget build(BuildContext context) {
+    // "Full laptop screen" for desktop, scaled down proportionally on
+    // phones so it still fits comfortably above the fold there — driven
+    // off the actual viewport height rather than a fixed pixel number so
+    // it adapts to whatever screen it's opened on.
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bannerHeight = isMobile
+        ? (screenHeight * 0.55).clamp(360.0, 640.0)
+        : (screenHeight * 0.92).clamp(560.0, 980.0);
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(width: 28, height: 2, color: context.colors.orchid),
-              const SizedBox(width: 10),
-              Text(context.strings.heroEyebrow, style: AppFonts.label(color: context.colors.orchid, )),
-              const SizedBox(width: 10),
-              Container(width: 28, height: 2, color: context.colors.orchid),
-            ],
-          ).animate().fadeIn(duration: 500.ms),
-          const SizedBox(height: 22),
-          ShimmerHeadline(
-            text: "Aya's Graphique",
-            textAlign: TextAlign.center,
-            style: AppFonts.display(color: context.colors.cream, size: isMobile ? 36 : 76, height: 1.0),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: isMobile ? double.infinity : 560,
-            child: Text(
-              context.strings.heroSubtitle,
-              textAlign: TextAlign.center,
-              style: AppFonts.body(color: context.colors.creamDim, size: isMobile ? 15 : 17),
+          // Both the wordmark and the "NOTEBOOKS & CALENDARS" eyebrow line
+          // are gone now — the sliders are the very first thing in the
+          // hero, sized to fill (almost) the whole screen like a proper
+          // full-bleed hero banner, with the dots directly underneath them.
+          if (banners.isNotEmpty) ...[
+            HomeBannerSlideshow(
+              banners: banners,
+              height: bannerHeight.toDouble(),
+              showDots: false,
+              onPageChanged: (i) => setState(() => _bannerPage = i),
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 150.ms),
-          const SizedBox(height: 30),
+            if (banners.length > 1) ...[
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(banners.length, (i) {
+                  final active = i == _bannerPage;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 20 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: active ? context.colors.orchid : context.colors.creamDim.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ],
+          const SizedBox(height: 24),
+          // Same pill-button treatment as OwnerIntroCard's "View full
+          // profile" CTA, reused here so the hero's own call-to-action
+          // matches the rest of the storefront's visual language. Sits
+          // outside the banners.isNotEmpty block above so it still shows
+          // even before banners have loaded in.
           GestureDetector(
-            onTap: onShopNow,
+            onTap: widget.onShopTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               decoration: BoxDecoration(
                 gradient: context.colors.violetGradient,
                 borderRadius: BorderRadius.circular(100),
                 boxShadow: [
                   BoxShadow(
                     color: context.colors.violetPop.withOpacity(0.35),
-                    blurRadius: 30,
-                    offset: const Offset(0, 12),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
-              child: Text(
-                context.strings.shopTheCollection,
-                style: AppFonts.label(
-                  size: 14,
-                  color: Colors.white,
-                  letterSpacing: 1.6,
-                ).copyWith(fontWeight: FontWeight.w700),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.strings.shopTheCollection,
+                    style: AppFonts.label(size: 13, color: Colors.white, letterSpacing: 0.6)
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_downward_rounded, size: 16, color: Colors.white),
+                ],
               ),
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 250.ms).scaleXY(begin: 0.94, end: 1),
+          ),
         ],
       ),
     );
@@ -300,17 +425,27 @@ class _CategoryCircles extends StatefulWidget {
   final List<Product> products;
   final List<String> categories;
   final Map<String, String> categoryImages;
+  // Owner-set thumbnails for the 3 fixed service circles, keyed by their
+  // index in kServiceCategories. Missing/blank entries fall back to that
+  // category's icon.
+  final Map<int, String> serviceCategoryImages;
   final String? active;
   final bool isMobile;
   final ValueChanged<String?> onSelect;
+  // Lets the service circles appended after the shop's own category
+  // circles (same row — see build() below) jump to the standalone
+  // Services tab and land on that specific category there.
+  final ValueChanged<int> onServiceCategoryTap;
 
   const _CategoryCircles({
     required this.products,
     required this.categories,
     required this.categoryImages,
+    required this.serviceCategoryImages,
     required this.active,
     required this.isMobile,
     required this.onSelect,
+    required this.onServiceCategoryTap,
   });
 
   @override
@@ -331,10 +466,10 @@ class _CategoryCirclesState extends State<_CategoryCircles> {
   @override
   void initState() {
     super.initState();
-    // Auto-advances the row every 5 seconds, looping back to the start
+    // Auto-advances the row every 10 seconds, looping back to the start
     // once it reaches the end — so it never fights a manual swipe (a
     // mid-flight timer tick just re-targets smoothly).
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _autoAdvance());
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) => _autoAdvance());
   }
 
   @override
@@ -374,25 +509,35 @@ class _CategoryCirclesState extends State<_CategoryCircles> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageController>().isArabic;
     final diameter = _diameter;
     final rowHeight = diameter + 56;
     final items = <Widget>[
-      _CategoryCircle(
-        label: context.strings.categoryAll,
-        icon: Icons.grid_view_rounded,
-        diameter: diameter,
-        selected: widget.active == null,
-        onTap: () => widget.onSelect(null),
-      ),
+      // No "All" circle anymore — tapping the already-active category
+      // deselects it instead, which shows every category again.
       ...widget.categories.map(
         (c) => _CategoryCircle(
           label: c,
           imageUrl: _thumbFor(c),
           diameter: diameter,
           selected: widget.active == c,
-          onTap: () => widget.onSelect(c),
+          onTap: () => widget.onSelect(widget.active == c ? null : c),
         ),
       ),
+      // Service circles ride right along in the same row as the shop's
+      // own categories — same size, same styling — just with a fixed
+      // "selected" (bright) look since tapping one navigates rather than
+      // filters. Each jumps down to that category in the embedded
+      // Services section further down this same page.
+      for (var i = 0; i < kServiceCategories.length; i++)
+        _CategoryCircle(
+          label: kServiceCategories[i].title.t(isArabic),
+          imageUrl: widget.serviceCategoryImages[i],
+          icon: kServiceCategories[i].icon,
+          diameter: diameter,
+          selected: true,
+          onTap: () => widget.onServiceCategoryTap(i),
+        ),
     ];
 
     return SizedBox(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/home_banner.dart';
 import '../models/product.dart';
 import '../providers/language_controller.dart';
+import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_backdrop.dart';
@@ -20,34 +22,56 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  ShopPage _page = ShopPage.about;
+  // Home is the site's main page now — it's the one that carries the
+  // sliders, Services, Shop, and Who am I sections all in one scroll, so
+  // it's what visitors should land on first (see HomeScreen).
+  ShopPage _page = ShopPage.home;
+  // Only used on mobile, to open ShopNavDrawer from the compact top bar's
+  // menu button — desktop never touches this since it keeps the full pill
+  // nav instead of a drawer.
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _homeScrollController = ScrollController();
-  final ScrollController _aboutScrollController = ScrollController();
+  // Lets Home's "service circles" row jump straight to a specific
+  // category on the standalone Services tab (see _openServiceCategory
+  // below and ServicesFocusController in graphical_services_screen.dart).
+  final ServicesFocusController _servicesFocusController = ServicesFocusController();
   late Future<List<Product>> _productsFuture;
-  // Only matters on mobile, where the theme/language utility pill opens
-  // *below* the main nav bar. When it's open, page content needs to
-  // shift down by the same amount so the pill sits over empty space
-  // instead of covering the top of the page.
-  bool _utilityOpen = false;
+  // Kicked off here, at the same time as _productsFuture, instead of
+  // inside HomeScreen's own initState — previously the banner fetch only
+  // *started* once HomeScreen mounted, which was itself gated behind
+  // _productsFuture resolving, so it was two network round-trips back to
+  // back (products, then banners) instead of one. Starting both together
+  // here is what actually fixes the banner slideshow feeling slow to
+  // appear; HomeScreen now just awaits whatever's passed in.
+  late Future<List<HomeBanner>> _bannersFuture;
 
   @override
   void initState() {
     super.initState();
     _productsFuture = ProductsRepository.fetchAll();
+    _bannersFuture = HomeBannersRepository.fetchSlides();
   }
 
   @override
   void dispose() {
     _homeScrollController.dispose();
-    _aboutScrollController.dispose();
+    _servicesFocusController.dispose();
     super.dispose();
   }
 
   void _goTo(ShopPage page) => setState(() => _page = page);
 
+  // Called from Home's service circles: switch to the Services tab and
+  // have it scroll straight to (and expand) the tapped category.
+  void _openServiceCategory(int index) {
+    _goTo(ShopPage.services);
+    _servicesFocusController.focusCategory(index);
+  }
+
   void _refreshProducts() {
     setState(() {
       _productsFuture = ProductsRepository.fetchAll();
+      _bannersFuture = HomeBannersRepository.fetchSlides();
     });
   }
 
@@ -72,7 +96,12 @@ class _MainShellState extends State<MainShell> {
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: context.colors.bgDeep,
+        // The drawer only exists on mobile — desktop keeps the full pill
+        // nav bar floating over the content instead, so there's nothing
+        // for a drawer to open there.
+        drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
         body: AnimatedBackdrop(
           child: FutureBuilder<List<Product>>(
             future: _productsFuture,
@@ -87,47 +116,50 @@ class _MainShellState extends State<MainShell> {
                       child: CircularProgressIndicator(color: context.colors.orchid),
                     )
                   else
-                    // On mobile, the utility pill drops down below the
-                    // main nav bar when opened. This padding grows to
-                    // match, pushing the page's own content down so the
-                    // pill has clear space to open into instead of
-                    // floating over the top of whatever's on screen.
-                    AnimatedPadding(
-                      duration: const Duration(milliseconds: 240),
-                      curve: Curves.easeOut,
-                      padding: EdgeInsets.only(
-                        top: (isMobile && _utilityOpen) ? 54 : 0,
-                      ),
-                      child: IndexedStack(
-                        index: _page.index,
-                        children: [
-                          HomeScreen(
-                            products: products,
-                            isMobile: isMobile,
-                            scrollController: _homeScrollController,
-                            onAdminReturn: _refreshProducts,
-                          ),
-                          SearchScreen(products: products, isMobile: isMobile),
-                          GraphicalServicesScreen(isMobile: isMobile),
-                          CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.home)),
-                          WhoAmIScreen(
-                            isMobile: isMobile,
-                            scrollController: _aboutScrollController,
-                          ),
-                        ],
-                      ),
+                    IndexedStack(
+                      index: _page.index,
+                      children: [
+                        HomeScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          scrollController: _homeScrollController,
+                          onAdminReturn: _refreshProducts,
+                          bannersFuture: _bannersFuture,
+                          onServiceCategoryTap: _openServiceCategory,
+                        ),
+                        SearchScreen(products: products, isMobile: isMobile),
+                        GraphicalServicesScreen(
+                          isMobile: isMobile,
+                          focusController: _servicesFocusController,
+                        ),
+                        // Standalone "Who am I" tab — same WhoAmIScreen
+                        // HomeScreen already embeds inline after the shop
+                        // grid, just not embedded here so it gets its own
+                        // scroll + top offset like every other tab.
+                        WhoAmIScreen(isMobile: isMobile),
+                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.home)),
+                      ],
                     ),
                   Positioned(
                     top: 20,
                     left: isMobile ? 10 : 0,
                     right: isMobile ? 10 : 0,
                     child: Center(
-                      child: ShopNavBar(
-                        active: _page,
-                        onTap: _goTo,
-                        isMobile: isMobile,
-                        onUtilityOpenChanged: (open) => setState(() => _utilityOpen = open),
-                      ),
+                      // Mobile swaps the full pill nav for the compact top
+                      // bar (menu button + logo + cart) that opens
+                      // ShopNavDrawer; desktop is unchanged.
+                      child: isMobile
+                          ? ShopMobileTopBar(
+                              active: _page,
+                              onTap: _goTo,
+                              onMenuTap: () =>
+                                  _scaffoldKey.currentState?.openDrawer(),
+                            )
+                          : ShopNavBar(
+                              active: _page,
+                              onTap: _goTo,
+                              isMobile: isMobile,
+                            ),
                     ),
                   ),
                 ],
