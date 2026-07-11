@@ -15,7 +15,7 @@ class MarqueeStrip extends StatefulWidget {
   const MarqueeStrip({
     super.key,
     required this.words,
-    this.height = 72,
+    this.height = 48,
   });
 
   @override
@@ -49,22 +49,22 @@ class _MarqueeStripState extends State<MarqueeStrip>
       mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.words.length, (i) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 26),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 widget.words[i],
                 style: AppFonts.display(
-                  size: 21,
+                  size: 18,
                   weight: FontWeight.w600,
                   color: colors.cream,
                   letterSpacing: 0.3,
                   text: widget.words[i],
                 ),
               ),
-              const SizedBox(width: 22),
-              Icon(Icons.auto_awesome_rounded, size: 15, color: colors.orchid),
+              const SizedBox(width: 14),
+              Icon(Icons.auto_awesome_rounded, size: 13, color: colors.orchid),
             ],
           ),
         );

@@ -56,7 +56,7 @@ class AppText {
 
   // Home — "most requested" circles (below the "available for" card)
   String get mostRequestedEyebrow => _t('MOST REQUESTED', 'الأكثر طلبًا');
-  String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الفنية');
+  String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الجرافيكية');
 
   // Home — service circles row
   String get homeServicesEyebrow => _t('SERVICES', 'الخدمات');
@@ -71,7 +71,7 @@ class AppText {
 
   // Home — footer
   String get footerTagline =>
-      _t('Notebooks & calendars, Simplicity makes it Art.', 'دفاتر وتقويمات، البساطة تصنع الفن.');
+      _t('Notebooks & calendars, simplicity makes it art.', 'دفاتر وتقويمات، البساطة تصنع الفن.');
   String get storeAdmin => _t('Store admin →', 'إدارة المتجر ←');
 
   // Graphical Services

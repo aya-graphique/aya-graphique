@@ -172,7 +172,12 @@ class _BackdropPainter extends CustomPainter {
       canvas.drawCircle(center, radius, paint);
     }
 
-    // Three large drifting orbs on independent elliptical paths.
+    // Three large drifting orbs on independent elliptical paths. The top
+    // two used to run brighter (0.30 / 0.28) — strong enough that any
+    // transparent section which happened to scroll into their fixed
+    // screen-space position (the backdrop doesn't move with scroll) read
+    // as an odd, mismatched light patch instead of blending in. Dialed
+    // down so the ambient glow stays subtle everywhere it's exposed.
     orb(
       Offset(
         size.width * 0.18 + math.sin(angle) * size.width * 0.08,
@@ -180,7 +185,7 @@ class _BackdropPainter extends CustomPainter {
       ),
       size.shortestSide * 0.42,
       colors.violetPop,
-      0.30,
+      0.16,
     );
 
     orb(
@@ -190,7 +195,7 @@ class _BackdropPainter extends CustomPainter {
       ),
       size.shortestSide * 0.36,
       colors.violetLight,
-      0.28,
+      0.15,
     );
 
     orb(

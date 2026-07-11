@@ -64,7 +64,7 @@ class ShopNavBar extends StatelessWidget {
                 child: Text(
                   "Aya's",
                   style: AppFonts.display(
-                    size: isMobile ? 20 : 17,
+                    size: isMobile ? 17 : 16.5,
                     weight: FontWeight.w800,
                     color: context.colors.cream,
                     letterSpacing: 1.0,
@@ -76,7 +76,7 @@ class ShopNavBar extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 10 : 12),
+              SizedBox(width: isMobile ? 8 : 11),
               if (!isMobile) ...[
                 _NavIconLabel(
                   icon: active == ShopPage.home
@@ -181,8 +181,8 @@ class ShopNavBar extends StatelessWidget {
               // own group instead of blending into the page icons.
               Container(
                 width: 1,
-                height: isMobile ? 22 : 18,
-                margin: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 5),
+                height: isMobile ? 18 : 17,
+                margin: EdgeInsets.symmetric(horizontal: isMobile ? 5 : 5),
                 color: context.colors.border(0.25),
               ),
               // Theme (light/dark) and language (EN/AR) toggles now live
@@ -241,7 +241,7 @@ class ShopMobileTopBar extends StatelessWidget {
             isMobile: true,
             onTap: onMenuTap,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           GestureDetector(
             onTap: () => onTap(ShopPage.home),
             // Same plain, solid-colored wordmark as the full pill — see the
@@ -250,7 +250,7 @@ class ShopMobileTopBar extends StatelessWidget {
             child: Text(
               "Aya's",
               style: AppFonts.display(
-                size: 20,
+                size: 17,
                 weight: FontWeight.w800,
                 color: context.colors.cream,
                 letterSpacing: 1.0,
@@ -258,7 +258,7 @@ class ShopMobileTopBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _NavIconLabel(
             icon: active == ShopPage.cart
                 ? Icons.shopping_bag_rounded
@@ -509,8 +509,8 @@ class _GlassPill extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 20 : 16,
-            vertical: isMobile ? 12 : 10,
+            horizontal: isMobile ? 16 : 17,
+            vertical: isMobile ? 9 : 9,
           ),
           decoration: BoxDecoration(
             color: context.colors.surface.withOpacity(0.55),
@@ -557,7 +557,7 @@ class _LanguageToggle extends StatelessWidget {
             // This label is always Latin ("EN"/"AR") — keep it a fixed
             // size regardless of which language is active.
             style: AppFonts.label(
-              size: isMobile ? 13 : 12,
+              size: isMobile ? 11 : 11,
               color: context.colors.cream,
               letterSpacing: 1.0,
               weight: FontWeight.w700,
@@ -615,7 +615,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
   Widget build(BuildContext context) {
     final color = _expanded ? context.colors.cream : context.colors.creamDim;
 
-    final iconSize = widget.isMobile ? 25.0 : 20.0;
+    final iconSize = widget.isMobile ? 21.0 : 19.0;
 
     final iconWithBadge = Stack(
       clipBehavior: Clip.none,
@@ -664,7 +664,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                   // bar's fixed footprint instead of growing with the
                   // Arabic-mode font boost.
                   style: AppFonts.label(
-                    size: 13.5,
+                    size: 11.5,
                     color: color,
                     letterSpacing: 0.6,
                     boostArabicSize: false,
@@ -684,7 +684,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                   // Same fix as the stacked (mobile) label above, for the
                   // desktop side-by-side layout.
                   style: AppFonts.label(
-                    size: 12.5,
+                    size: 11.5,
                     color: color,
                     letterSpacing: 1.0,
                     boostArabicSize: false,
@@ -717,7 +717,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
           // scale up and down as one single, proportioned unit instead
           // of the icon ballooning past a background box that stayed
           // put-size.
-          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 5 : (widget.label != null ? 4 : 3)),
+          margin: EdgeInsets.symmetric(horizontal: widget.stacked ? 4 : (widget.label != null ? 4 : 3)),
           child: AnimatedScale(
             // Mobile gets a much bigger pop than desktop — the bar has
             // more spare room stacked vertically per icon, so the active
@@ -734,8 +734,8 @@ class _NavIconLabelState extends State<_NavIconLabel> {
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOut,
               padding: EdgeInsets.symmetric(
-                horizontal: widget.stacked ? 6 : (widget.label != null ? 8 : 6),
-                vertical: widget.stacked ? 6 : 6,
+                horizontal: widget.stacked ? 5 : (widget.label != null ? 8 : 6),
+                vertical: widget.stacked ? 5 : 6,
               ),
               child: content,
             ),

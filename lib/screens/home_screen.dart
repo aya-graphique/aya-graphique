@@ -125,7 +125,9 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           const SizedBox(height: 40),
-          MarqueeStrip(words: [
+          MarqueeStrip(
+            height: 60,
+            words: [
             context.strings.marqueeNotebooks,
             context.strings.marqueeCalendars,
             context.strings.marqueeBookmark,
@@ -157,13 +159,18 @@ class _HomeScreenState extends State<HomeScreen> {
           // compact "available for" card instead: restaurant owners,
           // hotel owners, and individuals after a private workshop, each
           // tappable straight through to that category on Services.
-          const SizedBox(height: 56),
+          //
+          // No spacer here on purpose: both this and OwnerIntroCard paint
+          // their own full-bleed background band, so a gap between them
+          // would show a strip of the raw page background instead of one
+          // continuous wash. They're visually split by OwnerIntroCard's
+          // own eyebrow pill instead.
           OwnerIntroCard(
             isMobile: widget.isMobile,
             onViewProfile: widget.onViewProfileTap,
             onAudienceTap: widget.onServiceCategoryTap,
           ),
-          const SizedBox(height: 56),
+          const SizedBox(height: 40),
           TestimonialsSection(isMobile: widget.isMobile),
           const SizedBox(height: 60),
           _Footer(isMobile: widget.isMobile, onAdminReturn: widget.onAdminReturn),
@@ -679,8 +686,13 @@ class _MostRequestedCircles extends StatelessWidget {
       ],
     );
 
+    // Plain transparent padding — no background band. A colored band here
+    // (tried earlier to hide AnimatedBackdrop's dark-mode orb glow) ended
+    // up reading as its own stray light-purple rectangle in light mode,
+    // which looked worse than the problem it solved. See AnimatedBackdrop
+    // for the real fix to the dark-mode glow instead.
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60, vertical: isMobile ? 8 : 12),
       child: RevealOnScroll(child: content),
     );
   }
@@ -700,10 +712,19 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60, vertical: 32),
-      color: context.colors.surface.withOpacity(0.5),
+      decoration: BoxDecoration(
+        // surfaceRaised, not surface: in light mode surface is pure white
+        // (same as the page background), so it made this whole footer
+        // invisible against the rest of Home — no visual separation at
+        // all. surfaceRaised is a step darker/tinted in both palettes, so
+        // it actually reads as its own band now.
+        color: colors.surfaceRaised.withOpacity(colors.isDark ? 0.5 : 0.6),
+        border: Border(top: BorderSide(color: colors.border(0.08))),
+      ),
       child: Column(
         children: [
           // Plain solid color — see shop_nav_bar.dart / shimmer_text.dart
