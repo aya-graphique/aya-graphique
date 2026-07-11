@@ -635,6 +635,7 @@ class _MostRequestedCircles extends StatelessWidget {
         isMobile
             ? MobileCircleCarousel(
                 itemCount: 2,
+                sizeReferenceCount: kServiceCategories.length,
                 itemBuilder: (context, i, diameter) => i == 0
                     ? _CategoryCircle(
                         label: kServiceCategories[2].title.t(isArabic),

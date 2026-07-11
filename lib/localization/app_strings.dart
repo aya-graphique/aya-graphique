@@ -56,7 +56,7 @@ class AppText {
 
   // Home — "most requested" circles (below the "available for" card)
   String get mostRequestedEyebrow => _t('MOST REQUESTED', 'الأكثر طلبًا');
-  String get artisticProductsLabel => _t('Graphical  Products', 'المنتجات الفنية');
+  String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الفنية');
 
   // Home — service circles row
   String get homeServicesEyebrow => _t('SERVICES', 'الخدمات');

@@ -22,6 +22,13 @@ class MobileCircleCarousel extends StatefulWidget {
   // Extra height reserved below the circle itself for its label — bump
   // this up for callers whose labels can wrap to two lines.
   final double labelAreaHeight;
+  // By default the circle size is worked out from how many items are in
+  // *this* row (fewer items = more room each = bigger circles). Pass a
+  // fixed count here instead when a row with few items (e.g. the 2-circle
+  // "Most Requested" row) should still size its circles to match a
+  // different row elsewhere on the page (e.g. the 3-circle Services row)
+  // rather than growing to fill its own extra space.
+  final int? sizeReferenceCount;
 
   const MobileCircleCarousel({
     super.key,
@@ -30,6 +37,7 @@ class MobileCircleCarousel extends StatefulWidget {
     this.minDiameter = 60,
     this.maxDiameter = 130,
     this.labelAreaHeight = 46,
+    this.sizeReferenceCount,
   });
 
   @override
@@ -64,9 +72,11 @@ class _MobileCircleCarouselState extends State<MobileCircleCarousel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Shrink circles to whatever fits n-across in the available width,
-        // clamped so they never get too tiny or too big.
-        final diameter = ((constraints.maxWidth / n) - 20).clamp(widget.minDiameter, widget.maxDiameter);
+        // Shrink circles to whatever fits n-across in the available width
+        // (or the reference count, if given), clamped so they never get
+        // too tiny or too big.
+        final sizeRef = widget.sizeReferenceCount ?? n;
+        final diameter = ((constraints.maxWidth / sizeRef) - 20).clamp(widget.minDiameter, widget.maxDiameter);
         final itemWidth = diameter + 16;
         final rowHeight = diameter + widget.labelAreaHeight;
         final naturalWidth = itemWidth * n;
