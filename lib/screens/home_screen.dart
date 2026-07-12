@@ -490,21 +490,18 @@ class _EyebrowCirclesSection extends StatelessWidget {
 
     final content = Column(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          decoration: BoxDecoration(
-            color: colors.violetPop.withOpacity(0.14),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: colors.orchid.withOpacity(0.3)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 17, color: colors.orchid),
-              const SizedBox(width: 10),
-              Text(eyebrow, style: AppFonts.label(color: colors.orchid, size: 16)),
-            ],
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: isMobile ? 14 : 17, color: colors.orchid),
+            SizedBox(width: isMobile ? 7 : 10),
+            Text(eyebrow,
+                style: AppFonts.label(
+                  color: colors.orchid,
+                  size: isMobile ? 12.5 : 16,
+                  letterSpacing: isMobile ? 1.2 : 3.0,
+                )),
+          ],
         ),
         const SizedBox(height: 20),
         Container(

@@ -54,8 +54,8 @@ class AppText {
   String get bestSellersEyebrow => _t('CUSTOMER FAVOURITES', 'الأكثر طلبًا');
   String get bestSellersTitle => _t('Best sellers', 'الأكثر مبيعًا');
 
-  // Home — "most requested" circles (below the "available for" card)
-  String get mostRequestedEyebrow => _t('MOST REQUESTED', 'الأكثر طلبًا');
+  // Home — "most ordered" circles (below the "available for" card)
+  String get mostRequestedEyebrow => _t('MOST ORDERED', 'الأكثر طلبًا');
   String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الجرافيكية');
 
   // Home — service circles row

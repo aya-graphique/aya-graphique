@@ -687,8 +687,8 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Wrap(
-      alignment: WrapAlignment.start,
-      runAlignment: WrapAlignment.start,
+      alignment: WrapAlignment.center,
+      runAlignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 28,
       runSpacing: 16,
