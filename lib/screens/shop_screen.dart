@@ -106,11 +106,6 @@ class _ShopScreenState extends State<ShopScreen> {
                 padding: EdgeInsets.symmetric(
                   vertical: widget.isMobile ? 24 : 36,
                 ),
-                decoration: BoxDecoration(
-                  color: context.colors.surfaceRaised.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: context.colors.border(0.08)),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
