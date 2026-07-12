@@ -69,7 +69,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     : Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 5, child: _Gallery(product: product, isMobile: isMobile)),
+                          Expanded(flex: 6, child: _Gallery(product: product, isMobile: isMobile)),
                           const SizedBox(width: 48),
                           Expanded(
                             flex: 4,
@@ -144,7 +144,7 @@ class _Gallery extends StatelessWidget {
       liftOnHover: 0,
       borderRadius: BorderRadius.circular(28),
       child: AspectRatio(
-        aspectRatio: isMobile ? 1 : 0.85,
+        aspectRatio: isMobile ? 0.82 : 0.78,
         child: Container(
           decoration: BoxDecoration(gradient: context.colors.cardGradient),
           child: Image.network(

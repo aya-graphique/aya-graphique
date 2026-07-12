@@ -686,29 +686,32 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Wrap(
-      alignment: WrapAlignment.center,
-      runAlignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 28,
-      runSpacing: 16,
-      children: [
-        for (var i = 0; i < stats.length; i++) ...[
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(stats[i].value,
-                  style: AppFonts.display(color: colors.cream, size: 30, weight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              Text(
-                stats[i].label,
-                style: AppFonts.label(color: colors.creamDim, size: 13, weight: FontWeight.w700, letterSpacing: 0.6),
-              ),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (var i = 0; i < stats.length; i++) ...[
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(stats[i].value,
+                    style: AppFonts.display(color: colors.cream, size: 25, weight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(
+                  stats[i].label,
+                  style: AppFonts.label(color: colors.creamDim, size: 11.5, weight: FontWeight.w700, letterSpacing: 0.6),
+                ),
+              ],
+            ),
+            if (i != stats.length - 1) ...[
+              const SizedBox(width: 28),
+              Container(width: 1, height: 34, color: colors.border(0.14)),
             ],
-          ),
-          if (i != stats.length - 1) Container(width: 1, height: 34, color: colors.border(0.14)),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

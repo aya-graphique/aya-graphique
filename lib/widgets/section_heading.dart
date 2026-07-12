@@ -10,6 +10,7 @@ class SectionHeading extends StatelessWidget {
   final bool boostArabicSize;
   final double titleSize;
   final double? eyebrowSize;
+  final IconData? eyebrowIcon;
 
   const SectionHeading({
     super.key,
@@ -20,6 +21,7 @@ class SectionHeading extends StatelessWidget {
     this.boostArabicSize = true,
     this.titleSize = 40,
     this.eyebrowSize,
+    this.eyebrowIcon,
   });
 
   @override
@@ -33,11 +35,13 @@ class SectionHeading extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 28,
-              height: 2,
-              color: context.colors.orchid,
-            ),
+            eyebrowIcon != null
+                ? Icon(eyebrowIcon, size: (eyebrowSize ?? 13) + 4, color: context.colors.orchid)
+                : Container(
+                    width: 28,
+                    height: 2,
+                    color: context.colors.orchid,
+                  ),
             const SizedBox(width: 10),
             Text(eyebrow,
                 style: AppFonts.label(

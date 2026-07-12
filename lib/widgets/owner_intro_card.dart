@@ -83,7 +83,7 @@ class OwnerIntroCard extends StatelessWidget {
     final audienceCircles = isMobile
         ? Center(
             child: FractionallySizedBox(
-              widthFactor: 0.82,
+              widthFactor: 0.92,
               child: Column(
                 children: [
                   for (var i = 0; i < audiences.length; i++) ...[

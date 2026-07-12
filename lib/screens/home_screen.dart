@@ -375,13 +375,15 @@ class _ShopPreviewSection extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
           child: Align(
-            alignment: AlignmentDirectional.centerStart,
+            alignment: Alignment.center,
             child: RevealOnScroll(
               child: SectionHeading(
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
                 titleSize: isMobile ? 24 : 30,
                 eyebrowSize: isMobile ? 15 : 17,
+                eyebrowIcon: Icons.local_fire_department_rounded,
+                align: TextAlign.center,
               ),
             ),
           ),
