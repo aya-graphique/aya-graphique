@@ -1,4 +1,4 @@
-# Aya's graphique— Notebooks & Stationery (Flutter Web)
+# Carnet — Notebooks & Stationery (Flutter Web)
 
 A dark, gallery-style e-commerce app for notebooks and stationery, built
 entirely in Dart/Flutter. It reuses the exact design system — colors,

@@ -81,17 +81,22 @@ class OwnerIntroCard extends StatelessWidget {
         );
 
     final audienceCircles = isMobile
-        ? Column(
-            children: [
-              for (var i = 0; i < audiences.length; i++) ...[
-                if (i != 0) const SizedBox(height: 16),
-                _AudienceListItem(
-                  icon: audiences[i].icon,
-                  label: audiences[i].label,
-                  onTap: audiences[i].onTap,
-                ),
-              ],
-            ],
+        ? Center(
+            child: FractionallySizedBox(
+              widthFactor: 0.82,
+              child: Column(
+                children: [
+                  for (var i = 0; i < audiences.length; i++) ...[
+                    if (i != 0) const SizedBox(height: 16),
+                    _AudienceListItem(
+                      icon: audiences[i].icon,
+                      label: audiences[i].label,
+                      onTap: audiences[i].onTap,
+                    ),
+                  ],
+                ],
+              ),
+            ),
           )
         : Row(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -381,6 +381,7 @@ class _ShopPreviewSection extends StatelessWidget {
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
                 titleSize: isMobile ? 24 : 30,
+                eyebrowSize: isMobile ? 15 : 17,
               ),
             ),
           ),
@@ -498,7 +499,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
             Text(eyebrow,
                 style: AppFonts.label(
                   color: colors.orchid,
-                  size: isMobile ? 12.5 : 16,
+                  size: isMobile ? 15 : 19,
                   letterSpacing: isMobile ? 1.2 : 3.0,
                 )),
           ],

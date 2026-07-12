@@ -9,6 +9,7 @@ class SectionHeading extends StatelessWidget {
   final TextAlign align;
   final bool boostArabicSize;
   final double titleSize;
+  final double? eyebrowSize;
 
   const SectionHeading({
     super.key,
@@ -18,6 +19,7 @@ class SectionHeading extends StatelessWidget {
     this.align = TextAlign.start,
     this.boostArabicSize = true,
     this.titleSize = 40,
+    this.eyebrowSize,
   });
 
   @override
@@ -37,7 +39,12 @@ class SectionHeading extends StatelessWidget {
               color: context.colors.orchid,
             ),
             const SizedBox(width: 10),
-            Text(eyebrow, style: AppFonts.label(color: context.colors.orchid, boostArabicSize: boostArabicSize)),
+            Text(eyebrow,
+                style: AppFonts.label(
+                  color: context.colors.orchid,
+                  boostArabicSize: boostArabicSize,
+                  size: eyebrowSize ?? 13,
+                )),
           ],
         ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.1, end: 0),
         const SizedBox(height: 16),
