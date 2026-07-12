@@ -10,6 +10,7 @@ class Tilt3DCard extends StatefulWidget {
   final double liftOnHover;
   final BorderRadius borderRadius;
   final VoidCallback? onTap;
+  final bool showShadow;
 
   const Tilt3DCard({
     super.key,
@@ -18,6 +19,7 @@ class Tilt3DCard extends StatefulWidget {
     this.liftOnHover = 10,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
     this.onTap,
+    this.showShadow = true,
   });
 
   @override
@@ -92,19 +94,21 @@ class _Tilt3DCardState extends State<Tilt3DCard>
                 duration: const Duration(milliseconds: 220),
                 decoration: BoxDecoration(
                   borderRadius: widget.borderRadius,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(_hovering ? 0.45 : 0.25),
-                      blurRadius: _hovering ? 36 : 18,
-                      offset: Offset(0, _hovering ? 22 : 10),
-                    ),
-                    BoxShadow(
-                      color: const Color(0xFF9B3FD1)
-                          .withOpacity(_hovering ? 0.35 : 0.0),
-                      blurRadius: _hovering ? 46 : 0,
-                      spreadRadius: _hovering ? 1 : 0,
-                    ),
-                  ],
+                  boxShadow: !widget.showShadow
+                      ? const []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(_hovering ? 0.45 : 0.25),
+                            blurRadius: _hovering ? 36 : 18,
+                            offset: Offset(0, _hovering ? 22 : 10),
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFF9B3FD1)
+                                .withOpacity(_hovering ? 0.35 : 0.0),
+                            blurRadius: _hovering ? 46 : 0,
+                            spreadRadius: _hovering ? 1 : 0,
+                          ),
+                        ],
                 ),
                 child: ClipRRect(
                   borderRadius: widget.borderRadius,

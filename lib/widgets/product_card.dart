@@ -20,9 +20,11 @@ class ProductCard extends StatelessWidget {
       liftOnHover: 6,
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: Container(
+        decoration: BoxDecoration(gradient: context.colors.cardGradient),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
@@ -102,6 +104,7 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
       ),
     );
   }
