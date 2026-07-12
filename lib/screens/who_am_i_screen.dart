@@ -227,21 +227,21 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
               const SizedBox(height: 12),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 72),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: profile.isEmpty
-                        ? _EmptyProfileNotice(isMobile: widget.isMobile)
-                        : _Profile(
-                            profile: profile,
-                            isMobile: widget.isMobile,
-                            onOpenUrl: _openUrl,
-                            onOpenWhatsapp: _openWhatsapp,
-                            onOpenEmail: _openEmail,
-                          ),
-                  ),
-                ),
+                child: profile.isEmpty
+                    ? Align(
+                        alignment: Alignment.center,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 900),
+                          child: _EmptyProfileNotice(isMobile: widget.isMobile),
+                        ),
+                      )
+                    : _Profile(
+                        profile: profile,
+                        isMobile: widget.isMobile,
+                        onOpenUrl: _openUrl,
+                        onOpenWhatsapp: _openWhatsapp,
+                        onOpenEmail: _openEmail,
+                      ),
               ),
               const SizedBox(height: 60),
             ],
@@ -284,88 +284,121 @@ class _Profile extends StatelessWidget {
         profile.email.isNotEmpty ||
         profile.phone.isNotEmpty ||
         profile.portfolioUrl.isNotEmpty ||
-        profile.cvUrl.isNotEmpty;
+        profile.cvUrl.isNotEmpty ||
+        profile.instagramUrl.isNotEmpty ||
+        profile.facebookUrl.isNotEmpty ||
+        profile.tiktokUrl.isNotEmpty ||
+        profile.linkedinUrl.isNotEmpty;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Portrait photo — same brand photo used on the splash screen,
-        // in the same violet-gradient ring treatment as the audience/
-        // service circles elsewhere. Falls back to the lettered initials
-        // badge if the asset is missing.
-        if (profile.fullName.isNotEmpty) ...[
-          _PortraitAvatar(name: profile.fullName),
-          const SizedBox(height: 22),
-        ],
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        // Header block — photo through the stats row — capped at a
+        // readable width and centered on the screen regardless of
+        // language. Everything below the divider (bio, skills, experience,
+        // education, contact) is NOT capped — it spans the full available
+        // width so it actually reaches the edge (flush right in Arabic,
+        // flush left in English) instead of just the edge of a narrow
+        // centered column.
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(width: 28, height: 2, color: context.colors.orchid),
-            const SizedBox(width: 10),
-            Text(context.strings.whoAmIEyebrow, style: AppFonts.label(color: context.colors.orchid, size: 14)),
-            const SizedBox(width: 10),
-            Container(width: 28, height: 2, color: context.colors.orchid),
+            // Portrait photo — same brand photo used on the splash screen,
+            // in the same violet-gradient ring treatment as the audience/
+            // service circles elsewhere. Falls back to the lettered initials
+            // badge if the asset is missing.
+            if (profile.fullName.isNotEmpty) ...[
+              _PortraitAvatar(name: profile.fullName),
+              const SizedBox(height: 22),
+            ],
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 28, height: 2, color: context.colors.orchid),
+                const SizedBox(width: 10),
+                Text(context.strings.whoAmIEyebrow, style: AppFonts.label(color: context.colors.orchid, size: 15.5, weight: FontWeight.w700)),
+                const SizedBox(width: 10),
+                Container(width: 28, height: 2, color: context.colors.orchid),
+              ],
+            ).animate().fadeIn(duration: 500.ms),
+            // 16px gap — matches the eyebrow-to-title spacing in SectionHeading,
+            // which is what the Services page (and every other tab) uses, so
+            // the two pages open with the same visual rhythm.
+            const SizedBox(height: 16),
+            if (profile.fullName.isNotEmpty)
+              ShimmerHeadline(
+                text: _capitalizeWords(profile.fullName),
+                textAlign: TextAlign.center,
+                style: AppFonts.display(
+                  color: context.colors.cream,
+                  size: isMobile ? 40 : 64,
+                  weight: FontWeight.w800,
+                  height: 1.05,
+                  text: profile.fullName,
+                ),
+              ),
+            // Fixed brand slogan — always shown under the name, independent
+            // of the admin-editable headline field below. Small tracked caps
+            // read as a refined tagline rather than competing with the big
+            // gradient name above it.
+            const SizedBox(height: 10),
+            Text(
+              'SIMPLICITY MAKES IT ART',
+              textAlign: TextAlign.center,
+              style: AppFonts.label(
+                color: context.colors.creamDim,
+                size: isMobile ? 12.5 : 14,
+                letterSpacing: 3,
+              ).copyWith(fontWeight: FontWeight.w700),
+            ).animate().fadeIn(duration: 500.ms, delay: 80.ms),
+            if (profile.headlineFor(isArabic).isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                profile.headlineFor(isArabic),
+                textAlign: TextAlign.center,
+                style: AppFonts.label(
+                  color: context.colors.violetLight,
+                  size: 16.5,
+                  weight: FontWeight.w700,
+                  letterSpacing: 1.4,
+                  text: profile.headlineFor(isArabic),
+                ),
+              ),
+            ],
+            // Quick-read career stats — static figures (see kStats), kept
+            // separate from the admin-editable fields above so they're easy
+            // to tweak in code as the real numbers change.
+            const SizedBox(height: 28),
+            Center(child: _StatsRow(stats: kStats(isArabic))),
           ],
-        ).animate().fadeIn(duration: 500.ms),
-        // 16px gap — matches the eyebrow-to-title spacing in SectionHeading,
-        // which is what the Services page (and every other tab) uses, so
-        // the two pages open with the same visual rhythm.
-        const SizedBox(height: 16),
-        if (profile.fullName.isNotEmpty)
-          ShimmerHeadline(
-            text: _capitalizeWords(profile.fullName),
-            textAlign: TextAlign.start,
-            style: AppFonts.display(
-              color: context.colors.cream,
-              size: isMobile ? 36 : 58,
-              height: 1.05,
-              text: profile.fullName,
             ),
           ),
-        // Fixed brand slogan — always shown under the name, independent
-        // of the admin-editable headline field below. Small tracked caps
-        // read as a refined tagline rather than competing with the big
-        // gradient name above it.
-        const SizedBox(height: 10),
-        Text(
-          'SIMPLICITY MAKES IT ART',
-          textAlign: TextAlign.start,
-          style: AppFonts.label(
-            color: context.colors.creamDim,
-            size: isMobile ? 11 : 12.5,
-            letterSpacing: 3,
-          ).copyWith(fontWeight: FontWeight.w600),
-        ).animate().fadeIn(duration: 500.ms, delay: 80.ms),
-        if (profile.headlineFor(isArabic).isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            profile.headlineFor(isArabic),
-            textAlign: TextAlign.start,
-            style: AppFonts.label(
-              color: context.colors.violetLight,
-              size: 15,
-              letterSpacing: 1.4,
-              text: profile.headlineFor(isArabic),
-            ),
-          ),
-        ],
-        // Quick-read career stats — static figures (see kStats), kept
-        // separate from the admin-editable fields above so they're easy
-        // to tweak in code as the real numbers change.
-        const SizedBox(height: 28),
-        _StatsRow(stats: kStats(isArabic)),
+        ),
+        // Everything from here down (divider onward) reverts to a plain
+        // start-aligned column — flush right in Arabic, flush left in
+        // English — instead of the centered header above it.
+        Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         if (bio.isNotEmpty) ...[
           const SizedBox(height: 34),
-          _SectionDivider(),
+          Center(child: _SectionDivider()),
           const SizedBox(height: 26),
-          Text(
-            bio,
-            textAlign: TextAlign.start,
-            style: AppFonts.body(
-              color: context.colors.creamDim,
-              size: isMobile ? 17 : 18.5,
-              height: 1.55,
-              text: bio,
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              bio,
+              textAlign: TextAlign.center,
+              style: AppFonts.body(
+                color: context.colors.creamDim,
+                size: isMobile ? 19 : 21,
+                weight: FontWeight.w500,
+                height: 1.55,
+                text: bio,
+              ),
             ),
           ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
         ],
@@ -373,17 +406,17 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 40),
           _SectionCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _MiniSectionHeader(label: context.strings.skillsLabel),
                 const SizedBox(height: 20),
                 Wrap(
-                  alignment: WrapAlignment.start,
+                  alignment: WrapAlignment.center,
                   spacing: 10,
                   runSpacing: 10,
                   children: skills
                       .map((s) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
                               color: context.colors.surface,
                               borderRadius: BorderRadius.circular(100),
@@ -395,8 +428,8 @@ class _Profile extends StatelessWidget {
                             child: Text(
                               _capitalizeWords(s),
                               style: AppFonts.body(
-                                size: isMobile ? 16 : 17,
-                                weight: FontWeight.w600,
+                                size: isMobile ? 13.5 : 14.5,
+                                weight: FontWeight.w700,
                                 color: context.colors.cream,
                                 text: s,
                                 boostArabicSize: false,
@@ -445,7 +478,7 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 32),
           _SectionCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _MiniSectionHeader(label: context.strings.getInTouchLabel),
                 const SizedBox(height: 22),
@@ -453,7 +486,7 @@ class _Profile extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: Wrap(
-                      alignment: WrapAlignment.start,
+                      alignment: WrapAlignment.center,
                       spacing: 12,
                       runSpacing: 12,
                       children: [
@@ -488,6 +521,30 @@ class _Profile extends StatelessWidget {
                             label: context.strings.cvLabel,
                             onTap: () => onOpenUrl(profile.cvUrl),
                           ),
+                        if (profile.instagramUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.camera_alt_outlined,
+                            label: context.strings.instagramLabel,
+                            onTap: () => onOpenUrl(profile.instagramUrl),
+                          ),
+                        if (profile.facebookUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.facebook_outlined,
+                            label: context.strings.facebookLabel,
+                            onTap: () => onOpenUrl(profile.facebookUrl),
+                          ),
+                        if (profile.tiktokUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.music_note_outlined,
+                            label: context.strings.tiktokLabel,
+                            onTap: () => onOpenUrl(profile.tiktokUrl),
+                          ),
+                        if (profile.linkedinUrl.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.business_center_outlined,
+                            label: context.strings.linkedinLabel,
+                            onTap: () => onOpenUrl(profile.linkedinUrl),
+                          ),
                       ],
                     ),
                   ),
@@ -496,13 +553,13 @@ class _Profile extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Icon(Icons.place_outlined, size: 16, color: context.colors.creamDim),
                         const SizedBox(width: 6),
                         Text(profile.location,
-                            style: AppFonts.body(size: 15.5, color: context.colors.creamDim, text: profile.location)),
+                            style: AppFonts.body(size: 17, weight: FontWeight.w500, color: context.colors.creamDim, text: profile.location)),
                       ],
                     ),
                   ),
@@ -511,6 +568,8 @@ class _Profile extends StatelessWidget {
             ),
           ),
         ],
+        ],
+        ),
       ],
     );
   }
@@ -553,7 +612,7 @@ class _PortraitAvatar extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Text(
                 _initials,
-                style: AppFonts.display(color: colors.orchid, size: 56, weight: FontWeight.w800),
+                style: AppFonts.display(color: colors.orchid, size: 60, weight: FontWeight.w800),
               ),
             ),
           ),
@@ -611,7 +670,7 @@ class _MiniSectionHeader extends StatelessWidget {
       children: [
         Container(width: 22, height: 2, color: context.colors.orchid),
         const SizedBox(width: 10),
-        Text(label, style: AppFonts.label(color: context.colors.orchid, size: 14.5)),
+        Text(label, style: AppFonts.label(color: context.colors.orchid, size: 16, weight: FontWeight.w700)),
       ],
     );
   }
@@ -639,11 +698,11 @@ class _StatsRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(stats[i].value,
-                  style: AppFonts.display(color: colors.cream, size: 26, weight: FontWeight.w800)),
+                  style: AppFonts.display(color: colors.cream, size: 30, weight: FontWeight.w800)),
               const SizedBox(height: 4),
               Text(
                 stats[i].label,
-                style: AppFonts.label(color: colors.creamDim, size: 11.5, letterSpacing: 0.6),
+                style: AppFonts.label(color: colors.creamDim, size: 13, weight: FontWeight.w700, letterSpacing: 0.6),
               ),
             ],
           ),
@@ -678,8 +737,8 @@ class _TimelineCard extends StatelessWidget {
                 child: Text(
                   entry.title,
                   style: AppFonts.body(
-                    size: 18.5,
-                    weight: FontWeight.w700,
+                    size: 20.5,
+                    weight: FontWeight.w800,
                     color: colors.cream,
                     text: entry.title,
                   ),
@@ -694,18 +753,18 @@ class _TimelineCard extends StatelessWidget {
                 ),
                 child: Text(
                   entry.period,
-                  style: AppFonts.label(size: 12, color: colors.orchid, letterSpacing: 0.4),
+                  style: AppFonts.label(size: 13.5, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.4),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(entry.subtitle,
-              style: AppFonts.body(size: 15.5, color: colors.violetLight, text: entry.subtitle)),
+              style: AppFonts.body(size: 17, weight: FontWeight.w600, color: colors.violetLight, text: entry.subtitle)),
           if (entry.description.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(entry.description,
-                style: AppFonts.body(size: 15.5, height: 1.5, color: colors.creamDim, text: entry.description)),
+                style: AppFonts.body(size: 17, weight: FontWeight.w500, height: 1.5, color: colors.creamDim, text: entry.description)),
           ],
           if (entry.highlights.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -726,7 +785,7 @@ class _TimelineCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(h,
-                          style: AppFonts.body(size: 14.5, height: 1.45, color: colors.creamDim, text: h)),
+                          style: AppFonts.body(size: 16, weight: FontWeight.w500, height: 1.45, color: colors.creamDim, text: h)),
                     ),
                   ],
                 ),
@@ -756,7 +815,7 @@ class _ContactButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           gradient: filled ? context.colors.violetGradient : null,
           color: filled ? null : context.colors.surface,
@@ -768,15 +827,15 @@ class _ContactButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 17, color: filled ? Colors.white : context.colors.cream),
-            const SizedBox(width: 8),
+            Icon(icon, size: 14, color: filled ? Colors.white : context.colors.cream),
+            const SizedBox(width: 7),
             Text(
               label,
               style: AppFonts.label(
-                size: 15,
+                size: 13.5,
                 color: filled ? Colors.white : context.colors.cream,
-                letterSpacing: 0.8,
-              ).copyWith(fontWeight: FontWeight.w600),
+                letterSpacing: 0.6,
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -799,7 +858,7 @@ class _EmptyProfileNotice extends StatelessWidget {
         Text(
           context.strings.emptyProfileNotice,
           textAlign: TextAlign.start,
-          style: AppFonts.body(size: 16, color: context.colors.creamDim),
+          style: AppFonts.body(size: 17.5, weight: FontWeight.w500, color: context.colors.creamDim),
         ),
       ],
     );

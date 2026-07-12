@@ -286,6 +286,15 @@ alter table about_me add column if not exists headline_ar text not null default 
 alter table about_me add column if not exists bio_ar text not null default '';
 alter table about_me add column if not exists skills_ar text[] not null default '{}';
 
+-- Extra social/contact links for the "Get in touch" section, added later.
+-- Optional and additive, same as the *_ar columns above — leave any of
+-- them blank in the admin dashboard and that button just doesn't show up
+-- on the storefront.
+alter table about_me add column if not exists instagram_url text not null default '';
+alter table about_me add column if not exists facebook_url text not null default '';
+alter table about_me add column if not exists tiktok_url text not null default '';
+alter table about_me add column if not exists linkedin_url text not null default '';
+
 alter table about_me enable row level security;
 
 create policy "Public read access to about_me"

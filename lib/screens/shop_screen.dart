@@ -249,8 +249,8 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: 12,
+      runSpacing: 12,
       children: [
         _CategoryChip(
           label: context.strings.categoryAll,
@@ -286,7 +286,7 @@ class _CategoryChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
         decoration: BoxDecoration(
           gradient: selected ? context.colors.violetGradient : null,
           color: selected ? null : context.colors.surface.withOpacity(0.5),
@@ -300,9 +300,9 @@ class _CategoryChip extends StatelessWidget {
         child: Text(
           label,
           style: AppFonts.label(
-            size: 13,
+            size: 14.5,
             color: selected ? Colors.white : context.colors.creamDim,
-            letterSpacing: 0.4,
+            letterSpacing: 0.8,
             text: label,
           ).copyWith(fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
         ),

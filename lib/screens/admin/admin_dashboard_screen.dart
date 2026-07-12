@@ -12,7 +12,6 @@ import '../../services/settings_repository.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
-import 'admin_about_screen.dart';
 import 'admin_home_banners_screen.dart';
 import 'admin_illustration_art_screen.dart';
 import 'admin_orders_screen.dart';
@@ -426,13 +425,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             icon: Icon(Icons.view_carousel_outlined, color: context.colors.creamDim),
             tooltip: 'Home banners',
-          ),
-          IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminAboutScreen()),
-            ),
-            icon: Icon(Icons.person_outline_rounded, color: context.colors.creamDim),
-            tooltip: 'Slideshow photos',
           ),
           IconButton(
             onPressed: () => Navigator.of(context).push(

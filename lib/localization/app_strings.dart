@@ -281,6 +281,10 @@ class AppText {
   String get emailLabel => _t('Email', 'البريد الإلكتروني');
   String get portfolioLabel => _t('Portfolio', 'أعمالي');
   String get cvLabel => _t('CV', 'السيرة الذاتية');
+  String get instagramLabel => _t('Instagram', 'إنستجرام');
+  String get facebookLabel => _t('Facebook', 'فيسبوك');
+  String get tiktokLabel => _t('TikTok', 'تيك توك');
+  String get linkedinLabel => _t('LinkedIn', 'لينكدإن');
   String get emptyProfileNotice => _t(
         'This page is empty for now — add your name, bio, skills and '
         'photos from the admin dashboard\'s "Who am I" tab and they\'ll '

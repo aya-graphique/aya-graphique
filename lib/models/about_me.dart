@@ -8,6 +8,9 @@
 /// version so nothing breaks for stores that never fill them in.
 /// fullName/email/phone/whatsapp/location/urls stay single-value on
 /// purpose — a name, phone number or link isn't something you "translate".
+/// instagramUrl/facebookUrl/tiktokUrl/linkedinUrl are optional social
+/// links shown as extra buttons in "Get in touch" — leave any of them
+/// blank and that button just doesn't show up.
 class AboutMe {
   final String fullName;
   final String headline;
@@ -22,6 +25,10 @@ class AboutMe {
   final String location;
   final String portfolioUrl;
   final String cvUrl;
+  final String instagramUrl;
+  final String facebookUrl;
+  final String tiktokUrl;
+  final String linkedinUrl;
 
   const AboutMe({
     this.fullName = '',
@@ -37,6 +44,10 @@ class AboutMe {
     this.location = '',
     this.portfolioUrl = '',
     this.cvUrl = '',
+    this.instagramUrl = '',
+    this.facebookUrl = '',
+    this.tiktokUrl = '',
+    this.linkedinUrl = '',
   });
 
   bool get isEmpty =>
@@ -68,6 +79,10 @@ class AboutMe {
         location: (row['location'] as String?) ?? '',
         portfolioUrl: (row['portfolio_url'] as String?) ?? '',
         cvUrl: (row['cv_url'] as String?) ?? '',
+        instagramUrl: (row['instagram_url'] as String?) ?? '',
+        facebookUrl: (row['facebook_url'] as String?) ?? '',
+        tiktokUrl: (row['tiktok_url'] as String?) ?? '',
+        linkedinUrl: (row['linkedin_url'] as String?) ?? '',
       );
 
   Map<String, dynamic> toRow() => {
@@ -85,6 +100,10 @@ class AboutMe {
         'location': location,
         'portfolio_url': portfolioUrl,
         'cv_url': cvUrl,
+        'instagram_url': instagramUrl,
+        'facebook_url': facebookUrl,
+        'tiktok_url': tiktokUrl,
+        'linkedin_url': linkedinUrl,
       };
 }
 
