@@ -137,15 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
             context.strings.marqueeStand,
           ]),
           const SizedBox(height: 48),
-          // "Available for" moved up here, right after the marquee — it
-          // answers "is this place for me?" before the visitor has to
-          // scroll past Services/Illustration/Most Requested to find out.
-          OwnerIntroCard(
-            isMobile: widget.isMobile,
-            onViewProfile: widget.onViewProfileTap,
-            onAudienceTap: widget.onServiceCategoryTap,
-          ),
-          const SizedBox(height: 48),
           _ServicesSection(
             serviceCategoryImages: _serviceCategoryImages,
             isMobile: widget.isMobile,
@@ -171,6 +162,32 @@ class _HomeScreenState extends State<HomeScreen> {
               onShopTap: widget.onShopTap,
             ),
           ],
+          const SizedBox(height: 32),
+          // Soft divider to separate "Shop the collection" from
+          // "Available for" below it.
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 40 : 120),
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    context.colors.border(0.18),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          // "Available for" now sits right under "Shop the collection" —
+          // moved down from its old spot after the marquee.
+          OwnerIntroCard(
+            isMobile: widget.isMobile,
+            onViewProfile: widget.onViewProfileTap,
+            onAudienceTap: widget.onServiceCategoryTap,
+          ),
           const SizedBox(height: 40),
           TestimonialsSection(isMobile: widget.isMobile),
           const SizedBox(height: 60),
@@ -379,21 +396,21 @@ class _ShopPreviewSection extends StatelessWidget {
           child: GestureDetector(
             onTap: onShopTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 44, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 15),
               decoration: BoxDecoration(
                 gradient: colors.violetGradient,
                 borderRadius: BorderRadius.circular(100),
                 boxShadow: [
                   BoxShadow(
                     color: colors.violetPop.withOpacity(0.35),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
               child: Text(
                 context.strings.shopTheCollection,
-                style: AppFonts.label(size: 17, color: Colors.white, letterSpacing: 0.6)
+                style: AppFonts.label(size: 16, color: Colors.white, letterSpacing: 0.5)
                     .copyWith(fontWeight: FontWeight.w700),
               ),
             ),

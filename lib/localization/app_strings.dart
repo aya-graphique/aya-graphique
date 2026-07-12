@@ -20,7 +20,7 @@ class AppText {
   String get navShop => _t('Shop', 'المتجر');
   String get navSearch => _t('Search', 'بحث');
   String get navCart => _t('Cart', 'السلة');
-  String get navAbout => _t('Portfolio', 'من أنا');
+  String get navAbout => _t('Who am I', 'من أنا');
   String get navServices => _t('Services', 'الخدمات');
 
   // Home — hero

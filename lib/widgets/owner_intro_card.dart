@@ -56,7 +56,7 @@ class OwnerIntroCard extends StatelessWidget {
     // next third the middle, last third the right — with a clear gap
     // between each column group (not spaceBetween/edge-to-edge) and
     // capped + centered so it stays tidy on very wide screens.
-    const desktopItemWidth = 380.0;
+    const desktopItemWidth = 300.0;
     const desktopColumnGap = 36.0;
     const desktopColumns = 3;
     final desktopPerColumn = (audiences.length / desktopColumns).ceil();
@@ -71,7 +71,7 @@ class OwnerIntroCard extends StatelessWidget {
     Widget desktopColumn(List<_AudienceSpec> items) => Column(
           children: [
             for (var i = 0; i < items.length; i++) ...[
-              if (i != 0) const SizedBox(height: 14),
+              if (i != 0) const SizedBox(height: 22),
               _AudienceListItem(
                 icon: items[i].icon,
                 label: items[i].label,
@@ -85,7 +85,7 @@ class OwnerIntroCard extends StatelessWidget {
         ? Column(
             children: [
               for (var i = 0; i < audiences.length; i++) ...[
-                if (i != 0) const SizedBox(height: 12),
+                if (i != 0) const SizedBox(height: 16),
                 _AudienceListItem(
                   icon: audiences[i].icon,
                   label: audiences[i].label,
@@ -216,10 +216,10 @@ class _AudienceListItemState extends State<_AudienceListItem> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
             color: _hovered ? colors.violetPop.withOpacity(0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: colors.border(0.12)),
           ),
           child: Row(
@@ -227,39 +227,39 @@ class _AudienceListItemState extends State<_AudienceListItem> {
               // Icon chip — rounded square with the same violet-gradient
               // border treatment as the circle rings elsewhere.
               Container(
-                width: 56,
-                height: 56,
+                width: 40,
+                height: 40,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   gradient: colors.violetGradient,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                     color: colors.surface,
                   ),
                   child: Center(
-                    child: Icon(widget.icon, size: 25, color: colors.violetPop),
+                    child: Icon(widget.icon, size: 18, color: colors.violetPop),
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   widget.label,
                   style: AppFonts.label(
-                    size: 17,
+                    size: 14,
                     weight: FontWeight.w600,
                     color: colors.cream,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.2,
                     text: widget.label,
                   ),
                 ),
               ),
               Icon(
                 Icons.chevron_left_rounded,
-                size: 24,
+                size: 20,
                 color: colors.cream.withOpacity(0.35),
               ),
             ],

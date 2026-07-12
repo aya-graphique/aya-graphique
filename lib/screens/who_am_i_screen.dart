@@ -230,7 +230,7 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
                 child: Align(
                   alignment: Alignment.center,
                   child: SizedBox(
-                    width: widget.isMobile ? double.infinity : 720,
+                    width: widget.isMobile ? double.infinity : 980,
                     child: profile.isEmpty
                         ? _EmptyProfileNotice(isMobile: widget.isMobile)
                         : _Profile(
@@ -289,13 +289,12 @@ class _Profile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Initials avatar — a plain lettered badge (same gradient-ring
-        // family as the audience/service circles elsewhere), not a photo.
-        // "Who am I" intentionally stays photo-free; the admin dashboard's
-        // photo slideshow, if ever re-enabled, is a separate concern from
-        // this text profile.
+        // Portrait photo — same brand photo used on the splash screen,
+        // in the same violet-gradient ring treatment as the audience/
+        // service circles elsewhere. Falls back to the lettered initials
+        // badge if the asset is missing.
         if (profile.fullName.isNotEmpty) ...[
-          _InitialsAvatar(name: profile.fullName),
+          _PortraitAvatar(name: profile.fullName),
           const SizedBox(height: 22),
         ],
         Row(
@@ -323,6 +322,20 @@ class _Profile extends StatelessWidget {
               text: profile.fullName,
             ),
           ),
+        // Fixed brand slogan — always shown under the name, independent
+        // of the admin-editable headline field below. Small tracked caps
+        // read as a refined tagline rather than competing with the big
+        // gradient name above it.
+        const SizedBox(height: 10),
+        Text(
+          'SIMPLICITY MAKES IT ART',
+          textAlign: TextAlign.center,
+          style: AppFonts.label(
+            color: context.colors.creamDim,
+            size: isMobile ? 11 : 12.5,
+            letterSpacing: 3,
+          ).copyWith(fontWeight: FontWeight.w600),
+        ).animate().fadeIn(duration: 500.ms, delay: 80.ms),
         if (profile.headlineFor(isArabic).isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(
@@ -503,12 +516,14 @@ class _Profile extends StatelessWidget {
   }
 }
 
-/// Lettered avatar badge used in place of an owner photo — up to two
-/// initials from [name] inside the same violet-gradient ring treatment as
-/// the audience/service circles elsewhere on the storefront.
-class _InitialsAvatar extends StatelessWidget {
+/// Portrait badge used at the top of the profile — the same brand photo
+/// (assets/images/aya_portrait.png) shown on the splash screen, inside the
+/// same violet-gradient ring treatment as the audience/service circles
+/// elsewhere on the storefront. Falls back to a lettered initials badge if
+/// the photo asset is missing.
+class _PortraitAvatar extends StatelessWidget {
   final String name;
-  const _InitialsAvatar({required this.name});
+  const _PortraitAvatar({required this.name});
 
   String get _initials {
     final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
@@ -520,17 +535,27 @@ class _InitialsAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    const outer = 190.0;
+    const photo = 184.0;
     return Container(
-      width: 96,
-      height: 96,
-      padding: const EdgeInsets.all(3),
+      width: outer,
+      height: outer,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(shape: BoxShape.circle, gradient: colors.violetGradient),
       child: Container(
         decoration: BoxDecoration(shape: BoxShape.circle, color: colors.surface),
         child: Center(
-          child: Text(
-            _initials,
-            style: AppFonts.display(color: colors.orchid, size: 34, weight: FontWeight.w800),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/aya_portrait.png',
+              width: photo,
+              height: photo,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Text(
+                _initials,
+                style: AppFonts.display(color: colors.orchid, size: 56, weight: FontWeight.w800),
+              ),
+            ),
           ),
         ),
       ),

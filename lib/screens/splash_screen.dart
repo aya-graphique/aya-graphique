@@ -128,8 +128,8 @@ class _PortraitBadgeState extends State<_PortraitBadge>
   Widget build(BuildContext context) {
     final colors = context.colors;
     final outer = widget.size;
-    final gap = outer * 0.915; // ring thickness stays a consistent ~4-5%
-    final photo = outer * 0.845;
+    final gap = outer * 0.95; // thinner ring — was 0.915
+    final photo = outer * 0.89; // was 0.845
     return SizedBox(
       width: outer,
       height: outer,

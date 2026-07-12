@@ -684,7 +684,7 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                   // Same fix as the stacked (mobile) label above, for the
                   // desktop side-by-side layout.
                   style: AppFonts.label(
-                    size: 11.5,
+                    size: widget.isMobile ? 11.5 : 14.5,
                     color: color,
                     letterSpacing: 1.0,
                     boostArabicSize: false,
