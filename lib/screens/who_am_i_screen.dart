@@ -226,11 +226,11 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
               if (!widget.embedded) SizedBox(height: widget.isMobile ? 120 : 150),
               const SizedBox(height: 12),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
+                padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 72),
                 child: Align(
                   alignment: Alignment.center,
-                  child: SizedBox(
-                    width: widget.isMobile ? double.infinity : 980,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 900),
                     child: profile.isEmpty
                         ? _EmptyProfileNotice(isMobile: widget.isMobile)
                         : _Profile(
@@ -287,7 +287,7 @@ class _Profile extends StatelessWidget {
         profile.cvUrl.isNotEmpty;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Portrait photo — same brand photo used on the splash screen,
         // in the same violet-gradient ring treatment as the audience/
@@ -314,7 +314,7 @@ class _Profile extends StatelessWidget {
         if (profile.fullName.isNotEmpty)
           ShimmerHeadline(
             text: _capitalizeWords(profile.fullName),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.start,
             style: AppFonts.display(
               color: context.colors.cream,
               size: isMobile ? 36 : 58,
@@ -329,7 +329,7 @@ class _Profile extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           'SIMPLICITY MAKES IT ART',
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.start,
           style: AppFonts.label(
             color: context.colors.creamDim,
             size: isMobile ? 11 : 12.5,
@@ -340,7 +340,7 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             profile.headlineFor(isArabic),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.start,
             style: AppFonts.label(
               color: context.colors.violetLight,
               size: 15,
@@ -360,7 +360,7 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 26),
           Text(
             bio,
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.start,
             style: AppFonts.body(
               color: context.colors.creamDim,
               size: isMobile ? 17 : 18.5,
@@ -373,12 +373,12 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 40),
           _SectionCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _MiniSectionHeader(label: context.strings.skillsLabel),
                 const SizedBox(height: 20),
                 Wrap(
-                  alignment: WrapAlignment.center,
+                  alignment: WrapAlignment.start,
                   spacing: 10,
                   runSpacing: 10,
                   children: skills
@@ -415,7 +415,7 @@ class _Profile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(child: _MiniSectionHeader(label: context.strings.experienceLabel)),
+                _MiniSectionHeader(label: context.strings.experienceLabel),
                 const SizedBox(height: 22),
                 for (var i = 0; i < experience.length; i++) ...[
                   if (i != 0) const SizedBox(height: 14),
@@ -431,7 +431,7 @@ class _Profile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(child: _MiniSectionHeader(label: context.strings.educationLabel)),
+                _MiniSectionHeader(label: context.strings.educationLabel),
                 const SizedBox(height: 22),
                 for (var i = 0; i < education.length; i++) ...[
                   if (i != 0) const SizedBox(height: 14),
@@ -445,7 +445,7 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 32),
           _SectionCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _MiniSectionHeader(label: context.strings.getInTouchLabel),
                 const SizedBox(height: 22),
@@ -453,7 +453,7 @@ class _Profile extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: Wrap(
-                      alignment: WrapAlignment.center,
+                      alignment: WrapAlignment.start,
                       spacing: 12,
                       runSpacing: 12,
                       children: [
@@ -496,7 +496,7 @@ class _Profile extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Icon(Icons.place_outlined, size: 16, color: context.colors.creamDim),
@@ -592,16 +592,8 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceRaised.withOpacity(context.colors.isDark ? 0.35 : 0.5),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: context.colors.border(0.08)),
-      ),
-      child: child,
-    );
+    // Content now flows directly on the page — no boxed container.
+    return SizedBox(width: double.infinity, child: child);
   }
 }
 
@@ -636,8 +628,8 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Wrap(
-      alignment: WrapAlignment.center,
-      runAlignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
+      runAlignment: WrapAlignment.start,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 28,
       runSpacing: 16,
@@ -675,12 +667,7 @@ class _TimelineCard extends StatelessWidget {
     final colors = context.colors;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: colors.surface.withOpacity(colors.isDark ? 0.4 : 0.7),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.border(0.1)),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -804,24 +791,17 @@ class _EmptyProfileNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.border(0.1)),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.person_outline_rounded, size: 30, color: context.colors.creamDim),
-          const SizedBox(height: 12),
-          Text(
-            context.strings.emptyProfileNotice,
-            textAlign: TextAlign.center,
-            style: AppFonts.body(size: 16, color: context.colors.creamDim),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.person_outline_rounded, size: 30, color: context.colors.creamDim),
+        const SizedBox(height: 12),
+        Text(
+          context.strings.emptyProfileNotice,
+          textAlign: TextAlign.start,
+          style: AppFonts.body(size: 16, color: context.colors.creamDim),
+        ),
+      ],
     );
   }
 }

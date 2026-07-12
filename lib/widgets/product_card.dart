@@ -84,15 +84,19 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text(
-                        formatPrice(product.price),
-                        style: AppFonts.body(
-                          size: 15,
-                          weight: FontWeight.w700,
-                          color: context.colors.orchidSoft,
+                      Expanded(
+                        child: Text(
+                          formatPrice(product.price),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppFonts.body(
+                            size: 15,
+                            weight: FontWeight.w700,
+                            color: context.colors.orchidSoft,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       _AddToCartButton(product: product),
                     ],
                   ),

@@ -56,7 +56,6 @@ class OwnerIntroCard extends StatelessWidget {
     // next third the middle, last third the right — with a clear gap
     // between each column group (not spaceBetween/edge-to-edge) and
     // capped + centered so it stays tidy on very wide screens.
-    const desktopItemWidth = 300.0;
     const desktopColumnGap = 36.0;
     const desktopColumns = 3;
     final desktopPerColumn = (audiences.length / desktopColumns).ceil();
@@ -94,20 +93,14 @@ class OwnerIntroCard extends StatelessWidget {
               ],
             ],
           )
-        : Center(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var c = 0; c < desktopColumnsList.length; c++) ...[
-                    if (c != 0) const SizedBox(width: desktopColumnGap),
-                    SizedBox(width: desktopItemWidth, child: desktopColumn(desktopColumnsList[c])),
-                  ],
-                ],
-              ),
-            ),
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var c = 0; c < desktopColumnsList.length; c++) ...[
+                if (c != 0) const SizedBox(width: desktopColumnGap),
+                Expanded(child: desktopColumn(desktopColumnsList[c])),
+              ],
+            ],
           );
 
     final content = Column(
@@ -160,7 +153,7 @@ class OwnerIntroCard extends StatelessWidget {
     // page better than a differently-colored one does.
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 20 : 60,
+        horizontal: isMobile ? 20 : 40,
         vertical: isMobile ? 20 : 28,
       ),
       child: RevealOnScroll(child: content),

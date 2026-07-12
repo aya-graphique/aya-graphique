@@ -228,7 +228,10 @@ class _HeroState extends State<_Hero> {
     // Clamped at both ends so very narrow phones and very wide desktop
     // monitors still get a sensible height.
     final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = isMobile ? 24.0 : 60.0;
+    // Mobile now goes edge-to-edge (no side gutters) so the banner fills
+    // the screen left/right like a native app hero; desktop keeps its
+    // original inset frame.
+    final horizontalPadding = isMobile ? 0.0 : 60.0;
     final availableWidth = screenWidth - horizontalPadding * 2;
     const bannerAspectRatio = 16 / 9;
     final bannerHeight = (availableWidth / bannerAspectRatio).clamp(200.0, 760.0);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/order.dart';
 import '../../services/orders_repository.dart';
 import '../../theme/app_theme.dart';
@@ -23,10 +24,30 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   Object? _error;
   _OrderFilter _filter = _OrderFilter.all;
 
+  // "Delete" in this dashboard no longer calls Supabase's delete endpoint —
+  // that needs the "Authenticated can delete orders" RLS policy (see
+  // supabase/schema.sql), which some existing projects were created before
+  // and don't have, so it was failing with a permissions error. Instead,
+  // deleting just hides the order id locally (this browser only) — the
+  // order row stays completely untouched in the database.
+  static const _hiddenIdsPrefsKey = 'admin_hidden_order_ids';
+  Set<String> _hiddenIds = {};
+
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _hiddenIds = (prefs.getStringList(_hiddenIdsPrefsKey) ?? const []).toSet();
     _load();
+  }
+
+  Future<void> _saveHiddenIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_hiddenIdsPrefsKey, _hiddenIds.toList());
   }
 
   Future<void> _load() async {
@@ -38,7 +59,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       final orders = await OrdersRepository.fetchAll();
       if (!mounted) return;
       setState(() {
-        _orders = orders;
+        _orders = orders.where((o) => !_hiddenIds.contains(o.id)).toList();
         _loading = false;
       });
     } catch (e) {
@@ -63,7 +84,11 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   }
 
   Future<void> _deleteOrder(Order order) async {
-    await OrdersRepository.delete(order.id);
+    // Local-only hide — see the comment on _hiddenIds above. Nothing is
+    // sent to Supabase here, so this can never fail on a permissions
+    // error; the order simply drops out of this browser's dashboard view.
+    _hiddenIds.add(order.id);
+    await _saveHiddenIds();
     if (!mounted) return;
     setState(() {
       _orders = _orders?.where((o) => o.id != order.id).toList();
@@ -241,9 +266,9 @@ class _OrderTileState extends State<_OrderTile> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: context.colors.surface,
-        title: Text('Delete this order?', style: AppFonts.body(size: 16, weight: FontWeight.w700, color: context.colors.cream)),
+        title: Text('Remove this order from the list?', style: AppFonts.body(size: 16, weight: FontWeight.w700, color: context.colors.cream)),
         content: Text(
-          'This permanently removes the order and its items from the database. This can\'t be undone.',
+          'This hides it from your dashboard on this device. The order stays saved in the database and its data isn\'t affected.',
           style: AppFonts.body(size: 13.5, color: context.colors.creamDim),
         ),
         actions: [
