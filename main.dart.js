@@ -51005,7 +51005,7 @@ o=s}return A.on(r,B.ah,new A.ah(o,r,r,A.aA(100),r,r,B.w),B.ey,6,B.KQ,r,r,r,p)},
 $S:408}
 A.a2J.prototype={
 F(a){var s,r,q,p,o=t.f,n=A.d(a,!0,o).a===B.r
-o=A.d(a,!0,o).a===B.r?"\u0627\u0644\u062e\u062f\u0645\u0627\u062a":"SERVICES"
+o=A.d(a,!0,o).a===B.r?"\u062e\u062f\u0645\u0627\u062a \u0627\u0644\u062a\u0635\u0645\u064a\u0645 ":"Design Services"
 s=A.a([],t.SI)
 for(r=this.c,q=0;q<3;++q){p=B.eO[q].b
 p=n?p.b:p.a
@@ -51015,7 +51015,7 @@ $0(){return this.a.e.$1(this.b)},
 $S:0}
 A.a_f.prototype={
 F(a){var s,r,q,p,o=t.f,n=A.d(a,!0,o).a===B.r
-o=A.d(a,!0,o).a===B.r?"\u0631\u0633\u0648\u0645\u0627\u062a \u0648\u0641\u0646\u0648\u0646 \u062a\u0648\u0636\u064a\u062d\u064a\u0629":"ILLUSTRATION & ART"
+o=A.d(a,!0,o).a===B.r?"\u0645\u0647\u0627\u0631\u0627\u062a \u0648\u0641\u0646\u0648\u0646":"Skills & Arts"
 s=A.a([],t.SI)
 for(r=this.c,q=J.aT(r),p=0;p<q.gA(r);++p)s.push(new A.IB(q.h(r,p).aDb(n),q.h(r,p).d,null,new A.aCL()))
 return new A.Jf(B.M0,o,this.d,s,188,null)}}
