@@ -1,4 +1,4 @@
-# Carnet — Notebooks & Stationery (Flutter Web)
+# Aya's Graphique — Notebooks & Stationery (Flutter Web)
 
 A dark, gallery-style e-commerce app for notebooks and stationery, built
 entirely in Dart/Flutter. It reuses the exact design system — colors,
@@ -57,7 +57,7 @@ automatically when the mode changes.
 2. This folder ships with `pubspec.yaml`, `lib/`, and `supabase/` only —
    generate the platform scaffolding once:
    ```bash
-   cd carnet
+   cd aya_graphique
    flutter create .
    flutter pub get
    flutter run -d chrome
@@ -71,13 +71,13 @@ automatically when the mode changes.
 
 ### Deploying to GitHub Pages
 
-If your repo is `github.com/you/carnet` and you're using a **project
-page** (i.e. the site serves from `you.github.io/carnet/`, not a custom
+If your repo is `github.com/you/aya_graphique` and you're using a **project
+page** (i.e. the site serves from `you.github.io/aya_graphique/`, not a custom
 domain or a `you.github.io` user/org page), build with `--base-href` set
 to your repo name so assets resolve correctly:
 
 ```bash
-flutter build web --release --base-href /carnet/
+flutter build web --release --base-href /aya_graphique/
 ```
 
 Then push the contents of `build/web/` to your `gh-pages` branch (or the
@@ -86,8 +86,8 @@ Then push the contents of `build/web/` to your `gh-pages` branch (or the
 Flutter web uses **hash-based URLs by default** (no extra config
 needed), so once it's live:
 
-- `https://you.github.io/carnet/#/` — the storefront
-- `https://you.github.io/carnet/#/admin` — jumps straight to the admin
+- `https://you.github.io/aya_graphique/#/` — the storefront
+- `https://you.github.io/aya_graphique/#/admin` — jumps straight to the admin
   login, skipping the storefront entirely. Bookmark this one for
   yourself.
 

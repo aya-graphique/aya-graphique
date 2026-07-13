@@ -19,7 +19,7 @@ class ServicesRepository {
         for (final row in rows) row['item_key'] as String: ServiceOverride.fromRow(row),
       };
     } catch (e) {
-      debugPrint('Carnet: fetching service_content failed. Real error was:\n$e');
+      debugPrint("Aya's Graphique: fetching service_content failed. Real error was:\n$e");
       return {};
     }
   }

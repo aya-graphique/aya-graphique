@@ -19,7 +19,7 @@ class HomeBannersRepository {
           .map((row) => HomeBanner.fromRow(row as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('Carnet: fetching home_banners failed. Real error was:\n$e');
+      debugPrint("Aya's Graphique: fetching home_banners failed. Real error was:\n$e");
       return [];
     }
   }

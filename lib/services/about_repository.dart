@@ -18,7 +18,7 @@ class AboutRepository {
       if (row == null) return const AboutMe();
       return AboutMe.fromRow(row);
     } catch (e) {
-      debugPrint('Carnet: fetching about_me failed. Real error was:\n$e');
+      debugPrint("Aya's Graphique: fetching about_me failed. Real error was:\n$e");
       return const AboutMe();
     }
   }
@@ -41,7 +41,7 @@ class AboutRepository {
           .map((row) => AboutSlide.fromRow(row as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('Carnet: fetching about_slides failed. Real error was:\n$e');
+      debugPrint("Aya's Graphique: fetching about_slides failed. Real error was:\n$e");
       return [];
     }
   }

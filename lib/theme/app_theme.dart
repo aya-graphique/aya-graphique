@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Carnet — design tokens.
+/// Aya's Graphique — design tokens.
 /// Same monochrome-purple palette as the Aya's Graphique brand system:
 /// deep aubergine background, mid violet, and an electric-orchid accent.
 /// Dark, moody, gallery-like canvas so product photography pops — with a

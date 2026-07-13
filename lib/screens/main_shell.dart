@@ -108,16 +108,28 @@ class _MainShellState extends State<MainShell> {
     // Arabic.
     AppFonts.forceArabic = context.watch<FontController>().arabicMode;
 
-    return Directionality(
-      textDirection: textDirection,
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: context.colors.bgDeep,
-        // The drawer only exists on mobile — desktop keeps the full pill
-        // nav bar floating over the content instead, so there's nothing
-        // for a drawer to open there.
-        drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
-        body: AnimatedBackdrop(
+    return PopScope(
+      // Tab switches inside this shell (_goTo) are plain setState calls,
+      // not Navigator pushes, so they never land on the back stack. Without
+      // this, pressing back on any tab other than Home closes the app (or
+      // leaves the site, on web) instead of returning to Home like a user
+      // would expect. canPop is only true once we're already on Home, so
+      // that back press behaves normally (exits the app / leaves the page).
+      canPop: _page == ShopPage.home,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        _goTo(ShopPage.home);
+      },
+      child: Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: context.colors.bgDeep,
+          // The drawer only exists on mobile — desktop keeps the full pill
+          // nav bar floating over the content instead, so there's nothing
+          // for a drawer to open there.
+          drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
+          body: AnimatedBackdrop(
           child: FutureBuilder<List<Product>>(
             future: _productsFuture,
             builder: (context, snapshot) {
@@ -190,6 +202,7 @@ class _MainShellState extends State<MainShell> {
               );
             },
           ),
+        ),
         ),
       ),
     );

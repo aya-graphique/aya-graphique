@@ -1,5 +1,5 @@
-name: carnet
-description: "Carnet — a notebooks & stationery e-commerce app, built with Flutter."
+name: aya_graphique
+description: "Aya's Graphique — a notebooks & stationery e-commerce app, built with Flutter."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -50,8 +50,21 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#4b1d6b"
+    theme_color: "#4b1d6b"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/icon/

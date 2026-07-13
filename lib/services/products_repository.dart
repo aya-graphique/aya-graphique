@@ -27,8 +27,8 @@ class ProductsRepository {
           .toList();
       if (rows.isEmpty) {
         debugPrint(
-          'Carnet: the "products" table in Supabase is empty. Add a product '
-          'from the admin dashboard, or check that it actually saved.',
+          "Aya's Graphique: the \"products\" table in Supabase is empty. Add a product "
+          "from the admin dashboard, or check that it actually saved.",
         );
         lastFetchWasLive = false;
         return [];
@@ -37,7 +37,7 @@ class ProductsRepository {
       return rows;
     } catch (e) {
       debugPrint(
-        'Carnet: fetching products from Supabase failed. Real error was:\n$e',
+        "Aya's Graphique: fetching products from Supabase failed. Real error was:\n$e",
       );
       lastFetchWasLive = false;
       return [];

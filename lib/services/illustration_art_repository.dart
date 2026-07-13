@@ -20,7 +20,7 @@ class IllustrationArtRepository {
           .map((row) => IllustrationArtItem.fromRow(row as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('Carnet: fetching illustration_art_items failed. Real error was:\n$e');
+      debugPrint("Aya's Graphique: fetching illustration_art_items failed. Real error was:\n$e");
       return [];
     }
   }

@@ -84,7 +84,7 @@ class OrdersRepository {
         .toList();
     if (payload.isEmpty) return;
     SupabaseService.client.rpc('increment_product_sales', params: {'items': payload}).catchError((e) {
-      debugPrint('Carnet: incrementing product sales_count failed (order still saved fine): $e');
+      debugPrint("Aya's Graphique: incrementing product sales_count failed (order still saved fine): $e");
     });
   }
 
@@ -120,7 +120,7 @@ class OrdersRepository {
         'items': items,
       },
     ).catchError((e) {
-      debugPrint('Carnet: new-order email notification failed (order still saved fine): $e');
+      debugPrint("Aya's Graphique: new-order email notification failed (order still saved fine): $e");
     });
   }
 
