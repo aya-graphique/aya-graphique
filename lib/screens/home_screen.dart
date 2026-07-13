@@ -333,6 +333,10 @@ class _IllustrationArtSection extends StatelessWidget {
       eyebrow: context.strings.illustrationArtEyebrow,
       isMobile: isMobile,
       desktopDiameter: 188,
+      // Always size as if there were as many circles as the Services row
+      // above (kServiceCategories.length), so these stay the same size as
+      // that row no matter how many the owner adds here later.
+      mobileSizeReferenceCount: kServiceCategories.length,
       specs: [
         for (var i = 0; i < items.length; i++)
           _CircleSpec(
@@ -437,6 +441,12 @@ class _EyebrowCirclesSection extends StatelessWidget {
   final bool isMobile;
   final List<_CircleSpec> specs;
   final double desktopDiameter;
+  // On mobile, MobileCircleCarousel normally sizes circles off how many
+  // items are *in this row* (fewer items = bigger circles). Pass a fixed
+  // count here so this row's circles always size themselves as if there
+  // were that many items — e.g. matching the 3-circle Services row above —
+  // instead of growing/shrinking as the owner adds/removes items.
+  final int? mobileSizeReferenceCount;
 
   const _EyebrowCirclesSection({
     required this.icon,
@@ -444,6 +454,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
     required this.isMobile,
     required this.specs,
     required this.desktopDiameter,
+    this.mobileSizeReferenceCount,
   });
 
   @override
@@ -457,6 +468,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
     final circlesArea = isMobile
         ? MobileCircleCarousel(
             itemCount: specs.length,
+            sizeReferenceCount: mobileSizeReferenceCount,
             // Titles can wrap onto a second line (see _CategoryCircle's
             // maxLines: 2), so reserve extra height below the circle for
             // it instead of the default single-line allowance.
