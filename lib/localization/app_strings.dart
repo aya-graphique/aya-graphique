@@ -59,10 +59,10 @@ class AppText {
   String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الجرافيكية');
 
   // Home — service circles row
-  String get homeServicesEyebrow => _t('SERVICES', 'الخدمات');
+  String get homeServicesEyebrow => _t('Design Services', 'خدمات التصميم ');
 
   // Home — illustration & art circles (owner-managed from the dashboard)
-  String get illustrationArtEyebrow => _t('ILLUSTRATION & ART', 'رسومات وفنون توضيحية');
+  String get illustrationArtEyebrow => _t('Skills & Arts', 'مهارات وفنون');
 
 
   // Home — testimonials
