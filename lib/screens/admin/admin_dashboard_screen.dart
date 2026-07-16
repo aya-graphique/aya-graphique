@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/supabase_config.dart';
+import '../../models/home_banner.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/auth_service.dart';
@@ -425,6 +426,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             icon: Icon(Icons.view_carousel_outlined, color: context.colors.creamDim),
             tooltip: 'Home banners',
+          ),
+          IconButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const AdminHomeBannersScreen(
+                  placement: HomeBannerPlacement.mostOrdered,
+                  title: 'Most Ordered banners',
+                ),
+              ),
+            ),
+            icon: Icon(Icons.view_carousel_rounded, color: context.colors.creamDim),
+            tooltip: 'Most Ordered banners',
           ),
           IconButton(
             onPressed: () => Navigator.of(context).push(

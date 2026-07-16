@@ -365,8 +365,16 @@ create table if not exists home_banners (
   id          uuid primary key default gen_random_uuid(),
   image_url   text not null,
   sort_order  integer not null default 0,
+  -- Which strip this slide belongs to: 'hero' (top of Home) or
+  -- 'most_ordered' (the strip right above the "MOST ORDERED" section).
+  placement   text not null default 'hero',
   created_at  timestamptz not null default now()
 );
+
+-- Safe to re-run on a database that already has home_banners from before
+-- this column existed — existing rows all become 'hero' slides, which is
+-- exactly what they were before this change.
+alter table home_banners add column if not exists placement text not null default 'hero';
 
 alter table home_banners enable row level security;
 

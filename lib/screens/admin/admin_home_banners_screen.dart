@@ -6,12 +6,19 @@ import '../../services/home_banners_repository.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 
-/// Lets the owner manage the photos in the promotional banner strip near
-/// the top of the public Home page — nothing else on that page is
-/// editable from here. Maps straight onto [HomeBannerSlideshow] in
-/// `HomeScreen`.
+/// Lets the owner manage the photos in one of the two promotional banner
+/// strips on the public Home page: the one near the top ([HomeBannerPlacement.hero],
+/// maps onto the hero [HomeBannerSlideshow] in `HomeScreen`) or the one
+/// right above "MOST ORDERED" ([HomeBannerPlacement.mostOrdered]).
+/// Nothing else on Home is editable from here.
 class AdminHomeBannersScreen extends StatefulWidget {
-  const AdminHomeBannersScreen({super.key});
+  final String placement;
+  final String title;
+  const AdminHomeBannersScreen({
+    super.key,
+    this.placement = HomeBannerPlacement.hero,
+    this.title = 'Home banners',
+  });
 
   @override
   State<AdminHomeBannersScreen> createState() => _AdminHomeBannersScreenState();
@@ -31,7 +38,7 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
 
   Future<void> _loadSlides() async {
     setState(() => _loadingSlides = true);
-    final slides = await HomeBannersRepository.fetchSlides();
+    final slides = await HomeBannersRepository.fetchSlides(placement: widget.placement);
     if (!mounted) return;
     setState(() {
       _slides = slides;
@@ -62,7 +69,7 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
     });
     try {
       final url = await StorageService.uploadHomeBannerImage(bytes, file.name);
-      await HomeBannersRepository.addSlide(url, sortOrder: _slides.length);
+      await HomeBannersRepository.addSlide(url, sortOrder: _slides.length, placement: widget.placement);
       await _loadSlides();
     } catch (e) {
       setState(() => _slidesError = 'Couldn\'t upload photo: $e');
@@ -133,7 +140,7 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
       appBar: AppBar(
         backgroundColor: context.colors.bgDeep,
         elevation: 0,
-        title: Text('Home banners',
+        title: Text(widget.title,
             style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
       ),
       body: SafeArea(
@@ -141,13 +148,22 @@ class _AdminHomeBannersScreenState extends State<AdminHomeBannersScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 60),
           children: [
             Text(
-              'The photos that auto-advance in the banner strip near the '
-              'top of the Home page, every 5 seconds. Drag to reorder. '
-              'The strip is always a 16:9 frame — on phone and on '
-              'desktop alike — so a 16:9 photo (e.g. 1920×1080) shows '
-              'the exact same crop everywhere. Keep the important part '
-              'of the photo centered, since narrower screens crop the '
-              'sides more than wide ones.',
+              widget.placement == HomeBannerPlacement.mostOrdered
+                  ? 'The photos that auto-advance in the banner strip '
+                    'right above "MOST ORDERED" on the Home page, every 5 '
+                    'seconds. Drag to reorder. The strip is always a 16:9 '
+                    'frame — on phone and on desktop alike — so a 16:9 '
+                    'photo (e.g. 1920×1080) shows the exact same crop '
+                    'everywhere. Keep the important part of the photo '
+                    'centered, since narrower screens crop the sides more '
+                    'than wide ones.'
+                  : 'The photos that auto-advance in the banner strip near the '
+                    'top of the Home page, every 5 seconds. Drag to reorder. '
+                    'The strip is always a 16:9 frame — on phone and on '
+                    'desktop alike — so a 16:9 photo (e.g. 1920×1080) shows '
+                    'the exact same crop everywhere. Keep the important part '
+                    'of the photo centered, since narrower screens crop the '
+                    'sides more than wide ones.',
               style: AppFonts.body(size: 13, color: context.colors.creamDim),
             ),
             const SizedBox(height: 20),

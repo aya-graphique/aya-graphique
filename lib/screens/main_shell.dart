@@ -50,12 +50,19 @@ class _MainShellState extends State<MainShell> {
   // here is what actually fixes the banner slideshow feeling slow to
   // appear; HomeScreen now just awaits whatever's passed in.
   late Future<List<HomeBanner>> _bannersFuture;
+  // Same idea as _bannersFuture, but for the second banner strip further
+  // down Home, right above "MOST ORDERED" — its own owner-managed set of
+  // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
+  // others so it's ready by the time that part of Home scrolls into view.
+  late Future<List<HomeBanner>> _mostOrderedBannersFuture;
 
   @override
   void initState() {
     super.initState();
     _productsFuture = ProductsRepository.fetchAll();
     _bannersFuture = HomeBannersRepository.fetchSlides();
+    _mostOrderedBannersFuture =
+        HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
   }
 
   @override
@@ -87,6 +94,8 @@ class _MainShellState extends State<MainShell> {
     setState(() {
       _productsFuture = ProductsRepository.fetchAll();
       _bannersFuture = HomeBannersRepository.fetchSlides();
+      _mostOrderedBannersFuture =
+          HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
     });
   }
 
@@ -152,6 +161,7 @@ class _MainShellState extends State<MainShell> {
                           scrollController: _homeScrollController,
                           onAdminReturn: _refreshProducts,
                           bannersFuture: _bannersFuture,
+                          mostOrderedBannersFuture: _mostOrderedBannersFuture,
                           onServiceCategoryTap: _openServiceCategory,
                           onShopTap: () => _goTo(ShopPage.shop),
                           onCategoryTap: _openShopCategory,

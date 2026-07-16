@@ -33,6 +33,11 @@ class HomeScreen extends StatefulWidget {
   // products fetch — see the comment there for why. HomeScreen just
   // awaits it instead of kicking off its own fetch after mounting.
   final Future<List<HomeBanner>> bannersFuture;
+  // Same idea as bannersFuture, but for the second, independent banner
+  // strip further down the page, right above "MOST ORDERED" — its own
+  // owner-managed set of photos (see HomeBannerPlacement.mostOrdered in
+  // the admin dashboard), not just a repeat of the top one.
+  final Future<List<HomeBanner>> mostOrderedBannersFuture;
   // Services no longer lives on Home — it's its own tab now (see
   // MainShell). The little "service circles" row below still appears
   // here, though: tapping one calls this to jump to the Services tab
@@ -61,6 +66,7 @@ class HomeScreen extends StatefulWidget {
     required this.scrollController,
     this.onAdminReturn,
     required this.bannersFuture,
+    required this.mostOrderedBannersFuture,
     required this.onServiceCategoryTap,
     required this.onShopTap,
     required this.onCategoryTap,
@@ -153,6 +159,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (widget.products.isNotEmpty) ...[
             const SizedBox(height: 88),
+            // A second, independent banner slideshow — same 16:9 frame
+            // and same mobile/desktop sizing as the top hero, but its
+            // own set of owner-uploaded photos — right before "MOST
+            // ORDERED".
+            FutureBuilder<List<HomeBanner>>(
+              future: widget.mostOrderedBannersFuture,
+              builder: (context, snapshot) {
+                final banners = snapshot.data ?? const [];
+                if (banners.isEmpty) return const SizedBox.shrink();
+                return _Hero(isMobile: widget.isMobile, banners: banners);
+              },
+            ),
+            const SizedBox(height: 48),
             _ShopPreviewSection(
               products: widget.products,
               isMobile: widget.isMobile,
