@@ -8,7 +8,7 @@ class CartLine {
 
   const CartLine({required this.product, required this.quantity});
 
-  double get lineTotal => product.price * quantity;
+  double get lineTotal => product.discountedPrice * quantity;
 
   CartLine copyWith({int? quantity}) =>
       CartLine(product: product, quantity: quantity ?? this.quantity);

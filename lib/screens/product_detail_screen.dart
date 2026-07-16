@@ -205,9 +205,33 @@ class _Details extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        Text(
-          formatPrice(product.price),
-          style: AppFonts.display(size: 26, weight: FontWeight.w700, color: context.colors.orchidSoft),
+        Row(
+          children: [
+            Text(
+              formatPrice(product.discountedPrice),
+              style: AppFonts.display(size: 26, weight: FontWeight.w700, color: context.colors.orchidSoft),
+            ),
+            if (product.hasDiscount) ...[
+              const SizedBox(width: 12),
+              Text(
+                formatPrice(product.price),
+                style: AppFonts.body(size: 16, color: context.colors.creamDim)
+                    .copyWith(decoration: TextDecoration.lineThrough),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: context.colors.success.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}%',
+                  style: AppFonts.label(size: 11, color: Colors.white, letterSpacing: 0.5),
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 20),
         Text(product.description,

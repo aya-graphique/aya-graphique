@@ -140,8 +140,14 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 )
               : orders.isEmpty
                   ? Center(
-                      child: Text('No orders yet — they\'ll show up here as customers check out.',
-                          style: AppFonts.body(size: 14, color: context.colors.creamDim)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          'No orders yet — they\'ll show up here as customers check out.',
+                          textAlign: TextAlign.center,
+                          style: AppFonts.body(size: 14, color: context.colors.creamDim),
+                        ),
+                      ),
                     )
                   : Column(
                       children: [

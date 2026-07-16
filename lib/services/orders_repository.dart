@@ -46,7 +46,7 @@ class OrdersRepository {
               'order_id': orderId,
               'product_id': line.product.id,
               'product_name': line.product.name,
-              'unit_price': line.product.price,
+              'unit_price': line.product.discountedPrice,
               'quantity': line.quantity,
             })
         .toList();

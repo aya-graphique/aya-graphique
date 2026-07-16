@@ -1216,7 +1216,9 @@ class _ProductRow extends StatelessWidget {
                         size: 15, weight: FontWeight.w700, color: context.colors.cream, text: product.name)),
                 const SizedBox(height: 3),
                 Text(
-                  '${product.category} · ${formatPrice(product.price)} · stock ${product.stock}',
+                  product.hasDiscount
+                      ? '${product.category} · ${formatPrice(product.discountedPrice)} (was ${formatPrice(product.price)}) · stock ${product.stock}'
+                      : '${product.category} · ${formatPrice(product.price)} · stock ${product.stock}',
                   style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
                 ),
               ],

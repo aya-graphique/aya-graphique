@@ -22,8 +22,16 @@ create table if not exists products (
   -- set from the admin dashboard. Powers the storefront's "Best sellers"
   -- section.
   sales_count integer not null default 0,
+  -- Owner-set discount percentage (0–100). 0 means no discount. Everywhere
+  -- the app shows or charges a price, it's `price` minus this percentage —
+  -- see `Product.discountedPrice` in the app.
+  discount_percent numeric(5, 2) not null default 0 check (discount_percent >= 0 and discount_percent <= 100),
   created_at  timestamptz not null default now()
 );
+
+-- Safe to re-run on a database that already has products from before this
+-- column existed — existing rows all default to 0 (no discount).
+alter table products add column if not exists discount_percent numeric(5, 2) not null default 0;
 
 -- Safe to re-run on a database created before this column existed.
 alter table products add column if not exists sales_count integer not null default 0;

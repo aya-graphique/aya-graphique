@@ -103,8 +103,21 @@ class _CartLineTile extends StatelessWidget {
                     style: AppFonts.display(
                         color: context.colors.cream, size: 16, weight: FontWeight.w700, text: product.name)),
                 const SizedBox(height: 4),
-                Text(formatPrice(product.price),
-                    style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
+                product.hasDiscount
+                    ? Row(
+                        children: [
+                          Text(formatPrice(product.discountedPrice),
+                              style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
+                          const SizedBox(width: 6),
+                          Text(
+                            formatPrice(product.price),
+                            style: AppFonts.body(size: 11.5, color: context.colors.creamDim)
+                                .copyWith(decoration: TextDecoration.lineThrough),
+                          ),
+                        ],
+                      )
+                    : Text(formatPrice(product.price),
+                        style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
               ],
             ),
           ),

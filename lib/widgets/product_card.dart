@@ -52,6 +52,16 @@ class ProductCard extends StatelessWidget {
                       top: 10,
                       child: _Pill(text: context.strings.soldOut, color: context.colors.danger),
                     ),
+                  if (product.inStock && product.hasDiscount)
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: _Pill(
+                        text:
+                            '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}%',
+                        color: context.colors.success,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -85,16 +95,46 @@ class ProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          formatPrice(product.price),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppFonts.body(
-                            size: 15,
-                            weight: FontWeight.w700,
-                            color: context.colors.orchidSoft,
-                          ),
-                        ),
+                        child: product.hasDiscount
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      formatPrice(product.discountedPrice),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppFonts.body(
+                                        size: 15,
+                                        weight: FontWeight.w700,
+                                        color: context.colors.orchidSoft,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      formatPrice(product.price),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppFonts.body(
+                                        size: 12,
+                                        color: context.colors.creamDim,
+                                      ).copyWith(decoration: TextDecoration.lineThrough),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                formatPrice(product.price),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppFonts.body(
+                                  size: 15,
+                                  weight: FontWeight.w700,
+                                  color: context.colors.orchidSoft,
+                                ),
+                              ),
                       ),
                       const SizedBox(width: 8),
                       _AddToCartButton(product: product),

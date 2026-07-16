@@ -20,6 +20,11 @@ class Product {
   // the `increment_product_sales` Postgres function. Powers the "Best
   // sellers" section on the storefront; never set from the admin form.
   final int salesCount;
+  // Owner-set discount, 0–100. 0 (the default) means no discount — the
+  // product just sells at `price`. Anything above 0 knocks that percentage
+  // off `price` everywhere the product's price is shown or charged (see
+  // [discountedPrice]).
+  final double discountPercent;
 
   const Product({
     required this.id,
@@ -33,9 +38,19 @@ class Product {
     this.stock = 25,
     this.sortOrder = 0,
     this.salesCount = 0,
+    this.discountPercent = 0,
   });
 
   bool get inStock => stock > 0;
+
+  bool get hasDiscount => discountPercent > 0;
+
+  /// The price a shopper actually pays — `price` minus `discountPercent`,
+  /// or plain `price` when there's no discount. This is what every screen
+  /// should show/charge; `price` alone is just the pre-discount reference
+  /// (shown struck through next to it when discounted).
+  double get discountedPrice =>
+      hasDiscount ? price - (price * discountPercent / 100) : price;
 
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
@@ -50,6 +65,7 @@ class Product {
       stock: (map['stock'] as num?)?.toInt() ?? 0,
       sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
       salesCount: (map['sales_count'] as num?)?.toInt() ?? 0,
+      discountPercent: (map['discount_percent'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -63,6 +79,7 @@ class Product {
         'rating': rating,
         'stock': stock,
         'sort_order': sortOrder,
+        'discount_percent': discountPercent,
       };
 
   Product copyWith({
@@ -77,6 +94,7 @@ class Product {
     int? stock,
     int? sortOrder,
     int? salesCount,
+    double? discountPercent,
   }) {
     return Product(
       id: id ?? this.id,
@@ -90,6 +108,7 @@ class Product {
       stock: stock ?? this.stock,
       sortOrder: sortOrder ?? this.sortOrder,
       salesCount: salesCount ?? this.salesCount,
+      discountPercent: discountPercent ?? this.discountPercent,
     );
   }
 }

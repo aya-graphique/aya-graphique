@@ -6,6 +6,7 @@ import '../../services/categories_repository.dart';
 import '../../services/products_repository.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/currency.dart';
 
 /// Add or edit a single product. Every field the storefront cares about is
 /// editable here — name, description, price, category, image, tags,
@@ -30,6 +31,10 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   late final _rating = TextEditingController(text: widget.existing?.rating.toString() ?? '4.8');
   late final _stock = TextEditingController(text: widget.existing?.stock.toString() ?? '0');
   late final _sortOrder = TextEditingController(text: widget.existing?.sortOrder.toString() ?? '0');
+  late final _discountPercent =
+      TextEditingController(text: widget.existing?.discountPercent == null || widget.existing!.discountPercent == 0
+          ? ''
+          : widget.existing!.discountPercent.toString());
   final _newCategory = TextEditingController();
 
   List<String> _knownCategories = [];
@@ -76,6 +81,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     _rating.dispose();
     _stock.dispose();
     _sortOrder.dispose();
+    _discountPercent.dispose();
     _newCategory.dispose();
     super.dispose();
   }
@@ -134,6 +140,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
       rating: double.tryParse(_rating.text.trim()) ?? 4.8,
       stock: int.tryParse(_stock.text.trim()) ?? 0,
       sortOrder: int.tryParse(_sortOrder.text.trim()) ?? 0,
+      discountPercent: (double.tryParse(_discountPercent.text.trim()) ?? 0).clamp(0, 100),
     );
 
     try {
@@ -186,6 +193,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                       controller: _price,
                       required: true,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: () => setState(() {}),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -198,6 +206,37 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              _TextField(
+                label: 'Discount % (optional)',
+                controller: _discountPercent,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: () => setState(() {}),
+              ),
+              Builder(builder: (context) {
+                final price = double.tryParse(_price.text.trim()) ?? 0;
+                final pct = (double.tryParse(_discountPercent.text.trim()) ?? 0).clamp(0, 100);
+                if (pct <= 0 || price <= 0) return const SizedBox.shrink();
+                final discounted = price - (price * pct / 100);
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        formatPrice(price),
+                        style: AppFonts.body(size: 13, color: context.colors.creamDim).copyWith(
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${formatPrice(discounted)} at ${pct.toStringAsFixed(pct.truncateToDouble() == pct ? 0 : 1)}% off',
+                        style: AppFonts.body(size: 13, weight: FontWeight.w700, color: context.colors.success),
+                      ),
+                    ],
+                  ),
+                );
+              }),
               const SizedBox(height: 16),
               _CategoryPicker(
                 loading: _loadingCategories,
