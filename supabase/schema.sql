@@ -533,3 +533,46 @@ create policy "Authenticated delete access to illustration_art_items"
   on illustration_art_items for delete
   using (auth.role() = 'authenticated');
 
+-- Customer-submitted testimonials shown in the "What people say" section on
+-- the Home page. Anyone (not signed in) can submit one from the storefront,
+-- but it stays hidden from the public until the owner approves it from the
+-- admin dashboard — same moderation-gate idea as `is_completed` on orders,
+-- just named for what it does here.
+create table if not exists testimonials (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  quote        text not null,
+  rating       integer not null default 5 check (rating >= 1 and rating <= 5),
+  is_approved  boolean not null default false,
+  created_at   timestamptz not null default now()
+);
+
+alter table testimonials enable row level security;
+
+-- Storefront only ever needs approved testimonials for the public section.
+create policy "Public read access to approved testimonials"
+  on testimonials for select
+  using (is_approved = true);
+
+-- Anyone can submit a testimonial from the storefront, but it can only ever
+-- be inserted as unapproved — a submitter can't mark their own review
+-- approved by tampering with the request.
+create policy "Anyone can submit a testimonial"
+  on testimonials for insert
+  with check (is_approved = false);
+
+-- Only you (authenticated) can see pending + approved testimonials together,
+-- e.g. in the admin moderation screen.
+create policy "Authenticated can read all testimonials"
+  on testimonials for select
+  using (auth.role() = 'authenticated');
+
+-- Lets the admin dashboard approve/unapprove a testimonial.
+create policy "Authenticated can update testimonials"
+  on testimonials for update
+  using (auth.role() = 'authenticated');
+
+-- Lets the admin dashboard delete spam/unwanted testimonials.
+create policy "Authenticated can delete testimonials"
+  on testimonials for delete
+  using (auth.role() = 'authenticated');

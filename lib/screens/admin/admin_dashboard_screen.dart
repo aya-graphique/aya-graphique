@@ -11,6 +11,7 @@ import '../../services/orders_repository.dart';
 import '../../services/products_repository.dart';
 import '../../services/settings_repository.dart';
 import '../../services/storage_service.dart';
+import '../../services/testimonials_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
 import 'admin_home_banners_screen.dart';
@@ -18,6 +19,7 @@ import 'admin_illustration_art_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_services_screen.dart';
+import 'admin_testimonials_screen.dart';
 
 /// The client's product management screen: everything they need to run
 /// their own catalog without touching Supabase directly — add products,
@@ -63,6 +65,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   String? _instapayLinkError;
 
   int _pendingOrdersCount = 0;
+  int _pendingTestimonialsCount = 0;
 
   @override
   void initState() {
@@ -75,6 +78,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _loadPaymentNumber();
     _loadInstapayLink();
     _loadPendingOrdersCount();
+    _loadPendingTestimonialsCount();
   }
 
   @override
@@ -396,6 +400,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _loadPendingOrdersCount();
   }
 
+  Future<void> _loadPendingTestimonialsCount() async {
+    final count = await TestimonialsRepository.countPending();
+    if (!mounted) return;
+    setState(() => _pendingTestimonialsCount = count);
+  }
+
+  Future<void> _openTestimonials() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AdminTestimonialsScreen()),
+    );
+    // The badge should reflect anything approved/deleted while the owner
+    // was on the Testimonials screen.
+    _loadPendingTestimonialsCount();
+  }
+
   Future<void> _signOut() async {
     await AuthService.signOut();
     if (!mounted) return;
@@ -406,6 +425,103 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  /// Below this width the dashboard swaps the AppBar's row of icons for a
+  /// slide-out Drawer (hamburger menu) instead — there just isn't room for
+  /// six icons across a phone-width AppBar.
+  bool _isMobile(BuildContext context) => MediaQuery.of(context).size.width < AppBreakpoints.mobile;
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      backgroundColor: context.colors.bgDeep,
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Text('Store admin',
+                  style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
+            ),
+            Divider(color: context.colors.border(0.1), height: 1),
+            _DrawerTile(
+              icon: Icons.view_carousel_outlined,
+              label: 'Home banners',
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminHomeBannersScreen()),
+                );
+              },
+            ),
+            _DrawerTile(
+              icon: Icons.view_carousel_rounded,
+              label: 'Most Ordered banners',
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const AdminHomeBannersScreen(
+                      placement: HomeBannerPlacement.mostOrdered,
+                      title: 'Most Ordered banners',
+                    ),
+                  ),
+                );
+              },
+            ),
+            _DrawerTile(
+              icon: Icons.design_services_outlined,
+              label: 'Services',
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminServicesScreen()),
+                );
+              },
+            ),
+            _DrawerTile(
+              icon: Icons.brush_outlined,
+              label: 'Illustration & Art',
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminIllustrationArtScreen()),
+                );
+              },
+            ),
+            _DrawerTile(
+              icon: Icons.rate_review_outlined,
+              label: 'Testimonials',
+              badgeCount: _pendingTestimonialsCount,
+              onTap: () {
+                Navigator.of(context).pop();
+                _openTestimonials();
+              },
+            ),
+            _DrawerTile(
+              icon: Icons.receipt_long_rounded,
+              label: 'Orders',
+              badgeCount: _pendingOrdersCount,
+              onTap: () {
+                Navigator.of(context).pop();
+                _openOrders();
+              },
+            ),
+            Divider(color: context.colors.border(0.1), height: 1),
+            _DrawerTile(
+              icon: Icons.logout_rounded,
+              label: 'Sign out',
+              iconColor: context.colors.danger,
+              onTap: () {
+                Navigator.of(context).pop();
+                _signOut();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // The storefront's Arabic-font toggle sets a global static flag
@@ -413,13 +529,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     // toggle and always stays in English, so force it off here on every
     // build regardless of what a shopper picked on the storefront.
     AppFonts.forceArabic = false;
+    final isMobile = _isMobile(context);
     return Scaffold(
       backgroundColor: context.colors.bgDeep,
+      drawer: isMobile ? _buildDrawer(context) : null,
       appBar: AppBar(
         backgroundColor: context.colors.bgDeep,
         elevation: 0,
         title: Text('Store admin', style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
-        actions: [
+        actions: isMobile
+            ? null
+            : [
           IconButton(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AdminHomeBannersScreen()),
@@ -452,6 +572,42 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             icon: Icon(Icons.brush_outlined, color: context.colors.creamDim),
             tooltip: 'Illustration & Art',
+          ),
+          IconButton(
+            onPressed: _openTestimonials,
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(Icons.rate_review_outlined, color: context.colors.creamDim),
+                if (_pendingTestimonialsCount > 0)
+                  Positioned(
+                    right: -4,
+                    top: -3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.5),
+                      constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+                      decoration: BoxDecoration(
+                        color: context.colors.danger,
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: context.colors.bgDeep, width: 1.5),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _pendingTestimonialsCount > 99 ? '99+' : '$_pendingTestimonialsCount',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            tooltip: 'Testimonials',
           ),
           IconButton(
             onPressed: _openOrders,
@@ -1240,6 +1396,49 @@ class _ProductRow extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// One row in the mobile Drawer navigation menu: an icon, a label, and an
+/// optional small red count badge (mirrors the badges shown on the
+/// AppBar icons on wider screens, e.g. pending orders/testimonials).
+class _DrawerTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? iconColor;
+  final int badgeCount;
+  final VoidCallback onTap;
+
+  const _DrawerTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.iconColor,
+    this.badgeCount = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? context.colors.creamDim),
+      title: Text(label, style: AppFonts.body(size: 15, color: context.colors.cream)),
+      trailing: badgeCount > 0
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              constraints: const BoxConstraints(minWidth: 22),
+              decoration: BoxDecoration(
+                color: context.colors.danger,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                badgeCount > 99 ? '99+' : '$badgeCount',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
+              ),
+            )
+          : null,
+      onTap: onTap,
     );
   }
 }

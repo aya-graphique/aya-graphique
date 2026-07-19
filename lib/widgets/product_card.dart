@@ -97,16 +97,56 @@ class ProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: product.hasDiscount
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  FittedBox(
+                        // Fixed height so discounted and non-discounted
+                        // cards line up with the same overall card height
+                        // inside the grid, regardless of whether a second
+                        // (struck-through) price line is shown.
+                        child: SizedBox(
+                          height: 34,
+                          child: product.hasDiscount
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          formatPrice(product.discountedPrice),
+                                          maxLines: 1,
+                                          style: AppFonts.body(
+                                            size: 15,
+                                            weight: FontWeight.w700,
+                                            color: context.colors.orchidSoft,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          formatPrice(product.price),
+                                          maxLines: 1,
+                                          style: AppFonts.body(
+                                            size: 12,
+                                            color: context.colors.creamDim,
+                                          ).copyWith(decoration: TextDecoration.lineThrough),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      formatPrice(product.discountedPrice),
+                                      formatPrice(product.price),
                                       maxLines: 1,
                                       style: AppFonts.body(
                                         size: 15,
@@ -115,33 +155,8 @@ class ProductCard extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      formatPrice(product.price),
-                                      maxLines: 1,
-                                      style: AppFonts.body(
-                                        size: 12,
-                                        color: context.colors.creamDim,
-                                      ).copyWith(decoration: TextDecoration.lineThrough),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  formatPrice(product.price),
-                                  maxLines: 1,
-                                  style: AppFonts.body(
-                                    size: 15,
-                                    weight: FontWeight.w700,
-                                    color: context.colors.orchidSoft,
-                                  ),
                                 ),
-                              ),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       _AddToCartButton(product: product),
