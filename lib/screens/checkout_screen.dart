@@ -26,6 +26,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressCtrl = TextEditingController();
   final _phone1Ctrl = TextEditingController();
   final _phone2Ctrl = TextEditingController();
+  final _senderInfoCtrl = TextEditingController();
   bool _placing = false;
 
   PaymentMethod _paymentMethod = PaymentMethod.cod;
@@ -64,6 +65,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _addressCtrl.dispose();
     _phone1Ctrl.dispose();
     _phone2Ctrl.dispose();
+    _senderInfoCtrl.dispose();
     super.dispose();
   }
 
@@ -107,29 +109,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         buffer.writeln('Payment: Cash on delivery');
         break;
       case PaymentMethod.instapay:
-        buffer.writeln('Payment: InstaPay — I\'ll send a screenshot of the payment here now.');
+        buffer.writeln('Payment: InstaPay');
+        buffer.writeln('Paid from (InstaPay name): ${_senderInfoCtrl.text.trim()}');
         break;
       case PaymentMethod.vodafoneCash:
-        buffer.writeln('Payment: Vodafone Cash — I\'ll send a screenshot of the payment here now.');
+        buffer.writeln('Payment: Vodafone Cash');
+        buffer.writeln('Paid from (Vodafone Cash number): ${_senderInfoCtrl.text.trim()}');
         break;
     }
     return buffer.toString();
   }
 
-  /// Opens WhatsApp with the owner's chat pre-filled with the order
+  /// Opens WhatsApp with the owner's chat pre-filled with the given
   /// message. No API/business account needed — this is just the public
   /// wa.me deep link, so the customer still has to tap Send themselves
   /// inside WhatsApp once it opens.
-  Future<void> _openWhatsApp(CartProvider cart) async {
+  Future<void> _openWhatsApp(String message) async {
     if (_ownerWhatsapp.isEmpty) return;
-    final message = Uri.encodeComponent(_buildWhatsAppMessage(cart));
-    final uri = Uri.parse('https://wa.me/$_ownerWhatsapp?text=$message');
+    final uri = Uri.parse('https://wa.me/$_ownerWhatsapp?text=${Uri.encodeComponent(message)}');
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.couldntOpenWhatsApp('$e'))),
+        SnackBar(content: Text(context.stringsRead.couldntOpenWhatsApp('$e'))),
       );
     }
   }
@@ -144,7 +147,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.couldntOpenInstaPay('$e'))),
+        SnackBar(content: Text(context.stringsRead.couldntOpenInstaPay('$e'))),
       );
     }
   }
@@ -160,26 +163,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.couldntOpenContacts('$e'))),
-      );
-    }
-  }
-
-  /// Re-opens the same WhatsApp chat with a short follow-up message, in
-  /// case the customer already sent the order message and now needs to go
-  /// back and actually attach/send their payment screenshot (wa.me links
-  /// can only pre-fill text, never an image, so the customer still has to
-  /// attach the screenshot themselves once the chat is open).
-  Future<void> _openWhatsAppForScreenshot(BuildContext context) async {
-    if (_ownerWhatsapp.isEmpty) return;
-    final message = Uri.encodeComponent(context.strings.screenshotFollowUpMessage);
-    final uri = Uri.parse('https://wa.me/$_ownerWhatsapp?text=$message');
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.couldntOpenWhatsApp('$e'))),
+        SnackBar(content: Text(context.stringsRead.couldntOpenContacts('$e'))),
       );
     }
   }
@@ -195,13 +179,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         phone1: _phone1Ctrl.text.trim(),
         phone2: _phone2Ctrl.text.trim(),
         paymentMethod: _paymentMethodValue,
+        paymentSenderInfo: _paymentMethod == PaymentMethod.cod ? '' : _senderInfoCtrl.text.trim(),
         cart: cart,
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _placing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.couldntPlaceOrder('$e'))),
+        SnackBar(content: Text(context.stringsRead.couldntPlaceOrder('$e'))),
       );
       return;
     }
@@ -210,28 +195,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // so it'll show up on the admin dashboard) — everything from here is a
     // bonus follow-up action and must never block checkout from completing
     // even if it fails or the app is missing on the customer's phone.
+    //
+    // Straight away, send the customer to the payment app itself so they
+    // can actually pay. WhatsApp is *not* opened automatically here — it's
+    // only opened when the customer taps "Open WhatsApp" on the next
+    // screen, once they're done paying.
     if (_paymentMethod == PaymentMethod.instapay) {
       await _openInstaPay();
     } else if (_paymentMethod == PaymentMethod.vodafoneCash) {
       await _openVodafoneCashContact();
     }
-    // In every case — cash on delivery, InstaPay, or Vodafone Cash — the
-    // owner still gets notified on WhatsApp with the order details.
-    await _openWhatsApp(cart);
+
+    final whatsAppMessage = _buildWhatsAppMessage(cart);
 
     if (!mounted) return;
     setState(() => _placing = false);
-    final paymentNumber = _paymentNumber;
-    final method = _paymentMethod;
     cart.clear();
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => _OrderSuccessDialog(
         name: _nameCtrl.text.trim(),
-        paymentMethod: method,
-        paymentNumber: paymentNumber,
-        onResendScreenshot: () => _openWhatsAppForScreenshot(dialogContext),
+        onOpenWhatsApp: () => _openWhatsApp(whatsAppMessage),
       ),
     );
   }
@@ -284,6 +269,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             addressCtrl: _addressCtrl,
                             phone1Ctrl: _phone1Ctrl,
                             phone2Ctrl: _phone2Ctrl,
+                            senderInfoCtrl: _senderInfoCtrl,
                             paymentMethod: _paymentMethod,
                             onPaymentMethodChanged: (v) => setState(() => _paymentMethod = v),
                             paymentNumber: _paymentNumber,
@@ -306,6 +292,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 addressCtrl: _addressCtrl,
                                 phone1Ctrl: _phone1Ctrl,
                                 phone2Ctrl: _phone2Ctrl,
+                                senderInfoCtrl: _senderInfoCtrl,
                                 paymentMethod: _paymentMethod,
                                 onPaymentMethodChanged: (v) => setState(() => _paymentMethod = v),
                                 paymentNumber: _paymentNumber,
@@ -339,6 +326,7 @@ class _ShippingForm extends StatelessWidget {
   final TextEditingController addressCtrl;
   final TextEditingController phone1Ctrl;
   final TextEditingController phone2Ctrl;
+  final TextEditingController senderInfoCtrl;
   final PaymentMethod paymentMethod;
   final ValueChanged<PaymentMethod> onPaymentMethodChanged;
   final String paymentNumber;
@@ -351,6 +339,7 @@ class _ShippingForm extends StatelessWidget {
     required this.addressCtrl,
     required this.phone1Ctrl,
     required this.phone2Ctrl,
+    required this.senderInfoCtrl,
     required this.paymentMethod,
     required this.onPaymentMethodChanged,
     required this.paymentNumber,
@@ -418,6 +407,8 @@ class _ShippingForm extends StatelessWidget {
               subtitle: context.strings.codSubtitle,
               selected: paymentMethod == PaymentMethod.cod,
               onTap: () => onPaymentMethodChanged(PaymentMethod.cod),
+              icon: Icons.payments_rounded,
+              iconColor: context.colors.creamDim,
             ),
             const SizedBox(height: 10),
             _PaymentOption(
@@ -425,6 +416,8 @@ class _ShippingForm extends StatelessWidget {
               subtitle: context.strings.instapaySubtitle,
               selected: paymentMethod == PaymentMethod.instapay,
               onTap: () => onPaymentMethodChanged(PaymentMethod.instapay),
+              imagePath: 'assets/images/instapay_logo.png',
+              iconColor: const Color(0xFF6C2EB5),
             ),
             const SizedBox(height: 10),
             _PaymentOption(
@@ -432,6 +425,8 @@ class _ShippingForm extends StatelessWidget {
               subtitle: context.strings.vodafoneCashSubtitle,
               selected: paymentMethod == PaymentMethod.vodafoneCash,
               onTap: () => onPaymentMethodChanged(PaymentMethod.vodafoneCash),
+              imagePath: 'assets/images/vodafone_cash_logo.png',
+              iconColor: const Color(0xFFE60000),
             ),
             if (paymentMethod == PaymentMethod.instapay) ...[
               const SizedBox(height: 12),
@@ -453,6 +448,14 @@ class _ShippingForm extends StatelessWidget {
                         style: AppFonts.body(size: 12.5, color: context.colors.cream),
                       ),
               ),
+              const SizedBox(height: 12),
+              _Field(
+                label: context.strings.instapaySenderLabel,
+                controller: senderInfoCtrl,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? context.stringsRead.senderInfoRequired
+                    : null,
+              ),
             ],
             if (paymentMethod == PaymentMethod.vodafoneCash) ...[
               const SizedBox(height: 12),
@@ -473,6 +476,15 @@ class _ShippingForm extends StatelessWidget {
                         context.strings.vodafoneWithNumberNotice(paymentNumber),
                         style: AppFonts.body(size: 12.5, color: context.colors.cream),
                       ),
+              ),
+              const SizedBox(height: 12),
+              _Field(
+                label: context.strings.vodafoneSenderLabel,
+                controller: senderInfoCtrl,
+                keyboardType: TextInputType.phone,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? context.stringsRead.senderInfoRequired
+                    : null,
               ),
             ],
           ],
@@ -509,12 +521,18 @@ class _PaymentOption extends StatelessWidget {
   final String subtitle;
   final bool selected;
   final VoidCallback onTap;
+  final IconData? icon;
+  final Color iconColor;
+  final String? imagePath;
 
   const _PaymentOption({
     required this.label,
     required this.subtitle,
     required this.selected,
     required this.onTap,
+    this.icon,
+    required this.iconColor,
+    this.imagePath,
   });
 
   @override
@@ -534,10 +552,19 @@ class _PaymentOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-              size: 20,
-              color: selected ? context.colors.orchid : context.colors.creamDim,
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.16),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: imagePath != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Image.asset(imagePath!, fit: BoxFit.contain),
+                    )
+                  : Icon(icon, size: 18, color: iconColor),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -549,6 +576,12 @@ class _PaymentOption extends StatelessWidget {
                   Text(subtitle, style: AppFonts.body(size: 12, color: context.colors.creamDim)),
                 ],
               ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+              size: 20,
+              color: selected ? context.colors.orchid : context.colors.creamDim,
             ),
           ],
         ),
@@ -687,21 +720,15 @@ class _OrderReview extends StatelessWidget {
 
 class _OrderSuccessDialog extends StatelessWidget {
   final String name;
-  final PaymentMethod paymentMethod;
-  final String paymentNumber;
-  final VoidCallback onResendScreenshot;
+  final VoidCallback onOpenWhatsApp;
 
   const _OrderSuccessDialog({
     required this.name,
-    required this.paymentMethod,
-    required this.paymentNumber,
-    required this.onResendScreenshot,
+    required this.onOpenWhatsApp,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isInstapay = paymentMethod == PaymentMethod.instapay;
-    final isVodafoneCash = paymentMethod == PaymentMethod.vodafoneCash;
     return Dialog(
       backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -726,85 +753,28 @@ class _OrderSuccessDialog extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppFonts.body(color: context.colors.creamDim, size: 14),
             ),
-            if (isInstapay || isVodafoneCash) ...[
-              const SizedBox(height: 14),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colors.danger.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colors.danger.withOpacity(0.35)),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.camera_alt_rounded, size: 18, color: context.colors.danger),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        context.strings.paymentScreenshotReminder,
-                        style: AppFonts.body(size: 12.5, weight: FontWeight.w600, color: context.colors.cream),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: GestureDetector(
-                  onTap: onResendScreenshot,
-                  child: Container(
-                    height: 44,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: context.colors.orchid.withOpacity(0.5)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        context.strings.resendScreenshotOnWhatsApp,
-                        textAlign: TextAlign.center,
-                        style: AppFonts.label(size: 12, color: context.colors.orchid, letterSpacing: 0.8)
-                            .copyWith(fontWeight: FontWeight.w700),
-                      ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: onOpenWhatsApp,
+                child: Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: context.colors.orchid.withOpacity(0.5)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      context.strings.openWhatsApp,
+                      textAlign: TextAlign.center,
+                      style: AppFonts.label(size: 12, color: context.colors.orchid, letterSpacing: 0.8)
+                          .copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
               ),
-            ],
-            if (isInstapay) ...[
-              const SizedBox(height: 14),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colors.orchid.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  context.strings.instapayThanksNote,
-                  textAlign: TextAlign.center,
-                  style: AppFonts.body(size: 13, color: context.colors.cream),
-                ),
-              ),
-            ],
-            if (isVodafoneCash && paymentNumber.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colors.orchid.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  context.strings.vodafoneThanksNote(paymentNumber),
-                  textAlign: TextAlign.center,
-                  style: AppFonts.body(size: 13, color: context.colors.cream),
-                ),
-              ),
-            ],
+            ),
             const SizedBox(height: 22),
             SizedBox(
               width: double.infinity,

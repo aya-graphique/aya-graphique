@@ -79,8 +79,8 @@ class _SplashScreenState extends State<SplashScreen> {
               ).animate().fadeIn(duration: 600.ms, delay: 150.ms),
               const SizedBox(height: 10),
               Text(
-                'NOTEBOOKS · CALENDARS · DESIGN',
-                style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 2.2),
+                'NOTEBOOKS · CALENDARS · VISUAL DESIGN · ARTS · ADVERTISING',
+                style: AppFonts.label(color: context.colors.orchid, size: 13, letterSpacing: 2.2),
               ).animate().fadeIn(duration: 600.ms, delay: 250.ms),
               const SizedBox(height: 46),
               const _LoadingBar(duration: _minDisplay)
@@ -128,8 +128,8 @@ class _PortraitBadgeState extends State<_PortraitBadge>
   Widget build(BuildContext context) {
     final colors = context.colors;
     final outer = widget.size;
-    final gap = outer * 0.95; // thinner ring — was 0.915
-    final photo = outer * 0.89; // was 0.845
+    final gap = outer * 0.915; // ring thickness stays a consistent ~4-5%
+    final photo = outer * 0.845;
     return SizedBox(
       width: outer,
       height: outer,

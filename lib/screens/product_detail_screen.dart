@@ -8,6 +8,7 @@ import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
 import '../widgets/animated_backdrop.dart';
+import '../widgets/mini_cart_sheet.dart';
 import '../widgets/tilt_3d_card.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -94,41 +95,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   void _addToCart(BuildContext context, CartProvider cart, Product product) {
     cart.add(product, quantity: _quantity);
-    final colors = context.colorsRead;
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          duration: const Duration(milliseconds: 2200),
-          backgroundColor: colors.surfaceRaised,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: colors.orchid.withOpacity(0.5), width: 1),
-          ),
-          content: Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: colors.violetGradient,
-                ),
-                child: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  context.strings.addedQtyToCart(_quantity, product.name),
-                  style: AppFonts.body(size: 13, color: colors.cream),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+    showMiniCartSheet(context);
   }
 }
 

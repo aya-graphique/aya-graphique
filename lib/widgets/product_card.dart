@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
+import 'mini_cart_sheet.dart';
 import 'tilt_3d_card.dart';
 
 class ProductCard extends StatelessWidget {
@@ -164,18 +165,7 @@ class _AddToCartButton extends StatelessWidget {
         onTap: product.inStock
             ? () {
                 cart.add(product);
-                final colors = context.colorsRead;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    duration: const Duration(milliseconds: 1100),
-                    backgroundColor: colors.surfaceRaised,
-                    behavior: SnackBarBehavior.floating,
-                    content: Text(
-                      context.strings.addedToCart(product.name),
-                      style: AppFonts.body(size: 13, color: colors.cream),
-                    ),
-                  ),
-                );
+                showMiniCartSheet(context);
               }
             : null,
         child: Container(

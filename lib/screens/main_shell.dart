@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/home_banner.dart';
 import '../models/product.dart';
+import '../providers/cart_provider.dart';
 import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
@@ -27,6 +28,13 @@ class _MainShellState extends State<MainShell> {
   // and the owner intro, all in one scroll. The shop grid itself now
   // lives on its own standalone Shop tab (see ShopScreen).
   ShopPage _page = ShopPage.home;
+  // Tracks the tabs visited before the current one, most recent last, so
+  // the system/hardware back button can retrace the user's actual path
+  // (Shop -> Cart -> back goes to Shop) instead of always jumping to
+  // Home. Popped one at a time in _goBack(); empty means Home is the
+  // only stop so far, and a back press should behave normally (exit the
+  // app / leave the page) — see canPop below.
+  final List<ShopPage> _navHistory = [];
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
   // nav instead of a drawer.
@@ -60,6 +68,13 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _productsFuture = ProductsRepository.fetchAll();
+    // Reload whatever was in the cart last time this shopper was here,
+    // once we actually have the catalog to match those saved lines
+    // against (see CartProvider.restore).
+    _productsFuture.then((products) {
+      if (!mounted) return;
+      context.read<CartProvider>().restore(products);
+    });
     _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
@@ -74,7 +89,20 @@ class _MainShellState extends State<MainShell> {
     super.dispose();
   }
 
-  void _goTo(ShopPage page) => setState(() => _page = page);
+  void _goTo(ShopPage page) {
+    if (page == _page) return;
+    setState(() {
+      _navHistory.add(_page);
+      _page = page;
+    });
+  }
+
+  // Retraces the user's actual path one step at a time, instead of
+  // always dropping them back on Home.
+  void _goBack() {
+    if (_navHistory.isEmpty) return;
+    setState(() => _page = _navHistory.removeLast());
+  }
 
   // Called from Home's service circles: switch to the Services tab and
   // have it scroll straight to (and expand) the tapped category.
@@ -120,14 +148,15 @@ class _MainShellState extends State<MainShell> {
     return PopScope(
       // Tab switches inside this shell (_goTo) are plain setState calls,
       // not Navigator pushes, so they never land on the back stack. Without
-      // this, pressing back on any tab other than Home closes the app (or
-      // leaves the site, on web) instead of returning to Home like a user
-      // would expect. canPop is only true once we're already on Home, so
-      // that back press behaves normally (exits the app / leaves the page).
-      canPop: _page == ShopPage.home,
+      // this, pressing back on any tab would close the app (or leave the
+      // site, on web) instead of retracing the user's own path through the
+      // tabs. canPop is only true once _navHistory is empty (i.e. Home is
+      // the only stop so far), so that back press then behaves normally
+      // (exits the app / leaves the page).
+      canPop: _navHistory.isEmpty,
       onPopInvoked: (didPop) {
         if (didPop) return;
-        _goTo(ShopPage.home);
+        _goBack();
       },
       child: Directionality(
         textDirection: textDirection,

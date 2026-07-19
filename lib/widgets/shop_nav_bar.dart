@@ -8,6 +8,36 @@ import '../theme/app_theme.dart';
 
 enum ShopPage { home, shop, search, services, about, cart }
 
+/// Small circular portrait shown next to the "Aya's" wordmark — a rounded
+/// avatar framed by a thin gradient ring so it reads as a deliberate brand
+/// mark rather than a random product photo. Reused in all three places the
+/// wordmark appears (desktop pill, mobile top bar, drawer header), just at
+/// different sizes.
+class _BrandAvatar extends StatelessWidget {
+  final double size;
+  const _BrandAvatar({this.size = 28});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(1.4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: context.colors.violetGradient,
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/images/aya_portrait.png',
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(color: context.colors.surfaceRaised),
+        ),
+      ),
+    );
+  }
+}
+
 /// The same frosted glass pill nav from the Aya's Graphique brand system,
 /// re-purposed for page navigation instead of scroll-to-section links, plus
 /// a cart icon with a live item-count badge.
@@ -52,28 +82,35 @@ class ShopNavBar extends StatelessWidget {
               // English regardless of what a shopper picks here.
               GestureDetector(
                 onTap: () => onTap(ShopPage.home),
-                // Plain, solid-colored text on purpose — no ShaderMask.
-                // ShaderMask sits inside the same subtree as the
-                // BackdropFilter blur above it, and on Flutter Web that
-                // combination can silently fail to paint the masked
-                // child at all (it isn't a color/contrast issue — the
-                // gradient version never painted anything here). A flat
-                // color has no such dependency and always paints, and
-                // context.colors.cream already adapts correctly between
-                // the light and dark themes.
-                child: Text(
-                  "Aya's",
-                  style: AppFonts.display(
-                    size: isMobile ? 17 : 16.5,
-                    weight: FontWeight.w800,
-                    color: context.colors.cream,
-                    letterSpacing: 1.0,
-                    // The wordmark is always Latin text and the nav bar is
-                    // meant to stay a fixed, compact size in either
-                    // language — don't let the Arabic-mode size boost
-                    // (meant for actual Arabic copy) inflate it.
-                    boostArabicSize: false,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _BrandAvatar(size: isMobile ? 26 : 28),
+                    SizedBox(width: isMobile ? 7 : 8),
+                    // Plain, solid-colored text on purpose — no ShaderMask.
+                    // ShaderMask sits inside the same subtree as the
+                    // BackdropFilter blur above it, and on Flutter Web that
+                    // combination can silently fail to paint the masked
+                    // child at all (it isn't a color/contrast issue — the
+                    // gradient version never painted anything here). A flat
+                    // color has no such dependency and always paints, and
+                    // context.colors.cream already adapts correctly between
+                    // the light and dark themes.
+                    Text(
+                      "Aya's",
+                      style: AppFonts.display(
+                        size: isMobile ? 17 : 16.5,
+                        weight: FontWeight.w800,
+                        color: context.colors.cream,
+                        letterSpacing: 1.0,
+                        // The wordmark is always Latin text and the nav bar is
+                        // meant to stay a fixed, compact size in either
+                        // language — don't let the Arabic-mode size boost
+                        // (meant for actual Arabic copy) inflate it.
+                        boostArabicSize: false,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(width: isMobile ? 8 : 11),
@@ -95,15 +132,6 @@ class ShopNavBar extends StatelessWidget {
                   active: active == ShopPage.shop,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.shop),
-                ),
-                _NavIconLabel(
-                  icon: active == ShopPage.search
-                      ? Icons.search_rounded
-                      : Icons.search_outlined,
-                  label: strings.navSearch,
-                  active: active == ShopPage.search,
-                  isMobile: isMobile,
-                  onTap: () => onTap(ShopPage.search),
                 ),
                 _NavIconLabel(
                   icon: active == ShopPage.services
@@ -189,6 +217,18 @@ class ShopNavBar extends StatelessWidget {
               // right here in the main pill alongside the page icons,
               // instead of behind a separate "more" button that had to be
               // opened first.
+              // Icon-only search shortcut, no label — sits right next to
+              // the theme toggle so search is reachable in one tap from
+              // here too, without duplicating the labeled Search tab
+              // above (which stays as-is for the main nav list).
+              _NavIconLabel(
+                icon: active == ShopPage.search
+                    ? Icons.search_rounded
+                    : Icons.search_outlined,
+                active: active == ShopPage.search,
+                isMobile: isMobile,
+                onTap: () => onTap(ShopPage.search),
+              ),
               _NavIconLabel(
                 icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                 active: false,
@@ -247,15 +287,22 @@ class ShopMobileTopBar extends StatelessWidget {
             // Same plain, solid-colored wordmark as the full pill — see the
             // note in ShopNavBar.build() about ShaderMask + BackdropFilter
             // not playing nicely together on Flutter Web.
-            child: Text(
-              "Aya's",
-              style: AppFonts.display(
-                size: 17,
-                weight: FontWeight.w800,
-                color: context.colors.cream,
-                letterSpacing: 1.0,
-                boostArabicSize: false,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const _BrandAvatar(size: 24),
+                const SizedBox(width: 7),
+                Text(
+                  "Aya's",
+                  style: AppFonts.display(
+                    size: 17,
+                    weight: FontWeight.w800,
+                    color: context.colors.cream,
+                    letterSpacing: 1.0,
+                    boostArabicSize: false,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 6),
@@ -316,15 +363,21 @@ class ShopNavDrawer extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 22),
-                    child: Text(
-                      "Aya's",
-                      style: AppFonts.display(
-                        size: 26,
-                        weight: FontWeight.w800,
-                        color: context.colors.cream,
-                        letterSpacing: 1.0,
-                        boostArabicSize: false,
-                      ),
+                    child: Row(
+                      children: [
+                        const _BrandAvatar(size: 40),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Aya's",
+                          style: AppFonts.display(
+                            size: 26,
+                            weight: FontWeight.w800,
+                            color: context.colors.cream,
+                            letterSpacing: 1.0,
+                            boostArabicSize: false,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   _DrawerItem(

@@ -78,6 +78,10 @@ serve(async (req) => {
                order.payment_method === 'vodafone_cash' ? 'Vodafone Cash' :
                order.payment_method === 'transfer' ? 'Vodafone Cash / InstaPay transfer' :
                'Cash on delivery'
+             }${
+               order.payment_sender_info
+                 ? `<br/><b>${order.payment_method === 'instapay' ? 'Paid from (InstaPay name)' : 'Paid from (Vodafone Cash number)'}:</b> ${order.payment_sender_info}`
+                 : ''
              }</p>
           <ul>${itemsHtml}</ul>
           <p>

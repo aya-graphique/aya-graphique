@@ -400,6 +400,15 @@ class _OrderTileState extends State<_OrderTile> {
                       },
                       style: AppFonts.body(size: 13, color: context.colors.cream),
                     ),
+                    if (o.paymentSenderInfo.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        o.paymentMethod == 'instapay'
+                            ? 'Paid from (InstaPay name): ${o.paymentSenderInfo}'
+                            : 'Paid from (Vodafone Cash number): ${o.paymentSenderInfo}',
+                        style: AppFonts.body(size: 12.5, weight: FontWeight.w600, color: context.colors.orchidSoft),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text('Shipping address', style: AppFonts.label(color: context.colors.orchid, size: 10.5, letterSpacing: 1.2)),
                     const SizedBox(height: 4),

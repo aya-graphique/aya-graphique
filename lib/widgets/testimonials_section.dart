@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../data/testimonials.dart';
 import '../localization/app_strings.dart';
 import '../providers/language_controller.dart';
@@ -59,7 +60,74 @@ class TestimonialsSection extends StatelessWidget {
             },
           ),
         ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+          child: Center(
+            child: _FacebookReviewsButton(isMobile: isMobile),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// Pill button under the testimonials list that opens the owner's
+/// Facebook page reviews tab in an external browser/app.
+class _FacebookReviewsButton extends StatelessWidget {
+  final bool isMobile;
+  const _FacebookReviewsButton({required this.isMobile});
+
+  static final Uri _reviewsUri = Uri.parse(
+    'https://www.facebook.com/aya.attia.abed97/reviews/?id=100068226772356&sk=reviews',
+  );
+
+  Future<void> _open(BuildContext context) async {
+    try {
+      final launched = await launchUrl(_reviewsUri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.stringsRead.couldntOpenFacebookReviews('launchUrl returned false'))),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.stringsRead.couldntOpenFacebookReviews('$e'))));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return GestureDetector(
+      onTap: () => _open(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: colors.violetGradient,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: colors.violetPop.withOpacity(0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.facebook_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              context.strings.successPartnersReviews,
+              style: AppFonts.label(size: 15, color: Colors.white, letterSpacing: 0.3)
+                  .copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

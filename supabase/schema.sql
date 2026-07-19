@@ -105,6 +105,10 @@ create table if not exists orders (
   phone_1        text not null default '',
   phone_2        text not null default '',
   payment_method text not null default 'cod',
+  -- The customer-entered InstaPay name or Vodafone Cash number they paid
+  -- from, so the owner can confirm the transfer without needing a
+  -- screenshot. Empty for cash on delivery.
+  payment_sender_info text not null default '',
   -- Marked true once the owner has fulfilled/shipped the order. Drives the
   -- "Mark done" toggle and the red pending-orders badge in the admin
   -- dashboard.
@@ -119,6 +123,7 @@ create table if not exists orders (
 alter table orders add column if not exists phone_1 text not null default '';
 alter table orders add column if not exists phone_2 text not null default '';
 alter table orders add column if not exists payment_method text not null default 'cod';
+alter table orders add column if not exists payment_sender_info text not null default '';
 alter table orders add column if not exists is_completed boolean not null default false;
 
 create table if not exists order_items (

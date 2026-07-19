@@ -18,6 +18,7 @@ class OrdersRepository {
     required String phone1,
     required String phone2,
     required String paymentMethod,
+    String paymentSenderInfo = '',
     required CartProvider cart,
   }) async {
     if (!SupabaseConfig.isConfigured) {
@@ -32,6 +33,7 @@ class OrdersRepository {
           'phone_1': phone1,
           'phone_2': phone2,
           'payment_method': paymentMethod,
+          'payment_sender_info': paymentSenderInfo,
           'subtotal': cart.subtotal,
           'shipping': cart.shipping,
           'total': cart.total,
@@ -67,6 +69,7 @@ class OrdersRepository {
       phone1: phone1,
       phone2: phone2,
       paymentMethod: paymentMethod,
+      paymentSenderInfo: paymentSenderInfo,
       cart: cart,
       items: items,
     );
@@ -100,6 +103,7 @@ class OrdersRepository {
     required String phone1,
     required String phone2,
     required String paymentMethod,
+    String paymentSenderInfo = '',
     required CartProvider cart,
     required List<Map<String, dynamic>> items,
   }) {
@@ -113,6 +117,7 @@ class OrdersRepository {
           'phone_1': phone1,
           'phone_2': phone2,
           'payment_method': paymentMethod,
+          'payment_sender_info': paymentSenderInfo,
           'subtotal': cart.subtotal,
           'shipping': cart.shipping,
           'total': cart.total,

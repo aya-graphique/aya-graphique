@@ -37,6 +37,22 @@ class AppText {
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
   String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
   String get marqueeStand => _t('CALENDAR STAND', 'حامل');
+  String get marqueeDigitalArt => _t('DIGITAL ART', 'رسم رقمي');
+  String get marqueeKidsGamesPrint =>
+      _t('PRINTED KIDS GAMES', 'تصميم ألعاب أطفال مطبوعة');
+  String get marqueeCommercialPrint =>
+      _t('COMMERCIAL PRINTS', 'تصميم مطبوعات تجارية');
+  String get marqueeBranding => _t('FULL BRAND IDENTITY', 'هوية تجارية متكاملة');
+  String get marqueeLogo => _t('LOGO', 'شعار');
+  String get marqueeAds => _t('COMMERCIAL ADS DESIGN', 'تصميم الإعلانات التجارية');
+  String get marqueeWorkshops =>
+      _t('ONE-ON-ONE WORKSHOPS', 'ورش تعليمية فردية');
+
+  // Home — second marquee (under products)
+  String get marqueeCalendarsShort => _t('CALENDARS', 'تقويمات');
+  String get marqueeNotebooksShort => _t('NOTEBOOKS', 'دفاتر');
+  String get marqueeBookmarksShort => _t('BOOKMARKS', 'فواصل كتب');
+  String get marqueeGamesShort => _t('GAMES', 'ألعاب');
 
   // Home — collection section
   String get collectionEyebrow => _t('THE COLLECTION', 'المجموعة');
@@ -68,6 +84,9 @@ class AppText {
   // Home — testimonials
   String get testimonialsEyebrow => _t('TESTIMONIALS', 'التوصيات');
   String get testimonialsTitle => _t('What people say', 'ماذا يقول الناس');
+  String get successPartnersReviews => _t('Voices of Our Success Partners!', 'آراء شركاء النجاح !');
+  String couldntOpenFacebookReviews(String err) =>
+      _t('Couldn\'t open Facebook reviews: $err', 'تعذر فتح صفحة الآراء على فيسبوك: $err');
 
   // Home — footer
   String get footerTagline =>
@@ -121,6 +140,10 @@ class AppText {
   String get shipping => _t('Shipping', 'الشحن');
   String get total => _t('Total', 'الإجمالي');
   String get proceedToCheckout => _t('Proceed to checkout', 'إتمام الطلب');
+  String get estimatedDelivery =>
+      _t('Estimated delivery: 2–4 business days', 'التوصيل المتوقع خلال 2–4 أيام عمل');
+  String get youMightAlsoLike => _t('You might also like', 'قد يعجبك أيضًا');
+  String get removeItem => _t('Remove', 'حذف');
   String get emptyCartTitle => _t('Your cart is empty', 'سلتك فارغة');
   String get emptyCartSubtitle => _t(
         'Add a notebook or two — they pair well together.',
@@ -138,6 +161,7 @@ class AppText {
         'Added $qty × "$name" to cart',
         'تمت إضافة $qty × "$name" إلى السلة',
       );
+  String get continueShopping => _t('Continue shopping', 'إكمال التسوق');
 
   // Checkout
   String get checkoutTitle => _t('Checkout', 'إتمام الشراء');
@@ -168,12 +192,12 @@ class AppText {
         'وسنتفق معك على الدفع عبر واتساب.',
       );
   String get instapayWithLinkNotice => _t(
-        'Tap "Place order" and we\'ll open InstaPay for you, then '
-        'send your order to us on WhatsApp. After paying, take a '
-        'screenshot of the payment and send it in that WhatsApp chat.',
-        'اضغط "تنفيذ الطلب" وسنفتح لك إنستاباي، ثم نرسل طلبك '
-        'إلينا عبر واتساب. بعد الدفع، خد سكرين شوت من عملية '
-        'الدفع وابعته في نفس شات الواتساب.',
+        'Enter the InstaPay name you\'ll pay from below. Tap "Place '
+        'order" and we\'ll open InstaPay for you to send the total — '
+        'then use the "Open WhatsApp" button to confirm the order with us.',
+        'اكتب اسم إنستاباي اللي هتحول منه تحت. اضغط "تنفيذ الطلب" '
+        'وسنفتح لك إنستاباي لترسل قيمة الطلب — بعد كده استخدم زرار '
+        '"افتح واتساب" لتأكيد الطلب معنا.',
       );
   String get vodafoneNoNumberNotice => _t(
         'The store hasn\'t set a Vodafone Cash number yet — place '
@@ -182,14 +206,20 @@ class AppText {
         'وسنرسله لك عبر واتساب.',
       );
   String vodafoneWithNumberNotice(String number) => _t(
-        'Tap "Place order" and we\'ll open your Contacts with '
-        '$number ready to save, then send your order to '
-        'us on WhatsApp. After paying, take a screenshot of the '
-        'payment and send it in that WhatsApp chat.',
-        'اضغط "تنفيذ الطلب" وسنفتح لك جهات الاتصال برقم '
-        '$number جاهزًا للحفظ، ثم نرسل طلبك إلينا عبر واتساب. '
-        'بعد الدفع، خد سكرين شوت من عملية الدفع وابعته في نفس '
-        'شات الواتساب.',
+        'Enter the Vodafone Cash number you\'ll transfer from '
+        'below. Tap "Place order" and we\'ll open your Contacts with '
+        '$number ready to save — then use the "Open WhatsApp" button '
+        'to confirm the order with us.',
+        'اكتب رقم فودافون كاش اللي هتحول منه تحت. اضغط "تنفيذ '
+        'الطلب" وسنفتح لك جهات الاتصال برقم $number جاهزًا للحفظ — '
+        'بعد كده استخدم زرار "افتح واتساب" لتأكيد الطلب معنا.',
+      );
+
+  String get instapaySenderLabel => _t('Your InstaPay name', 'اسم إنستاباي بتاعك');
+  String get vodafoneSenderLabel => _t('Your Vodafone Cash number', 'رقم فودافون كاش اللي هتحول منه');
+  String get senderInfoRequired => _t(
+        'Enter the name/number you\'ll pay from',
+        'اكتب الاسم أو الرقم اللي هتحول منه',
       );
 
   String get required => _t('Required', 'مطلوب');
@@ -201,40 +231,20 @@ class AppText {
   String get orderPlaced => _t('Order placed!', 'تم تنفيذ الطلب!');
   String thanksMessage(String name) => name.isEmpty
       ? _t(
-          'Thanks for shopping with us. We opened WhatsApp with your '
-          'order details — just tap Send to confirm with us.',
-          'شكرًا لتسوقك معنا. لقد فتحنا واتساب مع تفاصيل طلبك — '
-          'فقط اضغط إرسال لتأكيد الطلب معنا.',
+          'Thanks for shopping with us. Once you\'ve paid, tap '
+          '"Open WhatsApp" below to send us your order details.',
+          'شكرًا لتسوقك معنا. بعد ما تدفع، اضغط "افتح واتساب" تحت '
+          'عشان تبعتلنا تفاصيل طلبك.',
         )
       : _t(
-          'Thanks, $name — we opened WhatsApp with your order details. '
-          'Just tap Send there to confirm with us.',
-          'شكرًا لك يا $name — لقد فتحنا واتساب مع تفاصيل طلبك. '
-          'فقط اضغط إرسال هناك لتأكيد الطلب معنا.',
+          'Thanks, $name. Once you\'ve paid, tap "Open WhatsApp" '
+          'below to send us your order details.',
+          'شكرًا لك يا $name. بعد ما تدفع، اضغط "افتح واتساب" تحت '
+          'عشان تبعتلنا تفاصيل طلبك.',
         );
-  String get instapayThanksNote => _t(
-        'We also opened InstaPay for you — send the total there.',
-        'كما فتحنا لك إنستاباي — أرسل قيمة الطلب من هناك.',
-      );
-  String vodafoneThanksNote(String number) => _t(
-        'We also opened Contacts with $number ready to save — '
-        'send your Vodafone Cash payment there.',
-        'كما فتحنا جهات الاتصال برقم $number جاهزًا للحفظ — '
-        'أرسل دفعة فودافون كاش من هناك.',
-      );
-  String get paymentScreenshotReminder => _t(
-        'Important: your order won\'t be confirmed until you send a '
-        'screenshot of your payment in the WhatsApp chat we opened.',
-        'مهم: طلبك مش هيتأكد غير لما تبعت سكرين شوت من عملية '
-        'الدفع في شات الواتساب اللي فتحناه لك.',
-      );
-  String get resendScreenshotOnWhatsApp => _t(
-        'Open WhatsApp to send the screenshot',
-        'افتح واتساب لإرسال السكرين شوت',
-      );
-  String get screenshotFollowUpMessage => _t(
-        'Here\'s a screenshot of my payment for the order above.',
-        'ده سكرين شوت من عملية الدفع بتاعة الطلب اللي فوق.',
+  String get openWhatsApp => _t(
+        'Open WhatsApp to confirm the order',
+        'افتح واتساب لتأكيد الطلب',
       );
   String get backToShop => _t('Back to shop', 'العودة للمتجر');
 
@@ -278,6 +288,7 @@ class AppText {
   String get skillsLabel => _t('SKILLS', 'المهارات');
   String get getInTouchLabel => _t('GET IN TOUCH', 'تواصل معايا');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');
+  String get contactNowLabel => _t('Contact now!', 'تواصل الآن!');
   String get emailLabel => _t('Email', 'البريد الإلكتروني');
   String get portfolioLabel => _t('Portfolio', 'أعمالي');
   String get cvLabel => _t('CV', 'السيرة الذاتية');
@@ -298,4 +309,10 @@ extension AppTextContextX on BuildContext {
   /// Storefront copy in the currently-selected language. Never use this
   /// inside admin/* screens — they should stay hardcoded in English.
   AppText get strings => AppText(isArabicLanguage);
+
+  /// Same as [strings] but doesn't subscribe to [LanguageController]
+  /// (via `read` instead of `watch`), so it's safe to call from event
+  /// handlers (onTap/onPressed callbacks, etc.) instead of only from
+  /// build methods.
+  AppText get stringsRead => AppText(languageController.isArabic);
 }

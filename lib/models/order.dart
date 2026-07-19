@@ -31,6 +31,7 @@ class Order {
   final String phone1;
   final String phone2;
   final String paymentMethod;
+  final String paymentSenderInfo;
   final bool isCompleted;
   final double subtotal;
   final double shipping;
@@ -46,6 +47,7 @@ class Order {
     this.phone1 = '',
     this.phone2 = '',
     this.paymentMethod = 'cod',
+    this.paymentSenderInfo = '',
     this.isCompleted = false,
     required this.subtotal,
     required this.shipping,
@@ -64,6 +66,7 @@ class Order {
       phone1: map['phone_1'] as String? ?? '',
       phone2: map['phone_2'] as String? ?? '',
       paymentMethod: map['payment_method'] as String? ?? 'cod',
+      paymentSenderInfo: map['payment_sender_info'] as String? ?? '',
       isCompleted: map['is_completed'] as bool? ?? false,
       subtotal: (map['subtotal'] as num).toDouble(),
       shipping: (map['shipping'] as num).toDouble(),
@@ -84,6 +87,7 @@ class Order {
       phone1: phone1,
       phone2: phone2,
       paymentMethod: paymentMethod,
+      paymentSenderInfo: paymentSenderInfo,
       isCompleted: isCompleted ?? this.isCompleted,
       subtotal: subtotal,
       shipping: shipping,
