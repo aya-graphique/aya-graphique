@@ -103,7 +103,7 @@ class _FacebookReviewsButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => _open(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 28, vertical: isMobile ? 12 : 14),
         decoration: BoxDecoration(
           gradient: colors.violetGradient,
           borderRadius: BorderRadius.circular(100),
@@ -118,12 +118,17 @@ class _FacebookReviewsButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.facebook_rounded, color: Colors.white, size: 20),
+            Icon(Icons.facebook_rounded, color: Colors.white, size: isMobile ? 18 : 20),
             const SizedBox(width: 8),
-            Text(
-              context.strings.successPartnersReviews,
-              style: AppFonts.label(size: 15, color: Colors.white, letterSpacing: 0.3)
-                  .copyWith(fontWeight: FontWeight.w700),
+            Flexible(
+              child: Text(
+                context.strings.successPartnersReviews,
+                textAlign: TextAlign.center,
+                maxLines: isMobile ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppFonts.label(size: isMobile ? 13 : 15, color: Colors.white, letterSpacing: 0.3)
+                    .copyWith(fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
