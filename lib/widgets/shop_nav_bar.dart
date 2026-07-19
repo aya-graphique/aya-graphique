@@ -290,12 +290,12 @@ class ShopMobileTopBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const _BrandAvatar(size: 24),
-                const SizedBox(width: 7),
+                const _BrandAvatar(size: 30),
+                const SizedBox(width: 8),
                 Text(
                   "Aya's",
                   style: AppFonts.display(
-                    size: 17,
+                    size: 20,
                     weight: FontWeight.w800,
                     color: context.colors.cream,
                     letterSpacing: 1.0,

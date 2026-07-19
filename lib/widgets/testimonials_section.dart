@@ -61,12 +61,13 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
           child: Align(
-            alignment: AlignmentDirectional.centerStart,
+            alignment: Alignment.center,
             child: RevealOnScroll(
               child: SectionHeading(
                 eyebrow: context.strings.testimonialsEyebrow,
                 title: context.strings.testimonialsTitle,
                 titleSize: widget.isMobile ? 24 : 30,
+                align: TextAlign.center,
               ),
             ),
           ),
@@ -75,18 +76,23 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
         if (_loading)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
-            child: SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
+            child: Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
+              ),
             ),
           )
         else if (_testimonials.isEmpty)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
-            child: Text(
-              context.strings.noTestimonialsYet,
-              style: AppFonts.body(size: 14, color: context.colors.creamDim),
+            child: Center(
+              child: Text(
+                context.strings.noTestimonialsYet,
+                textAlign: TextAlign.center,
+                style: AppFonts.body(size: 14, color: context.colors.creamDim),
+              ),
             ),
           )
         else

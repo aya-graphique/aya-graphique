@@ -320,7 +320,7 @@ class _HeroState extends State<_Hero> {
           // hero, with the dots directly underneath them.
           if (banners.isNotEmpty) ...[
             ClipRRect(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 28),
               child: HomeBannerSlideshow(
                 banners: banners,
                 height: bannerHeight.toDouble(),
