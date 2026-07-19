@@ -94,17 +94,20 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: product.hasDiscount
-                            ? Row(
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Flexible(
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
                                     child: Text(
                                       formatPrice(product.discountedPrice),
                                       maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                       style: AppFonts.body(
                                         size: 15,
                                         weight: FontWeight.w700,
@@ -112,12 +115,12 @@ class ProductCard extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Flexible(
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
                                     child: Text(
                                       formatPrice(product.price),
                                       maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                       style: AppFonts.body(
                                         size: 12,
                                         color: context.colors.creamDim,
@@ -126,14 +129,17 @@ class ProductCard extends StatelessWidget {
                                   ),
                                 ],
                               )
-                            : Text(
-                                formatPrice(product.price),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppFonts.body(
-                                  size: 15,
-                                  weight: FontWeight.w700,
-                                  color: context.colors.orchidSoft,
+                            : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  formatPrice(product.price),
+                                  maxLines: 1,
+                                  style: AppFonts.body(
+                                    size: 15,
+                                    weight: FontWeight.w700,
+                                    color: context.colors.orchidSoft,
+                                  ),
                                 ),
                               ),
                       ),

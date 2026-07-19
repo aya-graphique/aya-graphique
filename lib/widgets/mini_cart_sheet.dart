@@ -97,28 +97,32 @@ class _MiniCartSheet extends StatelessWidget {
                               style: AppFonts.body(color: colors.creamDim, size: 15),
                             ),
                           )
-                        : ListView.separated(
-                            shrinkWrap: true,
+                        : SingleChildScrollView(
                             padding: const EdgeInsets.symmetric(horizontal: 22),
-                            itemCount: cart.lines.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
-                            itemBuilder: (context, i) => _MiniCartLine(line: cart.lines[i]),
+                            child: Column(
+                              children: [
+                                for (int i = 0; i < cart.lines.length; i++) ...[
+                                  if (i > 0) const SizedBox(height: 12),
+                                  _MiniCartLine(line: cart.lines[i]),
+                                ],
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(2, 14, 2, 0),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.local_shipping_outlined, size: 15, color: colors.creamDim),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        strings.estimatedDelivery,
+                                        style: AppFonts.body(size: 12.5, color: colors.creamDim),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                   ),
                   if (cart.lines.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.local_shipping_outlined, size: 15, color: colors.creamDim),
-                          const SizedBox(width: 6),
-                          Text(
-                            strings.estimatedDelivery,
-                            style: AppFonts.body(size: 12.5, color: colors.creamDim),
-                          ),
-                        ],
-                      ),
-                    ),
                     _SuggestedProducts(cartProductIds: cart.lines.map((l) => l.product.id).toSet()),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),

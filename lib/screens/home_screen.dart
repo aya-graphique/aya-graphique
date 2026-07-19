@@ -169,21 +169,26 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           const SizedBox(height: 40),
-          MarqueeStrip(
-            height: 60,
-            words: [
-            context.strings.marqueeNotebooks,
-            context.strings.marqueeCalendars,
-            context.strings.marqueeBookmark,
-            context.strings.marqueeStand,
-            context.strings.marqueeDigitalArt,
-            context.strings.marqueeKidsGamesPrint,
-            context.strings.marqueeCommercialPrint,
-            context.strings.marqueeBranding,
-            context.strings.marqueeLogo,
-            context.strings.marqueeAds,
-            context.strings.marqueeWorkshops,
-          ]),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
+            child: MarqueeStrip(
+              height: 60,
+              pixelsPerSecond: 20,
+              words: [
+                context.strings.marqueeNotebooks,
+                context.strings.marqueeCalendars,
+                context.strings.marqueeBookmark,
+                context.strings.marqueeStand,
+                context.strings.marqueeDigitalArt,
+                context.strings.marqueeKidsGamesPrint,
+                context.strings.marqueeCommercialPrint,
+                context.strings.marqueeBranding,
+                context.strings.marqueeLogo,
+                context.strings.marqueeAds,
+                context.strings.marqueeWorkshops,
+              ],
+            ),
+          ),
           const SizedBox(height: 48),
           _ServicesSection(
             serviceCategoryImages: _serviceCategoryImages,
@@ -300,10 +305,10 @@ class _HeroState extends State<_Hero> {
     // Clamped at both ends so very narrow phones and very wide desktop
     // monitors still get a sensible height.
     final screenWidth = MediaQuery.of(context).size.width;
-    // Mobile now goes edge-to-edge (no side gutters) so the banner fills
-    // the screen left/right like a native app hero; desktop keeps its
-    // original inset frame.
-    final horizontalPadding = isMobile ? 0.0 : 60.0;
+    // Mobile now keeps a small side gutter (instead of going fully
+    // edge-to-edge) so the rounded corners read clearly against the
+    // screen edge; desktop keeps its original, larger inset frame.
+    final horizontalPadding = isMobile ? 16.0 : 60.0;
     final availableWidth = screenWidth - horizontalPadding * 2;
     const bannerAspectRatio = 16 / 9;
     final bannerHeight = (availableWidth / bannerAspectRatio).clamp(200.0, 760.0);
@@ -318,7 +323,7 @@ class _HeroState extends State<_Hero> {
           // hero, with the dots directly underneath them.
           if (banners.isNotEmpty) ...[
             ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(28),
               child: HomeBannerSlideshow(
                 banners: banners,
                 height: bannerHeight.toDouble(),
@@ -477,14 +482,17 @@ class _ShopPreviewSection extends StatelessWidget {
           child: ProductGrid(products: preview, onProductTap: onProductTap),
         ),
         const SizedBox(height: 40),
-        MarqueeStrip(
-          height: 60,
-          words: [
-            context.strings.marqueeCalendarsShort,
-            context.strings.marqueeNotebooksShort,
-            context.strings.marqueeBookmarksShort,
-            context.strings.marqueeGamesShort,
-          ],
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
+          child: MarqueeStrip(
+            height: 60,
+            words: [
+              context.strings.marqueeCalendarsShort,
+              context.strings.marqueeNotebooksShort,
+              context.strings.marqueeBookmarksShort,
+              context.strings.marqueeGamesShort,
+            ],
+          ),
         ),
         const SizedBox(height: 40),
         Center(

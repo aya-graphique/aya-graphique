@@ -78,9 +78,13 @@ class _SplashScreenState extends State<SplashScreen> {
                 style: AppFonts.display(color: context.colors.cream, size: 26),
               ).animate().fadeIn(duration: 600.ms, delay: 150.ms),
               const SizedBox(height: 10),
-              Text(
-                'NOTEBOOKS · CALENDARS · VISUAL DESIGN · ARTS · ADVERTISING',
-                style: AppFonts.label(color: context.colors.orchid, size: 13, letterSpacing: 2.2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'NOTEBOOKS · CALENDARS · VISUAL DESIGN · ARTS · ADVERTISING',
+                  textAlign: TextAlign.center,
+                  style: AppFonts.label(color: context.colors.orchid, size: 13, letterSpacing: 2.2),
+                ),
               ).animate().fadeIn(duration: 600.ms, delay: 250.ms),
               const SizedBox(height: 46),
               const _LoadingBar(duration: _minDisplay)

@@ -216,6 +216,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       barrierDismissible: false,
       builder: (dialogContext) => _OrderSuccessDialog(
         name: _nameCtrl.text.trim(),
+        isCod: _paymentMethod == PaymentMethod.cod,
         onOpenWhatsApp: () => _openWhatsApp(whatsAppMessage),
       ),
     );
@@ -553,18 +554,18 @@ class _PaymentOption extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.16),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: imagePath != null
-                  ? Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Image.asset(imagePath!, fit: BoxFit.contain),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.asset(imagePath!, fit: BoxFit.cover),
                     )
-                  : Icon(icon, size: 18, color: iconColor),
+                  : Icon(icon, size: 26, color: iconColor),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -720,10 +721,12 @@ class _OrderReview extends StatelessWidget {
 
 class _OrderSuccessDialog extends StatelessWidget {
   final String name;
+  final bool isCod;
   final VoidCallback onOpenWhatsApp;
 
   const _OrderSuccessDialog({
     required this.name,
+    required this.isCod,
     required this.onOpenWhatsApp,
   });
 
@@ -749,7 +752,7 @@ class _OrderSuccessDialog extends StatelessWidget {
             Text(context.strings.orderPlaced, style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
             const SizedBox(height: 10),
             Text(
-              context.strings.thanksMessage(name),
+              context.strings.thanksMessage(name, isCod: isCod),
               textAlign: TextAlign.center,
               style: AppFonts.body(color: context.colors.creamDim, size: 14),
             ),
@@ -759,7 +762,8 @@ class _OrderSuccessDialog extends StatelessWidget {
               child: GestureDetector(
                 onTap: onOpenWhatsApp,
                 child: Container(
-                  height: 44,
+                  constraints: const BoxConstraints(minHeight: 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(color: context.colors.orchid.withOpacity(0.5)),
@@ -768,8 +772,8 @@ class _OrderSuccessDialog extends StatelessWidget {
                     child: Text(
                       context.strings.openWhatsApp,
                       textAlign: TextAlign.center,
-                      style: AppFonts.label(size: 12, color: context.colors.orchid, letterSpacing: 0.8)
-                          .copyWith(fontWeight: FontWeight.w700),
+                      style: AppFonts.label(size: 13, color: context.colors.orchid, letterSpacing: 0.6)
+                          .copyWith(fontWeight: FontWeight.w700, height: 1.3),
                     ),
                   ),
                 ),

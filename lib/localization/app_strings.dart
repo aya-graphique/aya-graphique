@@ -229,19 +229,21 @@ class AppText {
   String get placeOrder => _t('Place order', 'تنفيذ الطلب');
 
   String get orderPlaced => _t('Order placed!', 'تم تنفيذ الطلب!');
-  String thanksMessage(String name) => name.isEmpty
-      ? _t(
-          'Thanks for shopping with us. Once you\'ve paid, tap '
-          '"Open WhatsApp" below to send us your order details.',
-          'شكرًا لتسوقك معنا. بعد ما تدفع، اضغط "افتح واتساب" تحت '
-          'عشان تبعتلنا تفاصيل طلبك.',
-        )
-      : _t(
-          'Thanks, $name. Once you\'ve paid, tap "Open WhatsApp" '
-          'below to send us your order details.',
-          'شكرًا لك يا $name. بعد ما تدفع، اضغط "افتح واتساب" تحت '
-          'عشان تبعتلنا تفاصيل طلبك.',
-        );
+  String thanksMessage(String name, {required bool isCod}) {
+    final who = name.isEmpty ? _t('Thanks for shopping with us', 'شكرًا لتسوقك معنا') : _t('Thanks, $name', 'شكرًا لك يا $name');
+    if (isCod) {
+      return _t(
+        '$who! Tap "Open WhatsApp" below to send us your order details. '
+        'You\'ll pay the courier when your order arrives.',
+        '$who! اضغط "افتح واتساب" تحت عشان تبعتلنا تفاصيل طلبك. '
+        'هتدفع للمندوب لما الطلب يوصلك.',
+      );
+    }
+    return _t(
+      '$who! Once you\'ve paid, tap "Open WhatsApp" below to send us your order details.',
+      '$who! بعد ما تدفع، اضغط "افتح واتساب" تحت عشان تبعتلنا تفاصيل طلبك.',
+    );
+  }
   String get openWhatsApp => _t(
         'Open WhatsApp to confirm the order',
         'افتح واتساب لتأكيد الطلب',

@@ -11,11 +11,13 @@ import '../theme/app_theme.dart';
 class MarqueeStrip extends StatefulWidget {
   final List<String> words;
   final double height;
+  final double pixelsPerSecond;
 
   const MarqueeStrip({
     super.key,
     required this.words,
     this.height = 48,
+    this.pixelsPerSecond = 34,
   });
 
   @override
@@ -25,6 +27,7 @@ class MarqueeStrip extends StatefulWidget {
 class _MarqueeStripState extends State<MarqueeStrip>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  final GlobalKey _rowKey = GlobalKey();
 
   @override
   void initState() {
@@ -33,6 +36,27 @@ class _MarqueeStripState extends State<MarqueeStrip>
       vsync: this,
       duration: const Duration(seconds: 18),
     )..repeat();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncSpeed());
+  }
+
+  @override
+  void didUpdateWidget(covariant MarqueeStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.words != widget.words ||
+        oldWidget.pixelsPerSecond != widget.pixelsPerSecond) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _syncSpeed());
+    }
+  }
+
+  void _syncSpeed() {
+    if (!mounted) return;
+    final box = _rowKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize || box.size.width <= 0) return;
+    final seconds = box.size.width / widget.pixelsPerSecond;
+    final newDuration = Duration(milliseconds: (seconds * 1000).round());
+    if (newDuration == _controller.duration) return;
+    _controller.duration = newDuration;
+    _controller.repeat();
   }
 
   @override
@@ -45,31 +69,37 @@ class _MarqueeStripState extends State<MarqueeStrip>
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final row = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(widget.words.length, (i) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.words[i],
-                style: AppFonts.display(
-                  size: 18,
-                  weight: FontWeight.w600,
-                  color: colors.cream,
-                  letterSpacing: 0.3,
-                  text: widget.words[i],
+    Widget buildRow({Key? key}) {
+      return Row(
+        key: key,
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(widget.words.length, (i) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.words[i],
+                  style: AppFonts.display(
+                    size: 18,
+                    weight: FontWeight.w600,
+                    color: colors.cream,
+                    letterSpacing: 0.3,
+                    text: widget.words[i],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Icon(Icons.auto_awesome_rounded, size: 13, color: colors.orchid),
-            ],
-          ),
-        );
-      }),
-    );
+                const SizedBox(width: 14),
+                Icon(Icons.auto_awesome_rounded, size: 13, color: colors.orchid),
+              ],
+            ),
+          );
+        }),
+      );
+    }
+
+    final row = buildRow(key: _rowKey);
+    final rowCopy = buildRow();
 
     // Same faded hairline treatment used under the eyebrow pills elsewhere
     // on Home, rather than a flat solid-colour rule.
@@ -88,7 +118,9 @@ class _MarqueeStripState extends State<MarqueeStrip>
 
     return Container(
       height: widget.height,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -133,7 +165,7 @@ class _MarqueeStripState extends State<MarqueeStrip>
                         // instead of always crawling left like it does in
                         // English.
                         translation: Offset((isRtl ? 1 : -1) * _controller.value * 0.5, 0),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [row, row]),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [row, rowCopy]),
                       ),
                     );
                   },
