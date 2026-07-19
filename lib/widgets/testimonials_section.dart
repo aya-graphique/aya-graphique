@@ -122,14 +122,17 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
         const SizedBox(height: 24),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _LeaveCommentButton(isMobile: widget.isMobile, onTap: _openCommentForm),
-              _FacebookReviewsButton(isMobile: widget.isMobile),
-            ],
+          child: Align(
+            alignment: Alignment.center,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _LeaveCommentButton(isMobile: widget.isMobile, onTap: _openCommentForm),
+                _FacebookReviewsButton(isMobile: widget.isMobile),
+              ],
+            ),
           ),
         ),
       ],
