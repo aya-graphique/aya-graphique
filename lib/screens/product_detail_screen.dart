@@ -107,23 +107,27 @@ class _Gallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tilt3DCard(
-      maxTiltDegrees: 5,
-      liftOnHover: 0,
-      borderRadius: BorderRadius.circular(28),
-      child: AspectRatio(
-        aspectRatio: isMobile ? 0.82 : 0.78,
-        child: Container(
-          decoration: BoxDecoration(gradient: context.colors.cardGradient),
-          child: Image.network(
-            product.imageUrl,
-            // .contain so the full product photo is always visible,
-            // uncropped — .cover was slicing off part of the image
-            // whenever its proportions didn't match this fixed
-            // aspect-ratio frame.
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stack) => Center(
-              child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 1000),
+      child: Tilt3DCard(
+        maxTiltDegrees: 5,
+        liftOnHover: 0,
+        borderRadius: BorderRadius.circular(28),
+        child: AspectRatio(
+          // مربع 1:1 بحد أقصى 1000px (محدد بالـ ConstrainedBox أعلاه)
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(gradient: context.colors.cardGradient),
+            child: Image.network(
+              product.imageUrl,
+              // .contain so the full product photo is always visible,
+              // uncropped — .cover was slicing off part of the image
+              // whenever its proportions didn't match this fixed
+              // aspect-ratio frame.
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stack) => Center(
+                child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
+              ),
             ),
           ),
         ),

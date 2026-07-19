@@ -236,8 +236,16 @@ class AppText {
         'بعد كده استخدم زرار "افتح واتساب" لتأكيد الطلب معنا.',
       );
 
-  String get instapaySenderLabel => _t('Your InstaPay name', 'اسم إنستاباي بتاعك');
+  String get instapaySenderLabel => _t('Your InstaPay name or number', 'اسم إنستاباي أو الرقم المحوّل منه');
   String get vodafoneSenderLabel => _t('Your Vodafone Cash number', 'رقم فودافون كاش اللي هتحول منه');
+  String get instapaySenderHint => _t(
+        'To respond to your order instantly, enter the number you transferred from or the sender name',
+        'للاستجابة لطلبك بشكل فوري اكتب الرقم الذي تم تحويل منه المبلغ او اسم المرسل',
+      );
+  String get vodafoneSenderHint => _t(
+        'To respond to your order instantly, enter the number you transferred from',
+        'للاستجابة لطلبك بشكل فوري اكتب الرقم الذي تم تحويل منه المبلغ',
+      );
   String get senderInfoRequired => _t(
         'Enter the name/number you\'ll pay from',
         'اكتب الاسم أو الرقم اللي هتحول منه',
@@ -249,7 +257,7 @@ class AppText {
   String get orderReview => _t('Order review', 'مراجعة الطلب');
   String get placeOrder => _t('Place order', 'تنفيذ الطلب');
 
-  String get orderPlaced => _t('Order placed!', 'تم تنفيذ الطلب!');
+  String get orderPlaced => _t('Order placed!', 'تم استلام طلبك!');
   String thanksMessage(String name, {required bool isCod}) {
     final who = name.isEmpty ? _t('Thanks for shopping with us', 'شكرًا لتسوقك معنا') : _t('Thanks, $name', 'شكرًا لك يا $name');
     if (isCod) {
@@ -261,15 +269,15 @@ class AppText {
       );
     }
     return _t(
-      '$who! Once you\'ve paid, tap "Open WhatsApp" below to send us your order details.',
-      '$who! بعد ما تدفع، اضغط "افتح واتساب" تحت عشان تبعتلنا تفاصيل طلبك.',
+      '$who! To confirm receipt of your order and get an instant response, please send a screenshot of the transfer on WhatsApp.',
+      '$who! لتأكيد استلام الطلب والاستجابة بشكل فوري قم بإرسال صورة التحويل على واتساب.',
     );
   }
   String get openWhatsApp => _t(
-        'Open WhatsApp to confirm the order',
-        'افتح واتساب لتأكيد الطلب',
+        'Instant confirmation via WhatsApp',
+        'تأكيد فوري عبر الواتساب',
       );
-  String get backToShop => _t('Back to shop', 'العودة للمتجر');
+  String get backToShop => _t('Back to shop', 'العودة للتسوق');
 
   String couldntOpenWhatsApp(String err) =>
       _t('Couldn\'t open WhatsApp: $err', 'تعذر فتح واتساب: $err');

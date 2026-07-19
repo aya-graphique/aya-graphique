@@ -450,6 +450,11 @@ class _ShippingForm extends StatelessWidget {
                       ),
               ),
               const SizedBox(height: 12),
+              Text(
+                context.strings.instapaySenderHint,
+                style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
+              ),
+              const SizedBox(height: 8),
               _Field(
                 label: context.strings.instapaySenderLabel,
                 controller: senderInfoCtrl,
@@ -479,6 +484,11 @@ class _ShippingForm extends StatelessWidget {
                       ),
               ),
               const SizedBox(height: 12),
+              Text(
+                context.strings.vodafoneSenderHint,
+                style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
+              ),
+              const SizedBox(height: 8),
               _Field(
                 label: context.strings.vodafoneSenderLabel,
                 controller: senderInfoCtrl,
@@ -765,14 +775,14 @@ class _OrderSuccessDialog extends StatelessWidget {
                   constraints: const BoxConstraints(minHeight: 48),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
+                    gradient: context.colors.violetGradient,
                     borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: context.colors.orchid.withOpacity(0.5)),
                   ),
                   child: Center(
                     child: Text(
                       context.strings.openWhatsApp,
                       textAlign: TextAlign.center,
-                      style: AppFonts.label(size: 13, color: context.colors.orchid, letterSpacing: 0.6)
+                      style: AppFonts.label(size: 13, color: Colors.white, letterSpacing: 0.6)
                           .copyWith(fontWeight: FontWeight.w700, height: 1.3),
                     ),
                   ),
@@ -789,13 +799,13 @@ class _OrderSuccessDialog extends StatelessWidget {
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    gradient: context.colors.violetGradient,
+                    color: context.colors.surfaceRaised,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Center(
                     child: Text(
-                      'Back to shop',
-                      style: AppFonts.label(size: 13, color: Colors.white, letterSpacing: 1.2)
+                      context.strings.backToShop,
+                      style: AppFonts.label(size: 13, color: context.colors.creamDim, letterSpacing: 1.2)
                           .copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
