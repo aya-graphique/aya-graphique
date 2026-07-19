@@ -169,25 +169,22 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           const SizedBox(height: 40),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
-            child: MarqueeStrip(
-              height: 60,
-              pixelsPerSecond: 20,
-              words: [
-                context.strings.marqueeNotebooks,
-                context.strings.marqueeCalendars,
-                context.strings.marqueeBookmark,
-                context.strings.marqueeStand,
-                context.strings.marqueeDigitalArt,
-                context.strings.marqueeKidsGamesPrint,
-                context.strings.marqueeCommercialPrint,
-                context.strings.marqueeBranding,
-                context.strings.marqueeLogo,
-                context.strings.marqueeAds,
-                context.strings.marqueeWorkshops,
-              ],
-            ),
+          MarqueeStrip(
+            height: 60,
+            pixelsPerSecond: 20,
+            words: [
+              context.strings.marqueeNotebooks,
+              context.strings.marqueeCalendars,
+              context.strings.marqueeBookmark,
+              context.strings.marqueeStand,
+              context.strings.marqueeDigitalArt,
+              context.strings.marqueeKidsGamesPrint,
+              context.strings.marqueeCommercialPrint,
+              context.strings.marqueeBranding,
+              context.strings.marqueeLogo,
+              context.strings.marqueeAds,
+              context.strings.marqueeWorkshops,
+            ],
           ),
           const SizedBox(height: 48),
           _ServicesSection(
@@ -482,17 +479,14 @@ class _ShopPreviewSection extends StatelessWidget {
           child: ProductGrid(products: preview, onProductTap: onProductTap),
         ),
         const SizedBox(height: 40),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: MarqueeStrip(
-            height: 60,
-            words: [
-              context.strings.marqueeCalendarsShort,
-              context.strings.marqueeNotebooksShort,
-              context.strings.marqueeBookmarksShort,
-              context.strings.marqueeGamesShort,
-            ],
-          ),
+        MarqueeStrip(
+          height: 60,
+          words: [
+            context.strings.marqueeCalendarsShort,
+            context.strings.marqueeNotebooksShort,
+            context.strings.marqueeBookmarksShort,
+            context.strings.marqueeGamesShort,
+          ],
         ),
         const SizedBox(height: 40),
         Center(

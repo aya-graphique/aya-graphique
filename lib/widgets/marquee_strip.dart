@@ -118,9 +118,7 @@ class _MarqueeStripState extends State<MarqueeStrip>
 
     return Container(
       height: widget.height,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,

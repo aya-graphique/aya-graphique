@@ -75,68 +75,81 @@ class _CartLineTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: context.colors.border(0.06)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 72,
-              height: 72,
-              child: Image.network(
-                product.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stack) => Container(
-                  color: context.colors.surfaceRaised,
-                  child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: Image.network(
+                    product.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => Container(
+                      color: context.colors.surfaceRaised,
+                      child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppFonts.display(
-                        color: context.colors.cream, size: 16, weight: FontWeight.w700, text: product.name)),
-                const SizedBox(height: 4),
-                product.hasDiscount
-                    ? Row(
-                        children: [
-                          Text(formatPrice(product.discountedPrice),
-                              style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
-                          const SizedBox(width: 6),
-                          Text(
-                            formatPrice(product.price),
-                            style: AppFonts.body(size: 11.5, color: context.colors.creamDim)
-                                .copyWith(decoration: TextDecoration.lineThrough),
-                          ),
-                        ],
-                      )
-                    : Text(formatPrice(product.price),
-                        style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              _stepButton(context, Icons.remove_rounded, () => cart.setQuantity(product.id, line.quantity - 1)),
-              SizedBox(
-                width: 26,
-                child: Text('${line.quantity}',
-                    textAlign: TextAlign.center,
-                    style: AppFonts.body(size: 14, weight: FontWeight.w700, color: context.colors.cream)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppFonts.display(
+                            color: context.colors.cream, size: 16, weight: FontWeight.w700, text: product.name)),
+                    const SizedBox(height: 4),
+                    product.hasDiscount
+                        ? Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            children: [
+                              Text(formatPrice(product.discountedPrice),
+                                  style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
+                              Text(
+                                formatPrice(product.price),
+                                style: AppFonts.body(size: 11.5, color: context.colors.creamDim)
+                                    .copyWith(decoration: TextDecoration.lineThrough),
+                              ),
+                            ],
+                          )
+                        : Text(formatPrice(product.price),
+                            style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
+                  ],
+                ),
               ),
-              _stepButton(context, Icons.add_rounded, () => cart.setQuantity(product.id, line.quantity + 1)),
+              IconButton(
+                icon: Icon(Icons.close_rounded, size: 18, color: context.colors.creamDim),
+                onPressed: () => cart.remove(product.id),
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
             ],
           ),
-          const SizedBox(width: 6),
-          IconButton(
-            icon: Icon(Icons.close_rounded, size: 18, color: context.colors.creamDim),
-            onPressed: () => cart.remove(product.id),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _stepButton(context, Icons.remove_rounded, () => cart.setQuantity(product.id, line.quantity - 1)),
+                SizedBox(
+                  width: 26,
+                  child: Text('${line.quantity}',
+                      textAlign: TextAlign.center,
+                      style: AppFonts.body(size: 14, weight: FontWeight.w700, color: context.colors.cream)),
+                ),
+                _stepButton(context, Icons.add_rounded, () => cart.setQuantity(product.id, line.quantity + 1)),
+              ],
+            ),
           ),
         ],
       ),

@@ -98,88 +98,90 @@ class _MiniCartSheet extends StatelessWidget {
                             ),
                           )
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(horizontal: 22),
+                            padding: const EdgeInsets.only(bottom: 14),
                             child: Column(
                               children: [
-                                for (int i = 0; i < cart.lines.length; i++) ...[
-                                  if (i > 0) const SizedBox(height: 12),
-                                  _MiniCartLine(line: cart.lines[i]),
-                                ],
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(2, 14, 2, 0),
-                                  child: Row(
+                                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                                  child: Column(
                                     children: [
-                                      Icon(Icons.local_shipping_outlined, size: 15, color: colors.creamDim),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        strings.estimatedDelivery,
-                                        style: AppFonts.body(size: 12.5, color: colors.creamDim),
+                                      for (int i = 0; i < cart.lines.length; i++) ...[
+                                        if (i > 0) const SizedBox(height: 12),
+                                        _MiniCartLine(line: cart.lines[i]),
+                                      ],
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(2, 14, 2, 0),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.local_shipping_outlined, size: 15, color: colors.creamDim),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              strings.estimatedDelivery,
+                                              style: AppFonts.body(size: 12.5, color: colors.creamDim),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                _SuggestedProducts(cartProductIds: cart.lines.map((l) => l.product.id).toSet()),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                                  child: Container(height: 1, color: colors.border(0.1)),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                                  child: Column(
+                                    children: [
+                                      _row(context, strings.subtotal, formatPrice(cart.subtotal)),
+                                      const SizedBox(height: 8),
+                                      _row(context, strings.shipping, formatPrice(cart.shipping)),
+                                      const SizedBox(height: 12),
+                                      _row(context, strings.total, formatPrice(cart.total), emphasize: true),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(24, 18, 24, 10),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 58,
+                                        decoration: BoxDecoration(
+                                          color: colors.violetPop,
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            strings.proceedToCheckout,
+                                            style: AppFonts.label(size: 15, color: Colors.white, letterSpacing: 1.0)
+                                                .copyWith(fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).maybePop(),
+                                  child: Text(
+                                    strings.continueShopping,
+                                    style: AppFonts.label(size: 13.5, color: colors.creamDim, letterSpacing: 0.4),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                   ),
-                  if (cart.lines.isNotEmpty) ...[
-                    _SuggestedProducts(cartProductIds: cart.lines.map((l) => l.product.id).toSet()),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                      child: Container(height: 1, color: colors.border(0.1)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                      child: Column(
-                        children: [
-                          _row(context, strings.subtotal, formatPrice(cart.subtotal)),
-                          const SizedBox(height: 8),
-                          _row(context, strings.shipping, formatPrice(cart.shipping)),
-                          const SizedBox(height: 12),
-                          _row(context, strings.total, formatPrice(cart.total), emphasize: true),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 10),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const CheckoutScreen()),
-                            );
-                          },
-                          child: Container(
-                            height: 58,
-                            decoration: BoxDecoration(
-                              color: colors.violetPop,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Center(
-                              child: Text(
-                                strings.proceedToCheckout,
-                                style: AppFonts.label(size: 15, color: Colors.white, letterSpacing: 1.0)
-                                    .copyWith(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        child: Text(
-                          strings.continueShopping,
-                          style: AppFonts.label(size: 13.5, color: colors.creamDim, letterSpacing: 0.4),
-                        ),
-                      ),
-                    ),
-                  ] else
-                    const SizedBox(height: 20),
+                  if (cart.lines.isEmpty) const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -376,13 +378,37 @@ class _SuggestedProductsState extends State<_SuggestedProducts> {
               const SizedBox(height: 10),
               SizedBox(
                 height: 158,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: suggestions.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (context, i) => _SuggestedTile(product: suggestions[i]),
-                ),
+                child: suggestions.length >= 3
+                    ? ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        itemCount: suggestions.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (context, i) => _SuggestedTile(product: suggestions[i]),
+                      )
+                    // With just 1-2 suggestions, a horizontal scroller leaves
+                    // a big awkward empty gap next to a single small card.
+                    // Instead, spread the card(s) evenly across the row
+                    // width (capped so a single item doesn't blow up into
+                    // an oversized tile) so the row always looks intentional.
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          children: [
+                            for (var i = 0; i < suggestions.length; i++) ...[
+                              if (i > 0) const SizedBox(width: 10),
+                              Expanded(
+                                child: Center(
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: 160),
+                                    child: _SuggestedTile(product: suggestions[i]),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
               ),
             ],
           ),
