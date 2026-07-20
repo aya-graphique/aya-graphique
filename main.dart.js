@@ -49816,7 +49816,7 @@ return A.q($async$uo,r)},
 C(a){var s,r=null,q=6e5,p=A.bB(a,r,t.w).w.a.a<700?148:190,o=t.p,n=A.c(a,!0,o).a===B.e?B.f:B.h,m=A.jx(A.fp(new A.Iw(p,r),r,r),r,r,A.bb(q,0,0)).lz(A.aRm(r,B.Qw,B.oS,r,r,B.Qo,r)),l=A.fp(new A.wN("Aya's Graphique",A.c5(!0,(A.c(a,!0,o).a===B.e?B.f:B.h).Q,r,r,26,r,B.x),B.eV,r),r,r),k=A.bb(q,0,0)
 k=A.jx(l,r,A.bb(15e4,0,0),k)
 A.c(a,!0,o).toString
-o=A.fp(new A.ag(B.pj,A.v("NOTEBOOKS \xb7 CALENDARS \xb7 VISUAL DESIGN \xb7 ARTS \xb7 ADVERTISING",r,r,r,A.aX(!0,B.t,2.2,13,r,B.y),B.an,r),r),r,r)
+o=A.fp(new A.ag(B.pj,A.v("VISUAL DESIGN \xb7 ARTS \xb7 ADVERTISING",r,r,r,A.aX(!0,B.t,2.2,13,r,B.y),B.an,r),r),r,r)
 l=A.bb(q,0,0)
 l=A.jx(o,r,A.bb(25e4,0,0),l)
 o=A.fp(B.a1t,r,r)
