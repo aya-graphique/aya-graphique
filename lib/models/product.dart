@@ -11,6 +11,11 @@ class Product {
   final double price;
   final String category;
   final String imageUrl;
+  // Two extra optional gallery photos, shown alongside imageUrl on the
+  // product detail page. Empty string means "not set" — the gallery just
+  // skips blank slots instead of showing a broken image.
+  final String imageUrl2;
+  final String imageUrl3;
   final List<String> tags;
   final double rating;
   final int stock;
@@ -33,6 +38,8 @@ class Product {
     required this.price,
     required this.category,
     required this.imageUrl,
+    this.imageUrl2 = '',
+    this.imageUrl3 = '',
     this.tags = const [],
     this.rating = 4.8,
     this.stock = 25,
@@ -44,6 +51,13 @@ class Product {
   bool get inStock => stock > 0;
 
   bool get hasDiscount => discountPercent > 0;
+
+  /// Every non-empty gallery photo, in order (imageUrl, imageUrl2,
+  /// imageUrl3). Whichever of the 3 slots were left blank are simply
+  /// skipped — the detail page's gallery only ever shows photos that
+  /// actually exist, and never renders empty/broken slides for the rest.
+  List<String> get galleryImages =>
+      [imageUrl, imageUrl2, imageUrl3].where((u) => u.trim().isNotEmpty).toList();
 
   /// The price a shopper actually pays — `price` minus `discountPercent`,
   /// or plain `price` when there's no discount. This is what every screen
@@ -60,6 +74,8 @@ class Product {
       price: (map['price'] as num).toDouble(),
       category: map['category'] as String? ?? 'Uncategorized',
       imageUrl: map['image_url'] as String? ?? '',
+      imageUrl2: map['image_url_2'] as String? ?? '',
+      imageUrl3: map['image_url_3'] as String? ?? '',
       tags: (map['tags'] as List?)?.map((t) => t.toString()).toList() ?? const [],
       rating: (map['rating'] as num?)?.toDouble() ?? 4.8,
       stock: (map['stock'] as num?)?.toInt() ?? 0,
@@ -75,6 +91,8 @@ class Product {
         'price': price,
         'category': category,
         'image_url': imageUrl,
+        'image_url_2': imageUrl2,
+        'image_url_3': imageUrl3,
         'tags': tags,
         'rating': rating,
         'stock': stock,
@@ -89,6 +107,8 @@ class Product {
     double? price,
     String? category,
     String? imageUrl,
+    String? imageUrl2,
+    String? imageUrl3,
     List<String>? tags,
     double? rating,
     int? stock,
@@ -103,6 +123,8 @@ class Product {
       price: price ?? this.price,
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
+      imageUrl2: imageUrl2 ?? this.imageUrl2,
+      imageUrl3: imageUrl3 ?? this.imageUrl3,
       tags: tags ?? this.tags,
       rating: rating ?? this.rating,
       stock: stock ?? this.stock,

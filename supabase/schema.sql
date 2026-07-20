@@ -36,6 +36,13 @@ alter table products add column if not exists discount_percent numeric(5, 2) not
 -- Safe to re-run on a database created before this column existed.
 alter table products add column if not exists sales_count integer not null default 0;
 
+-- A product can show up to 3 photos in its gallery (image_url plus these
+-- two optional extras). Both default to '' (empty = not set), same as
+-- image_url, so the storefront gallery just skips whichever slots are
+-- blank. Safe to re-run on a database created before these existed.
+alter table products add column if not exists image_url_2 text not null default '';
+alter table products add column if not exists image_url_3 text not null default '';
+
 alter table products enable row level security;
 
 -- Remembers category names that have been used before, so the admin
@@ -531,48 +538,4 @@ create policy "Authenticated update access to illustration_art_items"
 
 create policy "Authenticated delete access to illustration_art_items"
   on illustration_art_items for delete
-  using (auth.role() = 'authenticated');
-
--- Customer-submitted testimonials shown in the "What people say" section on
--- the Home page. Anyone (not signed in) can submit one from the storefront,
--- but it stays hidden from the public until the owner approves it from the
--- admin dashboard — same moderation-gate idea as `is_completed` on orders,
--- just named for what it does here.
-create table if not exists testimonials (
-  id           uuid primary key default gen_random_uuid(),
-  name         text not null,
-  quote        text not null,
-  rating       integer not null default 5 check (rating >= 1 and rating <= 5),
-  is_approved  boolean not null default false,
-  created_at   timestamptz not null default now()
-);
-
-alter table testimonials enable row level security;
-
--- Storefront only ever needs approved testimonials for the public section.
-create policy "Public read access to approved testimonials"
-  on testimonials for select
-  using (is_approved = true);
-
--- Anyone can submit a testimonial from the storefront, but it can only ever
--- be inserted as unapproved — a submitter can't mark their own review
--- approved by tampering with the request.
-create policy "Anyone can submit a testimonial"
-  on testimonials for insert
-  with check (is_approved = false);
-
--- Only you (authenticated) can see pending + approved testimonials together,
--- e.g. in the admin moderation screen.
-create policy "Authenticated can read all testimonials"
-  on testimonials for select
-  using (auth.role() = 'authenticated');
-
--- Lets the admin dashboard approve/unapprove a testimonial.
-create policy "Authenticated can update testimonials"
-  on testimonials for update
-  using (auth.role() = 'authenticated');
-
--- Lets the admin dashboard delete spam/unwanted testimonials.
-create policy "Authenticated can delete testimonials"
-  on testimonials for delete
   using (auth.role() = 'authenticated');

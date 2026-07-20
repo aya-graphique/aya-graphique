@@ -27,6 +27,8 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   late final _description = TextEditingController(text: widget.existing?.description ?? '');
   late final _price = TextEditingController(text: widget.existing?.price.toString() ?? '');
   late final _imageUrl = TextEditingController(text: widget.existing?.imageUrl ?? '');
+  late final _imageUrl2 = TextEditingController(text: widget.existing?.imageUrl2 ?? '');
+  late final _imageUrl3 = TextEditingController(text: widget.existing?.imageUrl3 ?? '');
   late final _tags = TextEditingController(text: widget.existing?.tags.join(', ') ?? '');
   late final _rating = TextEditingController(text: widget.existing?.rating.toString() ?? '4.8');
   late final _stock = TextEditingController(text: widget.existing?.stock.toString() ?? '0');
@@ -42,7 +44,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   bool _addingNewCategory = false;
   bool _loadingCategories = true;
   bool _saving = false;
-  bool _uploadingImage = false;
+  // Which of the 3 photo slots (1/2/3) is mid-upload, if any — lets each
+  // slot show its own spinner instead of all 3 lighting up at once.
+  int? _uploadingSlot;
   String? _error;
 
   bool get _isEditing => widget.existing != null;
@@ -77,6 +81,8 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     _description.dispose();
     _price.dispose();
     _imageUrl.dispose();
+    _imageUrl2.dispose();
+    _imageUrl3.dispose();
     _tags.dispose();
     _rating.dispose();
     _stock.dispose();
@@ -86,7 +92,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     super.dispose();
   }
 
-  Future<void> _pickAndUploadImage() async {
+  Future<void> _pickAndUploadImage(int slot, TextEditingController target) async {
     if (!SupabaseConfig.isConfigured) {
       setState(() => _error = 'Connect Supabase first (see lib/config/supabase_config.dart).');
       return;
@@ -104,16 +110,16 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     }
 
     setState(() {
-      _uploadingImage = true;
+      _uploadingSlot = slot;
       _error = null;
     });
     try {
       final url = await StorageService.uploadProductImage(bytes, file.name);
-      setState(() => _imageUrl.text = url);
+      setState(() => target.text = url);
     } catch (e) {
       setState(() => _error = 'Couldn\'t upload photo: $e');
     } finally {
-      if (mounted) setState(() => _uploadingImage = false);
+      if (mounted) setState(() => _uploadingSlot = null);
     }
   }
 
@@ -136,6 +142,8 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
       price: double.tryParse(_price.text.trim()) ?? 0,
       category: categoryName,
       imageUrl: _imageUrl.text.trim(),
+      imageUrl2: _imageUrl2.text.trim(),
+      imageUrl3: _imageUrl3.text.trim(),
       tags: _tags.text.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList(),
       rating: double.tryParse(_rating.text.trim()) ?? 4.8,
       stock: int.tryParse(_stock.text.trim()) ?? 0,
@@ -254,63 +262,36 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                 }),
               ),
               const SizedBox(height: 16),
-              Text('Photo', style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _uploadingImage ? null : _pickAndUploadImage,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: context.colors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: context.colors.border(0.1)),
-                        ),
-                        child: _uploadingImage
-                            ? SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
-                              )
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.upload_rounded, size: 18, color: context.colors.orchid),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Upload a photo from your device',
-                                    style: AppFonts.body(size: 13.5, weight: FontWeight.w600, color: context.colors.cream),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
+              Text('Photos (up to 3)', style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
+              const SizedBox(height: 4),
+              Text(
+                'Photo 1 is required. Photos 2 and 3 are optional — the storefront gallery only shows the ones you fill in.',
+                style: AppFonts.body(size: 12, color: context.colors.creamDim),
               ),
               const SizedBox(height: 10),
-              _TextField(label: 'Or paste an image URL', controller: _imageUrl, onChanged: () => setState(() {})),
-              if (_imageUrl.text.trim().isNotEmpty) ...[
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    _imageUrl.text.trim(),
-                    height: 140,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 140,
-                      alignment: Alignment.center,
-                      color: context.colors.surface,
-                      child: Text('Image preview unavailable',
-                          style: AppFonts.body(size: 12, color: context.colors.creamDim)),
-                    ),
-                  ),
-                ),
-              ],
+              _PhotoSlot(
+                label: 'Photo 1',
+                controller: _imageUrl,
+                uploading: _uploadingSlot == 1,
+                onUpload: () => _pickAndUploadImage(1, _imageUrl),
+                onChanged: () => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              _PhotoSlot(
+                label: 'Photo 2 (optional)',
+                controller: _imageUrl2,
+                uploading: _uploadingSlot == 2,
+                onUpload: () => _pickAndUploadImage(2, _imageUrl2),
+                onChanged: () => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              _PhotoSlot(
+                label: 'Photo 3 (optional)',
+                controller: _imageUrl3,
+                uploading: _uploadingSlot == 3,
+                onUpload: () => _pickAndUploadImage(3, _imageUrl3),
+                onChanged: () => setState(() {}),
+              ),
               const SizedBox(height: 16),
               _TextField(label: 'Tags (comma separated)', controller: _tags),
               const SizedBox(height: 16),
@@ -466,6 +447,93 @@ class _CategoryChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// One gallery photo slot: an "upload from device" button, a fallback
+/// "paste a URL" field, and a live preview once something's there.
+/// Reused 3x (once per photo) so all 3 slots behave identically.
+class _PhotoSlot extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final bool uploading;
+  final VoidCallback onUpload;
+  final VoidCallback onChanged;
+
+  const _PhotoSlot({
+    required this.label,
+    required this.controller,
+    required this.uploading,
+    required this.onUpload,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = controller.text.trim().isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: uploading ? null : onUpload,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: context.colors.border(0.1)),
+                  ),
+                  child: uploading
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.upload_rounded, size: 18, color: context.colors.orchid),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Upload a photo from your device',
+                              style: AppFonts.body(size: 13.5, weight: FontWeight.w600, color: context.colors.cream),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _TextField(label: 'Or paste an image URL', controller: controller, onChanged: onChanged),
+        if (hasImage) ...[
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              controller.text.trim(),
+              height: 140,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: 140,
+                alignment: Alignment.center,
+                color: context.colors.surface,
+                child: Text('Image preview unavailable',
+                    style: AppFonts.body(size: 12, color: context.colors.creamDim)),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

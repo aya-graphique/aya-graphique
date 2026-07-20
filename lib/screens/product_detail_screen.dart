@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +50,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       onTap: () => Navigator.of(context).pop(),
                     ),
                     const Spacer(),
-                    _CartHeaderBadge(onTap: () => Navigator.of(context).pop()),
+                    _CartHeaderBadge(onTap: () => showMiniCartSheet(context)),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -100,13 +101,51 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-class _Gallery extends StatelessWidget {
+/// Swipeable gallery over the product's up-to-3 photos (imageUrl,
+/// imageUrl2, imageUrl3). Every slide shares the exact same frame — size,
+/// aspect ratio, tilt card, gradient background — so flipping between
+/// photos never shifts the layout. Empty slots (product.galleryImages
+/// already strips those out) simply never get a slide, and if a product
+/// somehow has no photos at all we fall back to a single placeholder
+/// frame instead of an empty carousel.
+/// Flutter's default web scroll behaviour only lets touch/stylus pointers
+/// drag a scrollable — this lets touch, mouse, and trackpad all swipe the
+/// gallery, so it works the same way on phone and desktop browsers alike.
+class _DraggableScrollBehavior extends MaterialScrollBehavior {
+  const _DraggableScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
+class _Gallery extends StatefulWidget {
   final Product product;
   final bool isMobile;
   const _Gallery({required this.product, required this.isMobile});
 
   @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  final _controller = PageController();
+  int _index = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final images = widget.product.galleryImages;
+
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 1000),
       child: Tilt3DCard(
@@ -118,18 +157,126 @@ class _Gallery extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(gradient: context.colors.cardGradient),
-            child: Image.network(
-              product.imageUrl,
-              // .contain so the full product photo is always visible,
-              // uncropped — .cover was slicing off part of the image
-              // whenever its proportions didn't match this fixed
-              // aspect-ratio frame.
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stack) => Center(
-                child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
-              ),
-            ),
+            child: images.isEmpty
+                ? Center(
+                    child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
+                  )
+                : Stack(
+                    children: [
+                      ScrollConfiguration(
+                        behavior: const _DraggableScrollBehavior(),
+                        child: PageView.builder(
+                          controller: _controller,
+                          itemCount: images.length,
+                          onPageChanged: (i) => setState(() => _index = i),
+                          itemBuilder: (context, i) => Image.network(
+                            images[i],
+                            // .contain so the full product photo is always visible,
+                            // uncropped — .cover was slicing off part of the image
+                            // whenever its proportions didn't match this fixed
+                            // aspect-ratio frame.
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stack) => Center(
+                              child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (images.length > 1 && !widget.isMobile) ...[
+                        Positioned(
+                          left: 12,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: _GalleryArrowButton(
+                              icon: Icons.chevron_left_rounded,
+                              onTap: () => _controller.previousPage(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 12,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: _GalleryArrowButton(
+                              icon: Icons.chevron_right_rounded,
+                              onTap: () => _controller.nextPage(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (images.length > 1)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 14,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (int i = 0; i < images.length; i++)
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                                  width: i == _index ? 18 : 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: i == _index
+                                        ? context.colors.orchid
+                                        : context.colors.creamDim.withOpacity(0.35),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small circular hover button used for the left/right gallery arrows on
+/// desktop — gives a click target for navigating between product photos
+/// instead of relying on mouse-drag alone, which isn't discoverable.
+class _GalleryArrowButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _GalleryArrowButton({required this.icon, required this.onTap});
+
+  @override
+  State<_GalleryArrowButton> createState() => _GalleryArrowButtonState();
+}
+
+class _GalleryArrowButtonState extends State<_GalleryArrowButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: context.colors.bgDeep.withOpacity(_hovering ? 0.75 : 0.45),
+          ),
+          child: Icon(widget.icon, color: context.colors.cream, size: 24),
         ),
       ),
     );

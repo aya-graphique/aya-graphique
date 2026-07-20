@@ -15,13 +15,13 @@ import '../services/service_categories_repository.dart';
 import '../services/settings_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/circle_carousel.dart';
+import '../widgets/facebook_reviews_button.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/owner_intro_card.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
-import '../widgets/testimonials_section.dart';
 import 'admin/admin_login_screen.dart';
 import 'graphical_services_screen.dart';
 import 'product_detail_screen.dart';
@@ -262,8 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           _ContactNowButton(onTap: _openWhatsApp),
-          const SizedBox(height: 40),
-          TestimonialsSection(isMobile: widget.isMobile),
+          const SizedBox(height: 16),
+          Center(child: FacebookReviewsButton(isMobile: widget.isMobile)),
           const SizedBox(height: 60),
           _Footer(isMobile: widget.isMobile, onAdminReturn: widget.onAdminReturn),
         ],

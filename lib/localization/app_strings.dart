@@ -81,33 +81,10 @@ class AppText {
   String get illustrationArtEyebrow => _t('Skills & Arts', 'مهارات وفنون');
 
 
-  // Home — testimonials
-  String get testimonialsEyebrow => _t('TESTIMONIALS', 'التوصيات');
-  String get testimonialsTitle => _t('What people say', 'ماذا يقول الناس');
+  // Home — Facebook reviews button
   String get successPartnersReviews => _t('Voices of Our Success Partners!', 'آراء شركاء النجاح !');
   String couldntOpenFacebookReviews(String err) =>
       _t('Couldn\'t open Facebook reviews: $err', 'تعذر فتح صفحة الآراء على فيسبوك: $err');
-  String get noTestimonialsYet =>
-      _t('No reviews yet — be the first to leave one!', 'لسه معندناش تقييمات — كن أول واحد يكتب!');
-  String get leaveACommentButton => _t('Leave a comment', 'اكتب تعليقك');
-  String get leaveACommentTitle => _t('Share your experience', 'شاركنا تجربتك');
-  String get leaveACommentYourName => _t('Your name', 'اسمك');
-  String get leaveACommentYourNameHint => _t('e.g. Mona Adel', 'مثال: منى عادل');
-  String get leaveACommentYourComment => _t('Your comment', 'تعليقك');
-  String get leaveACommentYourCommentHint =>
-      _t('Tell us what you thought…', 'قولنا رأيك...');
-  String get leaveACommentRating => _t('Rating', 'التقييم');
-  String get leaveACommentSubmit => _t('Submit', 'إرسال');
-  String get leaveACommentCancel => _t('Cancel', 'إلغاء');
-  String get leaveACommentNameRequired => _t('Please enter your name.', 'من فضلك اكتب اسمك.');
-  String get leaveACommentCommentRequired =>
-      _t('Please write a comment.', 'من فضلك اكتب تعليقك.');
-  String get leaveACommentSuccess => _t(
-        'Thanks! Your comment will appear here once it\'s approved.',
-        'شكرًا! هيظهر تعليقك هنا بعد الموافقة عليه.',
-      );
-  String leaveACommentError(String err) =>
-      _t('Couldn\'t submit your comment: $err', 'تعذر إرسال تعليقك: $err');
 
   // Home — footer
   String get footerTagline =>

@@ -11,7 +11,6 @@ import '../../services/orders_repository.dart';
 import '../../services/products_repository.dart';
 import '../../services/settings_repository.dart';
 import '../../services/storage_service.dart';
-import '../../services/testimonials_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
 import 'admin_home_banners_screen.dart';
@@ -19,7 +18,6 @@ import 'admin_illustration_art_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_services_screen.dart';
-import 'admin_testimonials_screen.dart';
 
 /// The client's product management screen: everything they need to run
 /// their own catalog without touching Supabase directly — add products,
@@ -65,7 +63,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   String? _instapayLinkError;
 
   int _pendingOrdersCount = 0;
-  int _pendingTestimonialsCount = 0;
 
   @override
   void initState() {
@@ -78,7 +75,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _loadPaymentNumber();
     _loadInstapayLink();
     _loadPendingOrdersCount();
-    _loadPendingTestimonialsCount();
   }
 
   @override
@@ -400,21 +396,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _loadPendingOrdersCount();
   }
 
-  Future<void> _loadPendingTestimonialsCount() async {
-    final count = await TestimonialsRepository.countPending();
-    if (!mounted) return;
-    setState(() => _pendingTestimonialsCount = count);
-  }
-
-  Future<void> _openTestimonials() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AdminTestimonialsScreen()),
-    );
-    // The badge should reflect anything approved/deleted while the owner
-    // was on the Testimonials screen.
-    _loadPendingTestimonialsCount();
-  }
-
   Future<void> _signOut() async {
     await AuthService.signOut();
     if (!mounted) return;
@@ -486,15 +467,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminIllustrationArtScreen()),
                 );
-              },
-            ),
-            _DrawerTile(
-              icon: Icons.rate_review_outlined,
-              label: 'Testimonials',
-              badgeCount: _pendingTestimonialsCount,
-              onTap: () {
-                Navigator.of(context).pop();
-                _openTestimonials();
               },
             ),
             _DrawerTile(
@@ -572,42 +544,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             icon: Icon(Icons.brush_outlined, color: context.colors.creamDim),
             tooltip: 'Illustration & Art',
-          ),
-          IconButton(
-            onPressed: _openTestimonials,
-            icon: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(Icons.rate_review_outlined, color: context.colors.creamDim),
-                if (_pendingTestimonialsCount > 0)
-                  Positioned(
-                    right: -4,
-                    top: -3,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.5),
-                      constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
-                      decoration: BoxDecoration(
-                        color: context.colors.danger,
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: context.colors.bgDeep, width: 1.5),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _pendingTestimonialsCount > 99 ? '99+' : '$_pendingTestimonialsCount',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            height: 1.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            tooltip: 'Testimonials',
           ),
           IconButton(
             onPressed: _openOrders,
@@ -1402,7 +1338,7 @@ class _ProductRow extends StatelessWidget {
 
 /// One row in the mobile Drawer navigation menu: an icon, a label, and an
 /// optional small red count badge (mirrors the badges shown on the
-/// AppBar icons on wider screens, e.g. pending orders/testimonials).
+/// AppBar icons on wider screens, e.g. pending orders).
 class _DrawerTile extends StatelessWidget {
   final IconData icon;
   final String label;

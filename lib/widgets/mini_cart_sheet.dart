@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
@@ -337,6 +338,22 @@ class _MiniCartLine extends StatelessWidget {
 /// leaving the sheet. Renders nothing while loading or if there's simply
 /// nothing else to suggest (empty catalog / everything's already in the
 /// cart), so it never leaves an awkward empty gap.
+/// Flutter's default web scroll behaviour only lets touch/stylus pointers
+/// drag a scrollable — this lets touch, mouse, and trackpad all swipe the
+/// suggestions strip, so it works the same way on phone and desktop
+/// browsers alike.
+class _DraggableScrollBehavior extends MaterialScrollBehavior {
+  const _DraggableScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
 class _SuggestedProducts extends StatefulWidget {
   final Set<String> cartProductIds;
   const _SuggestedProducts({required this.cartProductIds});
@@ -379,12 +396,15 @@ class _SuggestedProductsState extends State<_SuggestedProducts> {
               SizedBox(
                 height: 158,
                 child: suggestions.length >= 3
-                    ? ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        itemCount: suggestions.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 10),
-                        itemBuilder: (context, i) => _SuggestedTile(product: suggestions[i]),
+                    ? ScrollConfiguration(
+                        behavior: const _DraggableScrollBehavior(),
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 10),
+                          itemBuilder: (context, i) => _SuggestedTile(product: suggestions[i]),
+                        ),
                       )
                     // With just 1-2 suggestions, a horizontal scroller leaves
                     // a big awkward empty gap next to a single small card.
