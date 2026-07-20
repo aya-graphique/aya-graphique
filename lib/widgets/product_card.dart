@@ -76,25 +76,26 @@ class ProductCard extends StatelessWidget {
                             color: context.colors.success,
                           ),
                         ),
-                      // Top-right so it never collides with the sold-out/
-                      // discount pill, which always sits top-left. Capped
-                      // to the card's own width (minus the 10px inset on
-                      // each side) and allowed to shrink-to-fit, so on
-                      // narrow phone cards — where two cards share the row
-                      // — the Arabic label can't blow up past the image
-                      // and swallow the whole card.
+                      // Flush against the card's top-right corner (both
+                      // the ribbon's flat right side and its top edge),
+                      // so it never collides with the sold-out/discount
+                      // pill, which always sits top-left. Capped to the
+                      // card's own width and allowed to shrink-to-fit, so
+                      // on narrow phone cards — where two cards share the
+                      // row — the Arabic label can't blow up past the
+                      // image and swallow the whole card.
                       if (isBestSeller)
                         Positioned(
-                          right: 10,
-                          top: 10,
+                          right: 0,
+                          top: 6,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: imageConstraints.maxWidth - 20,
+                              maxWidth: imageConstraints.maxWidth - 10,
                             ),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerRight,
-                              child: _BestSellerBadge(
+                              child: _BestSellerRibbon(
                                 label: context.strings.bestSellerBadge,
                                 compact: isMobile,
                               ),
@@ -243,54 +244,100 @@ class _AddToCartButton extends StatelessWidget {
   }
 }
 
-/// The "🔥 Bestseller" tag for top-selling products — flame icon and label
-/// side by side in a single pill, rather than the plain pill used for
-/// sold-out/discount so it still reads as its own distinct badge.
+/// The "Best Seller" corner tag for top-selling products, styled as a
+/// pointed-end fabric ribbon (a hexagonal banner with arrow-like tips on
+/// both sides plus a fold crease at each tip) rather than a plain pill or
+/// rectangle — the pointed ends are what make it read as "ribbon" at a
+/// glance, even at this small corner-badge size.
 ///
-/// [compact] shrinks the padding/icon/font for narrow phone-width cards,
-/// where two cards share a row and the full-size badge (sized for the
-/// wider tablet/desktop cards) would otherwise dominate the card. The
-/// parent also wraps this in a FittedBox as a hard safety net, but making
-/// the base size smaller to begin with keeps it looking like a small
-/// corner tag instead of a shrunk-down big one.
-class _BestSellerBadge extends StatelessWidget {
+/// [compact] shrinks the padding/font for narrow phone-width cards, where
+/// two cards share a row and the full-size ribbon (sized for the wider
+/// tablet/desktop cards) would otherwise dominate the card. The parent also
+/// wraps this in a FittedBox as a hard safety net, but making the base size
+/// smaller to begin with keeps it looking like a small corner tag instead
+/// of a shrunk-down big one.
+class _BestSellerRibbon extends StatelessWidget {
   final String label;
   final bool compact;
-  const _BestSellerBadge({required this.label, this.compact = false});
+  const _BestSellerRibbon({required this.label, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 11,
-        vertical: compact ? 4 : 6,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE60024),
-        borderRadius: BorderRadius.circular(compact ? 10 : 13),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.local_fire_department_rounded,
-            size: compact ? 13 : 17,
-            color: Colors.white,
-          ),
-          SizedBox(width: compact ? 3 : 5),
-          Text(
-            label,
-            style: AppFonts.label(
-              size: compact ? 9 : 11,
-              color: Colors.white,
-              letterSpacing: 0.4,
-              text: label,
+    // Extra left padding keeps the text clear of the inward notch the
+    // painter cuts into the left edge only; the right edge is flush/flat
+    // so no extra padding is needed there.
+    final tipAllowance = compact ? 4.0 : 5.0;
+    final base = compact ? 7.0 : 10.0;
+    return CustomPaint(
+      painter: _RibbonPainter(),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          base + tipAllowance,
+          compact ? 3 : 5,
+          base,
+          compact ? 3 : 5,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: AppFonts.label(
+                size: compact ? 7.5 : 9,
+                color: Colors.white,
+                letterSpacing: 0.5,
+                weight: FontWeight.w800,
+                text: label,
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: compact ? 2 : 4),
+            Icon(
+              Icons.local_fire_department_rounded,
+              size: compact ? 10 : 13,
+              color: Colors.white,
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Paints the ribbon background behind [_BestSellerRibbon]'s text: a
+/// banner with a flat, flush right edge and a V-shaped notch cut inward
+/// into the left edge only (a one-sided forked "flag tail" ribbon end)
+/// — shaded with a soft top-to-bottom gradient so it reads as a smooth
+/// strip of fabric rather than a flat cutout.
+class _RibbonPainter extends CustomPainter {
+  static const _topColor = Color(0xFFFF3B4E);
+  static const _bottomColor = Color(0xFFD4001F);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tip = size.width * 0.11;
+    final midY = size.height / 2;
+
+    final ribbonPath = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..lineTo(tip, midY)
+      ..close();
+
+    canvas.drawShadow(ribbonPath, Colors.black, 4, true);
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [_topColor, _bottomColor],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawPath(ribbonPath, fillPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RibbonPainter oldDelegate) => false;
 }
 
 class _Pill extends StatelessWidget {
