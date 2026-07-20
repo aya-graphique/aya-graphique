@@ -81,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
-                  'NOTEBOOKS · CALENDARS · VISUAL DESIGN · ARTS · ADVERTISING',
+                  'VISUAL DESIGN · ARTS · ADVERTISING',
                   textAlign: TextAlign.center,
                   style: AppFonts.label(color: context.colors.orchid, size: 13, letterSpacing: 2.2),
                 ),
