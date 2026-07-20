@@ -50,6 +50,18 @@ class Product {
 
   bool get inStock => stock > 0;
 
+  /// The IDs of the top [topN] sellers among [products], for badging
+  /// "Bestseller" on the storefront. Ranked by [salesCount] — a product
+  /// with zero sales is never included, even if the whole catalog has
+  /// nothing sold yet (so a brand-new shop shows no badges at all instead
+  /// of tagging arbitrary products). Ties beyond [topN] are simply cut
+  /// off in list order, same as `List.take`.
+  static Set<String> bestSellerIds(List<Product> products, {int topN = 5}) {
+    final sold = products.where((p) => p.salesCount > 0).toList()
+      ..sort((a, b) => b.salesCount.compareTo(a.salesCount));
+    return sold.take(topN).map((p) => p.id).toSet();
+  }
+
   bool get hasDiscount => discountPercent > 0;
 
   /// Every non-empty gallery photo, in order (imageUrl, imageUrl2,

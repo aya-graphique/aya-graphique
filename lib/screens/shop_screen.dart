@@ -84,6 +84,9 @@ class _ShopScreenState extends State<ShopScreen> {
     final filtered = _activeCategory == null
         ? widget.products
         : widget.products.where((p) => p.category == _activeCategory).toList();
+    // Ranked against the full, unfiltered catalog so a top seller keeps its
+    // badge no matter which category chip is active.
+    final bestSellerIds = Product.bestSellerIds(widget.products);
 
     return SingleChildScrollView(
       controller: widget.scrollController,
@@ -133,7 +136,11 @@ class _ShopScreenState extends State<ShopScreen> {
                       // category's products, full width, no extra headings
                       // needed since the chip itself already shows which
                       // one is active.
-                      ProductGrid(products: filtered, onProductTap: _openProduct)
+                      ProductGrid(
+                        products: filtered,
+                        onProductTap: _openProduct,
+                        bestSellerIds: bestSellerIds,
+                      )
                     else ...[
                       // Nothing selected: each category gets its own
                       // labelled section, shown in order.
@@ -144,6 +151,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           title: categories[i],
                           products: widget.products.where((p) => p.category == categories[i]).toList(),
                           onProductTap: _openProduct,
+                          bestSellerIds: bestSellerIds,
                         ),
                         const SizedBox(height: 48),
                       ],
@@ -170,6 +178,7 @@ class _ProductSection extends StatelessWidget {
   final String title;
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
+  final Set<String> bestSellerIds;
 
   const _ProductSection({
     required this.isMobile,
@@ -177,6 +186,7 @@ class _ProductSection extends StatelessWidget {
     required this.title,
     required this.products,
     required this.onProductTap,
+    this.bestSellerIds = const {},
   });
 
   @override
@@ -204,7 +214,7 @@ class _ProductSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        ProductGrid(products: products, onProductTap: onProductTap),
+        ProductGrid(products: products, onProductTap: onProductTap, bestSellerIds: bestSellerIds),
       ],
     );
   }

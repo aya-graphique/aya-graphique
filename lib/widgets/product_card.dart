@@ -11,8 +11,18 @@ import 'tilt_3d_card.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
+  // Set by ProductGrid from Product.bestSellerIds, computed off the full
+  // catalog's salesCount — true for the handful of top sellers, regardless
+  // of which category filter/section this particular card happens to be
+  // rendered under.
+  final bool isBestSeller;
 
-  const ProductCard({super.key, required this.product, required this.onTap});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onTap,
+    this.isBestSeller = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +72,14 @@ class ProductCard extends StatelessWidget {
                             '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}%',
                         color: context.colors.success,
                       ),
+                    ),
+                  // Top-right so it never collides with the sold-out/
+                  // discount pill, which always sits top-left.
+                  if (isBestSeller)
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: _BestSellerBadge(label: context.strings.bestSellerBadge),
                     ),
                 ],
               ),
@@ -198,6 +216,36 @@ class _AddToCartButton extends StatelessWidget {
           ),
           child: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+/// The "🔥 Bestseller" tag for top-selling products — flame icon and label
+/// side by side in a single pill, rather than the plain pill used for
+/// sold-out/discount so it still reads as its own distinct badge.
+class _BestSellerBadge extends StatelessWidget {
+  final String label;
+  const _BestSellerBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE60024),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.local_fire_department_rounded, size: 17, color: Colors.white),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppFonts.label(size: 11, color: Colors.white, letterSpacing: 0.6, text: label),
+          ),
+        ],
       ),
     );
   }

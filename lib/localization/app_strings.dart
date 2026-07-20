@@ -69,6 +69,10 @@ class AppText {
   // Home — best sellers
   String get bestSellersEyebrow => _t('CUSTOMER FAVOURITES', 'الأكثر طلبًا');
   String get bestSellersTitle => _t('Best sellers', 'الأكثر مبيعًا');
+  // Small "🔥 Bestseller" badge shown on a product card itself (Shop grid
+  // and Home's shop-preview grid), not to be confused with the section
+  // title above — this one sits on the card for the top-selling products.
+  String get bestSellerBadge => _t('Bestseller', 'الأكثر مبيعاً');
 
   // Home — "most ordered" circles (below the "available for" card)
   String get mostRequestedEyebrow => _t('MOST ORDERED', 'الأكثر طلبًا');

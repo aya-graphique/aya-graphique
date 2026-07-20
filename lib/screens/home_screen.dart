@@ -448,6 +448,10 @@ class _ShopPreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // Ranked against the full catalog (before the take(8) slice) so a top
+    // seller keeps its badge even if it doesn't happen to land in Home's
+    // 8-product teaser.
+    final bestSellerIds = Product.bestSellerIds(products);
     final preview = products.take(8).toList();
 
     return Column(
@@ -476,7 +480,7 @@ class _ShopPreviewSection extends StatelessWidget {
           // grid ends up the same effective width — and the cards the
           // same size — on both Home and the Shop tab.
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: ProductGrid(products: preview, onProductTap: onProductTap),
+          child: ProductGrid(products: preview, onProductTap: onProductTap, bestSellerIds: bestSellerIds),
         ),
         const SizedBox(height: 40),
         MarqueeStrip(

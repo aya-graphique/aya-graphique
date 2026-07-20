@@ -7,8 +7,19 @@ import 'reveal_on_scroll.dart';
 class ProductGrid extends StatelessWidget {
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
+  // IDs of the products that should show the 🔥 Bestseller badge. Left as a
+  // plain Set (rather than computed internally from `products`) so callers
+  // can rank against the *full* catalog even when this particular grid is
+  // only showing a filtered/sliced subset of it — see ShopScreen and
+  // HomeScreen's _ShopPreviewSection.
+  final Set<String> bestSellerIds;
 
-  const ProductGrid({super.key, required this.products, required this.onProductTap});
+  const ProductGrid({
+    super.key,
+    required this.products,
+    required this.onProductTap,
+    this.bestSellerIds = const {},
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +51,7 @@ class ProductGrid extends StatelessWidget {
           child: ProductCard(
             product: product,
             onTap: () => onProductTap(product),
+            isBestSeller: bestSellerIds.contains(product.id),
           ),
         );
       },
