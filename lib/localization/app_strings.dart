@@ -194,9 +194,6 @@ class AppText {
   String get shippingAddress => _t('Shipping address', 'عنوان الشحن');
   String get payment => _t('Payment', 'الدفع');
 
-  String get cod => _t('Cash on delivery', 'الدفع عند الاستلام');
-  String get codSubtitle =>
-      _t('Pay the courier when your order arrives.', 'ادفع للمندوب عند وصول طلبك.');
   String get instapay => _t('InstaPay', 'إنستاباي');
   String get instapaySubtitle =>
       _t('We\'ll open InstaPay so you can send the total.', 'سنفتح إنستاباي لترسل قيمة الطلب.');
@@ -246,6 +243,8 @@ class AppText {
         'To respond to your order instantly, enter the number you transferred from',
         'للاستجابة لطلبك بشكل فوري اكتب الرقم الذي تم تحويل منه المبلغ',
       );
+  String get instapaySenderPlaceholder => _t('InstaPay name or number', 'اسم إنستاباي أو الرقم المحوّل منه');
+  String get vodafoneSenderPlaceholder => _t('Vodafone Cash number', 'رقم فودافون كاش');
   String get senderInfoRequired => _t(
         'Enter the name/number you\'ll pay from',
         'اكتب الاسم أو الرقم اللي هتحول منه',
@@ -258,16 +257,8 @@ class AppText {
   String get placeOrder => _t('Place order', 'تنفيذ الطلب');
 
   String get orderPlaced => _t('Order placed!', 'تم استلام طلبك!');
-  String thanksMessage(String name, {required bool isCod}) {
+  String thanksMessage(String name) {
     final who = name.isEmpty ? _t('Thanks for shopping with us', 'شكرًا لتسوقك معنا') : _t('Thanks, $name', 'شكرًا لك يا $name');
-    if (isCod) {
-      return _t(
-        '$who! Tap "Open WhatsApp" below to send us your order details. '
-        'You\'ll pay the courier when your order arrives.',
-        '$who! اضغط "افتح واتساب" تحت عشان تبعتلنا تفاصيل طلبك. '
-        'هتدفع للمندوب لما الطلب يوصلك.',
-      );
-    }
     return _t(
       '$who! To confirm receipt of your order and get an instant response, please send a screenshot of the transfer on WhatsApp.',
       '$who! لتأكيد استلام الطلب والاستجابة بشكل فوري قم بإرسال صورة التحويل على واتساب.',

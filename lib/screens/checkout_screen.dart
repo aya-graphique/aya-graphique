@@ -10,7 +10,7 @@ import '../theme/app_theme.dart';
 import '../utils/currency.dart';
 import '../widgets/animated_backdrop.dart';
 
-enum PaymentMethod { cod, instapay, vodafoneCash }
+enum PaymentMethod { instapay, vodafoneCash }
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -29,7 +29,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _senderInfoCtrl = TextEditingController();
   bool _placing = false;
 
-  PaymentMethod _paymentMethod = PaymentMethod.cod;
+  PaymentMethod _paymentMethod = PaymentMethod.instapay;
 
   // Owner's WhatsApp number, the Vodafone Cash number, and the InstaPay
   // link, all set by the admin from the Store admin settings panel. Loaded
@@ -71,8 +71,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   String get _paymentMethodValue {
     switch (_paymentMethod) {
-      case PaymentMethod.cod:
-        return 'cod';
       case PaymentMethod.instapay:
         return 'instapay';
       case PaymentMethod.vodafoneCash:
@@ -105,9 +103,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     buffer.writeln('Total: ${formatPrice(cart.total)}');
     buffer.writeln();
     switch (_paymentMethod) {
-      case PaymentMethod.cod:
-        buffer.writeln('Payment: Cash on delivery');
-        break;
       case PaymentMethod.instapay:
         buffer.writeln('Payment: InstaPay');
         buffer.writeln('Paid from (InstaPay name): ${_senderInfoCtrl.text.trim()}');
@@ -179,7 +174,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         phone1: _phone1Ctrl.text.trim(),
         phone2: _phone2Ctrl.text.trim(),
         paymentMethod: _paymentMethodValue,
-        paymentSenderInfo: _paymentMethod == PaymentMethod.cod ? '' : _senderInfoCtrl.text.trim(),
+        paymentSenderInfo: _senderInfoCtrl.text.trim(),
         cart: cart,
       );
     } catch (e) {
@@ -216,7 +211,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       barrierDismissible: false,
       builder: (dialogContext) => _OrderSuccessDialog(
         name: _nameCtrl.text.trim(),
-        isCod: _paymentMethod == PaymentMethod.cod,
         onOpenWhatsApp: () => _openWhatsApp(whatsAppMessage),
       ),
     );
@@ -404,15 +398,6 @@ class _ShippingForm extends StatelessWidget {
             Text(context.strings.payment, style: AppFonts.display(color: context.colors.cream, size: 18, weight: FontWeight.w700)),
             const SizedBox(height: 12),
             _PaymentOption(
-              label: context.strings.cod,
-              subtitle: context.strings.codSubtitle,
-              selected: paymentMethod == PaymentMethod.cod,
-              onTap: () => onPaymentMethodChanged(PaymentMethod.cod),
-              icon: Icons.payments_rounded,
-              iconColor: context.colors.creamDim,
-            ),
-            const SizedBox(height: 10),
-            _PaymentOption(
               label: context.strings.instapay,
               subtitle: context.strings.instapaySubtitle,
               selected: paymentMethod == PaymentMethod.instapay,
@@ -431,33 +416,10 @@ class _ShippingForm extends StatelessWidget {
             ),
             if (paymentMethod == PaymentMethod.instapay) ...[
               const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: context.colors.orchid.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colors.orchid.withOpacity(0.3)),
-                ),
-                child: instapayLink.isEmpty
-                    ? Text(
-                        context.strings.instapayNoLinkNotice,
-                        style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
-                      )
-                    : Text(
-                        context.strings.instapayWithLinkNotice,
-                        style: AppFonts.body(size: 12.5, color: context.colors.cream),
-                      ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.strings.instapaySenderHint,
-                style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
-              ),
-              const SizedBox(height: 8),
               _Field(
-                label: context.strings.instapaySenderLabel,
                 controller: senderInfoCtrl,
+                helperText: context.strings.instapaySenderHint,
+                hintText: context.strings.instapaySenderPlaceholder,
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? context.stringsRead.senderInfoRequired
                     : null,
@@ -465,34 +427,11 @@ class _ShippingForm extends StatelessWidget {
             ],
             if (paymentMethod == PaymentMethod.vodafoneCash) ...[
               const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: context.colors.orchid.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colors.orchid.withOpacity(0.3)),
-                ),
-                child: paymentNumber.isEmpty
-                    ? Text(
-                        context.strings.vodafoneNoNumberNotice,
-                        style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
-                      )
-                    : Text(
-                        context.strings.vodafoneWithNumberNotice(paymentNumber),
-                        style: AppFonts.body(size: 12.5, color: context.colors.cream),
-                      ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.strings.vodafoneSenderHint,
-                style: AppFonts.body(size: 12.5, color: context.colors.creamDim),
-              ),
-              const SizedBox(height: 8),
               _Field(
-                label: context.strings.vodafoneSenderLabel,
                 controller: senderInfoCtrl,
                 keyboardType: TextInputType.phone,
+                helperText: context.strings.vodafoneSenderHint,
+                hintText: context.strings.vodafoneSenderPlaceholder,
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? context.stringsRead.senderInfoRequired
                     : null,
@@ -602,23 +541,27 @@ class _PaymentOption extends StatelessWidget {
 }
 
 class _Field extends StatelessWidget {
-  final String label;
+  final String? label;
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final int maxLines;
   final String? Function(String?) validator;
+  final String? helperText;
+  final String? hintText;
 
   const _Field({
-    required this.label,
+    this.label,
     required this.controller,
     this.keyboardType,
     this.maxLines = 1,
     required this.validator,
+    this.helperText,
+    this.hintText,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    final field = TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
@@ -626,22 +569,52 @@ class _Field extends StatelessWidget {
       style: AppFonts.body(size: 14.5, color: context.colors.cream),
       cursorColor: context.colors.orchid,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: (label == null || label!.isEmpty) ? null : label,
         labelStyle: AppFonts.body(color: context.colors.creamDim, size: 13.5),
+        hintText: hintText,
+        hintStyle: AppFonts.body(color: context.colors.creamDim.withOpacity(0.6), size: 13.5),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         filled: true,
-        fillColor: context.colors.surfaceRaised,
+        fillColor: helperText == null ? context.colors.surfaceRaised : context.colors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: context.colors.orchid, width: 1.4),
+          borderSide: BorderSide(
+            color: helperText == null ? context.colors.orchid : context.colors.orchid.withOpacity(0.5),
+            width: helperText == null ? 1.4 : 1.2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: context.colors.danger, width: 1.2),
         ),
+      ),
+    );
+
+    if (helperText == null) return field;
+
+    // Sender-info fields pass a helperText: show the hint sentence, then a
+    // proper text field right below it for the customer to fill in.
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            helperText!,
+            style: AppFonts.body(color: context.colors.creamDim, size: 12),
+          ),
+          const SizedBox(height: 10),
+          field,
+        ],
       ),
     );
   }
@@ -731,12 +704,10 @@ class _OrderReview extends StatelessWidget {
 
 class _OrderSuccessDialog extends StatelessWidget {
   final String name;
-  final bool isCod;
   final VoidCallback onOpenWhatsApp;
 
   const _OrderSuccessDialog({
     required this.name,
-    required this.isCod,
     required this.onOpenWhatsApp,
   });
 
@@ -762,7 +733,7 @@ class _OrderSuccessDialog extends StatelessWidget {
             Text(context.strings.orderPlaced, style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
             const SizedBox(height: 10),
             Text(
-              context.strings.thanksMessage(name, isCod: isCod),
+              context.strings.thanksMessage(name),
               textAlign: TextAlign.center,
               style: AppFonts.body(color: context.colors.creamDim, size: 14),
             ),
