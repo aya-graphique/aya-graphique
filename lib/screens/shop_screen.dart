@@ -84,11 +84,6 @@ class _ShopScreenState extends State<ShopScreen> {
     final filtered = _activeCategory == null
         ? widget.products
         : widget.products.where((p) => p.category == _activeCategory).toList();
-    // Real sales data only — a brand new store with no orders yet just
-    // shows no "Best sellers" section instead of a misleading one.
-    final topSellers = widget.products.where((p) => p.salesCount > 0).toList()
-      ..sort((a, b) => b.salesCount.compareTo(a.salesCount));
-    final bestSellers = topSellers.take(8).toList();
 
     return SingleChildScrollView(
       controller: widget.scrollController,
@@ -140,20 +135,8 @@ class _ShopScreenState extends State<ShopScreen> {
                       // one is active.
                       ProductGrid(products: filtered, onProductTap: _openProduct)
                     else ...[
-                      // Nothing selected: "Best sellers" leads the page —
-                      // built from real sales_count totals, shown only when
-                      // at least one product has actually sold — followed
-                      // by each category in its own labelled section.
-                      if (bestSellers.isNotEmpty) ...[
-                        _ProductSection(
-                          isMobile: widget.isMobile,
-                          eyebrow: context.strings.bestSellersEyebrow,
-                          title: context.strings.bestSellersTitle,
-                          products: bestSellers,
-                          onProductTap: _openProduct,
-                        ),
-                        const SizedBox(height: 48),
-                      ],
+                      // Nothing selected: each category gets its own
+                      // labelled section, shown in order.
                       for (var i = 0; i < categories.length; i++) ...[
                         _ProductSection(
                           isMobile: widget.isMobile,

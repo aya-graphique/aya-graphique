@@ -35,8 +35,8 @@ class AppText {
   // Home — marquee
   String get marqueeNotebooks => _t('NOTEBOOKS', 'دفاتر');
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
-  String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
-  String get marqueeStand => _t('CALENDAR STAND', 'حامل');
+  // String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
+  // String get marqueeStand => _t('CALENDAR STAND', 'حامل');
   String get marqueeDigitalArt => _t('DIGITAL ART', 'رسم رقمي');
   String get marqueeKidsGamesPrint =>
       _t('PRINTED KIDS GAMES', 'تصميم ألعاب أطفال مطبوعة');
@@ -72,7 +72,7 @@ class AppText {
 
   // Home — "most ordered" circles (below the "available for" card)
   String get mostRequestedEyebrow => _t('MOST ORDERED', 'الأكثر طلبًا');
-  String get artisticProductsLabel => _t('Graphical Products', 'المنتجات الجرافيكية');
+  String get artisticProductsLabel => _t('Printed Designs', 'التصاميم المطبوعة');
 
   // Home — service circles row
   String get homeServicesEyebrow => _t('Design Services', 'خدمات التصميم ');
