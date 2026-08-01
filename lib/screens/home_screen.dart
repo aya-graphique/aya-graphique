@@ -701,12 +701,14 @@ class _ServicesSection extends StatelessWidget {
       eyebrow: context.strings.homeServicesEyebrow,
       isMobile: isMobile,
       desktopDiameter: 188,
+      asContainer: true,
       specs: [
         for (var i = 0; i < kServiceCategories.length; i++)
           _CircleSpec(
             label: kServiceCategories[i].title.t(isArabic),
             imageUrl: serviceCategoryImages[i],
             icon: kServiceCategories[i].icon,
+            description: kServiceCategories[i].intro.t(isArabic),
             onTap: () => onServiceCategoryTap(i),
           ),
       ],
@@ -862,6 +864,11 @@ class _EyebrowCirclesSection extends StatelessWidget {
   // were that many items — e.g. matching the 3-circle Services row above —
   // instead of growing/shrinking as the owner adds/removes items.
   final int? mobileSizeReferenceCount;
+  // When true, each item renders as a rounded-square "container" card
+  // instead of a full circle — used by the Services row so it reads as a
+  // set of tappable cards rather than the Instagram-story-style circles
+  // used elsewhere (e.g. Illustration Art).
+  final bool asContainer;
 
   const _EyebrowCirclesSection({
     required this.icon,
@@ -870,6 +877,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
     required this.specs,
     required this.desktopDiameter,
     this.mobileSizeReferenceCount,
+    this.asContainer = false,
   });
 
   @override
@@ -880,43 +888,105 @@ class _EyebrowCirclesSection extends StatelessWidget {
     // same size wraps one-per-line (see the old screenshot this was
     // fixed from), so instead it's a single horizontal row of smaller
     // circles that periodically swap places — see MobileCircleCarousel.
-    final circlesArea = isMobile
-        ? MobileCircleCarousel(
-            itemCount: specs.length,
-            sizeReferenceCount: mobileSizeReferenceCount,
-            // Titles can wrap onto a second line (see _CategoryCircle's
-            // maxLines: 2), so reserve extra height below the circle for
-            // it instead of the default single-line allowance.
-            labelAreaHeight: 60,
-            itemBuilder: (context, i, diameter) => _CategoryCircle(
-              label: specs[i].label,
-              imageUrl: specs[i].imageUrl,
-              icon: specs[i].icon,
-              diameter: diameter,
-              // Smaller circles need a smaller label to still read as one
-              // tidy line under each — desktop keeps its own value below.
-              labelSize: (diameter * 0.15).clamp(13.0, 16.0),
-              selected: true,
-              onTap: specs[i].onTap,
-            ),
-          )
-        : Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 24,
-            runSpacing: 24,
-            children: [
-              for (var i = 0; i < specs.length; i++)
-                _CategoryCircle(
+    // The Services row (asContainer) renders each card side-by-side. On
+    // wide screens that's a plain Row + Expanded (3 fit comfortably); on
+    // mobile, 3-across would be too cramped to read, so instead it's a
+    // horizontally swipeable strip — same card design, touch-drag to move
+    // between them, similar to a mini carousel.
+    final circlesArea = asContainer
+        ? (isMobile
+            ? SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var i = 0; i < specs.length; i++) ...[
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: _CategoryCircle(
+                          label: specs[i].label,
+                          imageUrl: specs[i].imageUrl,
+                          icon: specs[i].icon,
+                          description: specs[i].description,
+                          diameter: 160,
+                          labelSize: 21,
+                          selected: true,
+                          floatDelayIndex: i,
+                          asContainer: true,
+                          fullWidth: true,
+                          onTap: specs[i].onTap,
+                        ),
+                      ),
+                      if (i != specs.length - 1) const SizedBox(width: 14),
+                    ],
+                  ],
+                ),
+              )
+            : IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < specs.length; i++) ...[
+                      Expanded(
+                        child: _CategoryCircle(
+                          label: specs[i].label,
+                          imageUrl: specs[i].imageUrl,
+                          icon: specs[i].icon,
+                          description: specs[i].description,
+                          diameter: 200,
+                          labelSize: 24,
+                          selected: true,
+                          floatDelayIndex: i,
+                          asContainer: true,
+                          fullWidth: true,
+                          onTap: specs[i].onTap,
+                        ),
+                      ),
+                      if (i != specs.length - 1) const SizedBox(width: 20),
+                    ],
+                  ],
+                ),
+              ))
+        : isMobile
+            ? MobileCircleCarousel(
+                itemCount: specs.length,
+                sizeReferenceCount: mobileSizeReferenceCount,
+                // Titles can wrap onto a second line (see _CategoryCircle's
+                // maxLines: 2), so reserve extra height below the circle for
+                // it instead of the default single-line allowance.
+                labelAreaHeight: 60,
+                itemBuilder: (context, i, diameter) => _CategoryCircle(
                   label: specs[i].label,
                   imageUrl: specs[i].imageUrl,
                   icon: specs[i].icon,
-                  diameter: desktopDiameter,
+                  description: specs[i].description,
+                  diameter: diameter,
+                  // Smaller circles need a smaller label to still read as one
+                  // tidy line under each — desktop keeps its own value below.
+                  labelSize: (diameter * 0.15).clamp(13.0, 16.0),
                   selected: true,
-                  floatDelayIndex: i,
                   onTap: specs[i].onTap,
                 ),
-            ],
-          );
+              )
+            : Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 24,
+                runSpacing: 24,
+                children: [
+                  for (var i = 0; i < specs.length; i++)
+                    _CategoryCircle(
+                      label: specs[i].label,
+                      imageUrl: specs[i].imageUrl,
+                      icon: specs[i].icon,
+                      description: specs[i].description,
+                      diameter: desktopDiameter,
+                      selected: true,
+                      floatDelayIndex: i,
+                      onTap: specs[i].onTap,
+                    ),
+                ],
+              );
 
     final content = Column(
       children: [
@@ -968,12 +1038,16 @@ class _CircleSpec {
   final String? imageUrl;
   final IconData? icon;
   final VoidCallback onTap;
+  // Short blurb shown under the title — only used in "container" mode
+  // (see [_CategoryCircle.asContainer]); ignored for plain circles.
+  final String? description;
 
   const _CircleSpec({
     required this.label,
     this.imageUrl,
     this.icon,
     required this.onTap,
+    this.description,
   });
 }
 
@@ -989,6 +1063,18 @@ class _CategoryCircle extends StatefulWidget {
   // fixed desktop size; the mobile carousel passes a smaller value scaled
   // to its (smaller) diameter instead.
   final double labelSize;
+  // Renders as a rounded-square "container" card instead of a full circle
+  // — image on top, title, then description underneath. Used by the
+  // Services row; ignored (no-op) for plain circles elsewhere.
+  final bool asContainer;
+  // Short blurb under the title — only shown when asContainer is true.
+  final String? description;
+  // When true (with asContainer), the card stretches to fill the width
+  // given by its parent instead of sizing itself off `diameter` — image
+  // becomes a fixed-size thumbnail on one side, title/description sit
+  // next to it. Used by the Services row so its 3 cards read as full-
+  // width list rows rather than a grid of squares.
+  final bool fullWidth;
 
   const _CategoryCircle({
     required this.label,
@@ -999,6 +1085,9 @@ class _CategoryCircle extends StatefulWidget {
     this.floatDelayIndex = 0,
     required this.onTap,
     this.labelSize = 19,
+    this.asContainer = false,
+    this.description,
+    this.fullWidth = false,
   });
 
   @override
@@ -1010,6 +1099,145 @@ class _CategoryCircleState extends State<_CategoryCircle> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.asContainer) return _buildContainerCard(context);
+    return _buildCircle(context);
+  }
+
+  /// Card version: a decorative icon panel on top (no photo — just the
+  /// category icon on a soft gradient tile), then a centered title and
+  /// description underneath — everything inside ONE bordered container so
+  /// title/description read as part of the card. `fullWidth` lets it
+  /// stretch to fill an Expanded/SizedBox instead of being exactly
+  /// `diameter` wide, while the icon panel itself stays `diameter` tall.
+  Widget _buildContainerCard(BuildContext context) {
+    final diameter = widget.diameter;
+    final colors = context.colors;
+    final radius = BorderRadius.circular(diameter * 0.09);
+    final textPad = (diameter * 0.07).clamp(10.0, 16.0);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          scale: _hovered ? 0.97 : 1.0,
+          child: Container(
+            width: widget.fullWidth ? double.infinity : diameter,
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              color: Colors.transparent,
+              border: Border.all(color: colors.border(0.12)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Panel shows the owner's uploaded photo when there is
+                  // one (added from the admin dashboard → Services →
+                  // category image), and falls back to a decorative icon
+                  // tile otherwise. Sized by aspect ratio (~1.54:1, matching
+                  // the reference artwork) rather than a fixed height, so
+                  // it scales consistently with the card's width.
+                  AspectRatio(
+                    aspectRatio: 1554 / 1012,
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(diameter * 0.09),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            colors.violetPop.withOpacity(0.22),
+                            colors.surfaceRaised,
+                          ],
+                        ),
+                      ),
+                      child: widget.imageUrl != null
+                          ? Image.network(
+                              widget.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Padding(
+                                padding: EdgeInsets.all(diameter * 0.14),
+                                child: Center(
+                                  child: Icon(
+                                    widget.icon ?? Icons.auto_awesome_rounded,
+                                    color: colors.violetPop,
+                                    size: diameter * 0.5,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Padding(
+                              padding: EdgeInsets.all(diameter * 0.14),
+                              child: Center(
+                                child: Icon(
+                                  widget.icon ?? Icons.auto_awesome_rounded,
+                                  color: colors.violetPop,
+                                  size: diameter * 0.5,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(textPad, 16, textPad, textPad - 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.label,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: AppFonts.label(
+                            size: widget.labelSize,
+                            weight: FontWeight.w700,
+                            color: colors.cream,
+                            letterSpacing: 0.4,
+                            text: widget.label,
+                          ),
+                        ),
+                        if (widget.description != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.description!,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: AppFonts.body(
+                              color: colors.creamDim,
+                              size: (widget.labelSize * 0.72).clamp(14.0, 17.0),
+                              height: 1.6,
+                              text: widget.description!,
+                              boostArabicSize: false,
+                            ),
+                          ),
+                        ],
+                      ],
+                  ),
+                ),
+              ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Original Instagram-story styling: a gradient ring always frames the
+  /// circle (not just when selected) — selecting it just brightens it,
+  /// same way a viewed vs. unviewed story ring differs on Instagram.
+  /// Shrinks slightly on hover as a lightweight hint that it's tappable.
+  Widget _buildCircle(BuildContext context) {
     final diameter = widget.diameter;
     final selected = widget.selected;
     return MouseRegion(
@@ -1022,11 +1250,6 @@ class _CategoryCircleState extends State<_CategoryCircle> {
           width: diameter + 16,
           child: Column(
             children: [
-              // Instagram-story styling: a gradient ring always frames
-              // the circle (not just when selected) — selecting it just
-              // brightens it, same way a viewed vs. unviewed story ring
-              // differs on Instagram. Shrinks slightly on hover as a
-              // lightweight hint that it's tappable, no shadow/glow.
               AnimatedScale(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
