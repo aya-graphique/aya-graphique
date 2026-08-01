@@ -818,15 +818,27 @@ class _IllustrationArtSection extends StatelessWidget {
                     ],
                   );
                 }
-                return Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
+                final rows = <List<IllustrationArtItem>>[];
+                for (var i = 0; i < items.length; i += 2) {
+                  rows.add(items.sublist(i, i + 2 > items.length ? items.length : i + 2));
+                }
+                return Column(
                   children: [
-                    for (final item in items)
-                      SizedBox(
-                        width: (constraints.maxWidth - 20) / 2,
-                        child: _SkillArtCard(item: item, isArabic: isArabic),
+                    for (var r = 0; r < rows.length; r++) ...[
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < rows[r].length; i++) ...[
+                              Expanded(child: _SkillArtCard(item: rows[r][i], isArabic: isArabic)),
+                              if (i != rows[r].length - 1) const SizedBox(width: 20),
+                            ],
+                            if (rows[r].length == 1) const Spacer(),
+                          ],
+                        ),
                       ),
+                      if (r != rows.length - 1) const SizedBox(height: 20),
+                    ],
                   ],
                 );
               },
@@ -876,87 +888,107 @@ class _SkillArtCardState extends State<_SkillArtCard> {
         // so the card reads the same in both languages.
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: SizedBox(
-                      width: 110,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [colors.violetPop.withOpacity(0.22), colors.surfaceRaised],
-                          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: SizedBox(
+                    width: 128,
+                    height: 128,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [colors.violetPop.withOpacity(0.22), colors.surfaceRaised],
                         ),
-                        child: widget.item.imageUrl.isNotEmpty
-                            ? Image.network(
-                                widget.item.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Icon(
-                                  Icons.palette_outlined,
-                                  color: colors.violetPop,
-                                  size: 34,
-                                ),
-                              )
-                            : Center(
-                                child: Icon(Icons.palette_outlined, color: colors.violetPop, size: 34),
-                              ),
                       ),
+                      child: widget.item.imageUrl.isNotEmpty
+                          ? Image.network(
+                              widget.item.imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.palette_outlined,
+                                color: colors.violetPop,
+                                size: 34,
+                              ),
+                            )
+                          : Center(
+                              child: Icon(Icons.palette_outlined, color: colors.violetPop, size: 34),
+                            ),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 16, 18, 16),
-                    child: Directionality(
-                      // Text itself still flows per-language (Arabic
-                      // right-aligned, English left-aligned) inside the
-                      // fixed image-left / text-right shell above.
-                      textDirection: widget.isArabic ? TextDirection.rtl : TextDirection.ltr,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppFonts.body(
-                              size: 18,
-                              weight: FontWeight.w700,
-                              color: colors.orchid,
-                              text: title,
-                              boostArabicSize: false,
-                            ),
-                          ),
-                          if (description.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              description,
-                              maxLines: 3,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 16, 18, 16),
+                  child: Directionality(
+                    // Text itself still flows per-language (Arabic
+                    // right-aligned, English left-aligned) inside the
+                    // fixed image-left / text-right shell above.
+                    textDirection: widget.isArabic ? TextDirection.rtl : TextDirection.ltr,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Fixed-height block (room for 2 lines) so a
+                        // one-line title and a two-line title take up
+                        // exactly the same space — otherwise a shorter
+                        // title would make its whole card shorter than
+                        // its neighbour.
+                        SizedBox(
+                          height: 50,
+                          child: Align(
+                            alignment: AlignmentDirectional.topStart,
+                            child: Text(
+                              title,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: AppFonts.body(
-                                color: colors.creamDim,
-                                size: 13.5,
-                                height: 1.55,
-                                text: description,
+                                size: 18,
+                                weight: FontWeight.w700,
+                                color: colors.orchid,
+                                text: title,
                                 boostArabicSize: false,
                               ),
                             ),
-                          ],
+                          ),
+                        ),
+                        if (description.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          // Same idea: a fixed-height block (room for 3
+                          // lines) so a short description doesn't leave
+                          // its card shorter than one with a long
+                          // description right next to it.
+                          SizedBox(
+                            height: 63,
+                            child: Align(
+                              alignment: AlignmentDirectional.topStart,
+                              child: Text(
+                                description,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppFonts.body(
+                                  color: colors.creamDim,
+                                  size: 13.5,
+                                  height: 1.55,
+                                  text: description,
+                                  boostArabicSize: false,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
