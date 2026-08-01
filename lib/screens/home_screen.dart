@@ -159,16 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           SizedBox(height: widget.isMobile ? 120 : 150),
-          FutureBuilder<List<HomeBanner>>(
-            future: widget.bannersFuture,
-            builder: (context, snapshot) {
-              return _Hero(
-                isMobile: widget.isMobile,
-                banners: snapshot.data ?? const [],
-              );
-            },
+          _WelcomeHero(
+            isMobile: widget.isMobile,
+            onPrimaryTap: widget.onViewProfileTap,
+            onSecondaryTap: widget.onShopTap,
           ),
-          const SizedBox(height: 40),
+          // Extra space here clears the portrait's bottom overflow (which
+          // now hangs lower than the card thanks to the added paint
+          // offset) so the flag tail doesn't overlap the marquee below.
+          SizedBox(height: widget.isMobile ? 40 : 110),
           MarqueeStrip(
             height: 60,
             pixelsPerSecond: 20,
@@ -349,6 +348,331 @@ class _HeroState extends State<_Hero> {
             ],
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// The very first thing on Home: a static, hand-built welcome hero (no
+/// longer an owner-uploaded photo banner) — a purple card with Aya's
+/// portrait laid over a red flag/ribbon backdrop on one side, and a
+/// greeting pill, two-tone headline, subtitle, and the "view my work" /
+/// "explore the shop" button pair on the other. The old photo-slideshow
+/// [_Hero] above still powers the second banner strip further down the
+/// page (right before "MOST ORDERED"), which keeps its own owner-managed
+/// photos — only this top slot changed.
+class _WelcomeHero extends StatelessWidget {
+  final bool isMobile;
+  final VoidCallback onPrimaryTap;
+  final VoidCallback onSecondaryTap;
+
+  const _WelcomeHero({
+    required this.isMobile,
+    required this.onPrimaryTap,
+    required this.onSecondaryTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final horizontalPadding = isMobile ? 16.0 : 60.0;
+    final radius = isMobile ? 16.0 : 28.0;
+
+    final textColumn = _HeroText(
+      isMobile: isMobile,
+      onPrimaryTap: onPrimaryTap,
+      onSecondaryTap: onSecondaryTap,
+    );
+
+    // Mobile keeps the simple stacked layout, portrait sized to fit
+    // normally inside the card (no room to break out of it on a narrow
+    // screen without covering the text).
+    if (isMobile) {
+      final portrait = _HeroPortrait(size: 240);
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
+        child: RevealOnScroll(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4A2060), Color(0xFF2A1140)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2A1140).withOpacity(0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [portrait, const SizedBox(height: 24), textColumn],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Desktop: the portrait sits with a small gap from the card's top
+    // edge (topGap) and breaks out past the card's bottom edge
+    // (overflowBottom), matching the reference.
+    const portraitSize = 470.0;
+    const portraitHeight = portraitSize * 1.12;
+    const topGap = 50.0;
+    const overflowBottom = 60.0;
+    const leftInset = 44.0;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final portrait = const _HeroPortrait(size: portraitSize);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: horizontalPadding,
+        right: horizontalPadding,
+        top: 20,
+        bottom: 20,
+      ),
+      child: RevealOnScroll(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(
+                minHeight: topGap + portraitHeight - overflowBottom,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 48),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF4A2060), Color(0xFF2A1140)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2A1140).withOpacity(0.4),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: textColumn),
+                  // Reserves the space the overlaid portrait sits over,
+                  // so the text never runs underneath it.
+                  const SizedBox(width: leftInset + portraitSize - 56),
+                ],
+              ),
+            ),
+            Positioned(
+              // The image always sits on the opposite side from the text
+              // (the "end" edge of the row): left in Arabic/RTL, right in
+              // English/LTR.
+              left: isRtl ? leftInset : null,
+              right: isRtl ? null : leftInset,
+              top: topGap,
+              child: Transform.translate(
+                // Paint-only nudge: change this number to move the image
+                // up/down without touching topGap or the container's
+                // minHeight above — this offset doesn't affect layout at
+                // all, just where the image is drawn.
+                offset: const Offset(0, 39),
+                child: SizedBox(
+                  width: portraitSize,
+                  height: portraitHeight,
+                  child: portrait,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Aya's portrait already composited over the red flag-shaped backdrop —
+/// a single finished graphic (photo + ribbon baked in together), matching
+/// the reference design this hero replaces. Replaces the old two-layer
+/// version that painted the ribbon separately and clipped a plain photo
+/// on top.
+class _HeroPortrait extends StatelessWidget {
+  final double size;
+  const _HeroPortrait({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size * 1.12,
+      child: Image.asset(
+        'assets/images/aya_hero_flag_photo.png',
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
+/// The greeting pill, two-tone headline, subtitle, and the "view my
+/// work" / "explore the shop" button pair on the text side of the hero.
+class _HeroText extends StatelessWidget {
+  final bool isMobile;
+  final VoidCallback onPrimaryTap;
+  final VoidCallback onSecondaryTap;
+
+  const _HeroText({
+    required this.isMobile,
+    required this.onPrimaryTap,
+    required this.onSecondaryTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final crossAlign = isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+    final textAlign = isMobile ? TextAlign.center : TextAlign.start;
+
+    return Column(
+      crossAxisAlignment: crossAlign,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: Colors.white.withOpacity(0.16)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFFE7D4F5)),
+              const SizedBox(width: 8),
+              Text(
+                strings.heroWelcomePillName,
+                style: AppFonts.label(
+                  size: 13,
+                  color: Colors.white,
+                  letterSpacing: 0.4,
+                  text: strings.heroWelcomePillName,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: isMobile ? 18 : 24),
+        Text.rich(
+          TextSpan(children: [
+            // Order and colors swapped from before: the accent word now
+            // comes first and is white, the main word now comes second
+            // and is pink.
+            TextSpan(
+              text: strings.heroWelcomeTitleAccent,
+              style: AppFonts.display(
+                size: isMobile ? 40 : 70,
+                weight: FontWeight.w800,
+                color: Colors.white,
+                text: strings.heroWelcomeTitleAccent,
+              ),
+            ),
+            TextSpan(
+              text: ' ',
+              style: AppFonts.display(
+                size: isMobile ? 40 : 70,
+                weight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            TextSpan(
+              text: strings.heroWelcomeTitleMain,
+              style: AppFonts.display(
+                size: isMobile ? 40 : 70,
+                weight: FontWeight.w800,
+                color: const Color(0xFFD11B34),
+                text: strings.heroWelcomeTitleMain,
+              ),
+            ),
+          ]),
+          textAlign: textAlign,
+        ),
+        SizedBox(height: isMobile ? 14 : 18),
+        Text(
+          strings.heroWelcomeSubtitle,
+          textAlign: textAlign,
+          style: AppFonts.body(
+            size: isMobile ? 15 : 18,
+            color: Colors.white.withOpacity(0.78),
+            text: strings.heroWelcomeSubtitle,
+          ),
+        ),
+        SizedBox(height: isMobile ? 26 : 32),
+        Wrap(
+          alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
+          spacing: 14,
+          runSpacing: 12,
+          children: [
+            _HeroButton(label: strings.heroWelcomePrimaryButton, filled: true, onTap: onPrimaryTap),
+            _HeroButton(label: strings.heroWelcomeSecondaryButton, filled: false, onTap: onSecondaryTap),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// One pill-shaped button in [_HeroText] — filled white (primary, "view
+/// my work") or outlined (secondary, "explore the shop"), with a small
+/// hover scale-up on desktop/web.
+class _HeroButton extends StatefulWidget {
+  final String label;
+  final bool filled;
+  final VoidCallback onTap;
+
+  const _HeroButton({required this.label, required this.filled, required this.onTap});
+
+  @override
+  State<_HeroButton> createState() => _HeroButtonState();
+}
+
+class _HeroButtonState extends State<_HeroButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _hovered ? 1.03 : 1.0,
+          duration: const Duration(milliseconds: 140),
+          curve: Curves.easeOut,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 15),
+            decoration: BoxDecoration(
+              color: widget.filled ? Colors.white : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: widget.filled ? null : Border.all(color: Colors.white.withOpacity(0.5)),
+            ),
+            child: Text(
+              widget.label,
+              style: AppFonts.label(
+                size: 14,
+                color: widget.filled ? const Color(0xFF2A1140) : Colors.white,
+                letterSpacing: 0.3,
+                text: widget.label,
+              ).copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
       ),
     );
   }

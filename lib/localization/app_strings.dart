@@ -32,6 +32,15 @@ class AppText {
         'مجموعة صغيرة ومختارة بعناية من الدفاتر والتقويمات — أغلفة داكنة， '
         'ورق فاتح، وتجليد يدوم أطول من الأفكار التي تكتبها فيه.',
       );
+  // Home — welcome hero (the very first section on Home: portrait +
+  // greeting + the two "view my work" / "explore the shop" buttons)
+  String get heroWelcomePillName => _t('Aya Attia', 'ايه عطية');
+  String get heroWelcomeTitleMain => _t('A Home', 'عنوان');
+  String get heroWelcomeTitleAccent => _t('for Creativity', 'للابداع');
+  String get heroWelcomeSubtitle =>
+      _t("Welcome to creative Aya Attia's site.", 'اهلا وسهلا بكم في موقع المبدعه ايه عطية');
+  String get heroWelcomePrimaryButton => _t('View my work', 'عرض أعمالي');
+  String get heroWelcomeSecondaryButton => _t('Explore the shop', 'استكشف المتجر');
   // Home — marquee
   String get marqueeNotebooks => _t('NOTEBOOKS', 'دفاتر');
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
