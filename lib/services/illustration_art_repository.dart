@@ -29,12 +29,16 @@ class IllustrationArtRepository {
   static Future<void> addItem({
     required String titleEn,
     required String titleAr,
+    String descriptionEn = '',
+    String descriptionAr = '',
     required String imageUrl,
     required int sortOrder,
   }) async {
     await SupabaseService.client.from('illustration_art_items').insert({
       'title': titleEn,
       'title_ar': titleAr,
+      'description': descriptionEn,
+      'description_ar': descriptionAr,
       'image_url': imageUrl,
       'sort_order': sortOrder,
     });
@@ -44,11 +48,15 @@ class IllustrationArtRepository {
     String id, {
     required String titleEn,
     required String titleAr,
+    String? descriptionEn,
+    String? descriptionAr,
     String? imageUrl,
   }) async {
     final update = <String, dynamic>{
       'title': titleEn,
       'title_ar': titleAr,
+      if (descriptionEn != null) 'description': descriptionEn,
+      if (descriptionAr != null) 'description_ar': descriptionAr,
     };
     if (imageUrl != null) update['image_url'] = imageUrl;
     await SupabaseService.client.from('illustration_art_items').update(update).eq('id', id);

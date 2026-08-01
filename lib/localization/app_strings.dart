@@ -89,9 +89,17 @@ class AppText {
 
   // Home — service circles row
   String get homeServicesEyebrow => _t('Design Services', 'خدمات التصميم ');
+  String get homeServicesSubtitle => _t(
+        'Professional design paths tailored to your goals, from mentoring to full branding',
+        'مسارات تصميم احترافية تناسب أهدافك، من الإرشاد المهني إلى الهوية الكاملة',
+      );
 
   // Home — illustration & art circles (owner-managed from the dashboard)
   String get illustrationArtEyebrow => _t('Skills & Arts', 'مهارات وفنون');
+  String get illustrationArtSubtitle => _t(
+        'Creative tools and artistic skills that turn ideas into a magical visual reality',
+        'أدوات إبداعية ومهارات فنية نطور بها الأفكار إلى واقع بصري ساحر',
+      );
 
 
   // Home — Facebook reviews button

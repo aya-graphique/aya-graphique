@@ -699,6 +699,8 @@ class _ServicesSection extends StatelessWidget {
     return _EyebrowCirclesSection(
       icon: Icons.design_services_outlined,
       eyebrow: context.strings.homeServicesEyebrow,
+      subtitle: context.strings.homeServicesSubtitle,
+      useStarHeading: true,
       isMobile: isMobile,
       desktopDiameter: 188,
       asContainer: true,
@@ -716,12 +718,64 @@ class _ServicesSection extends StatelessWidget {
   }
 }
 
-/// The owner-managed "Illustration & Art" row: same eyebrow-pill-plus-
-/// divider treatment as [_ServicesSection] right above it, but the
-/// circles here are a fully open-ended list the owner adds/edits/deletes/
-/// reorders from the admin dashboard (see AdminIllustrationArtScreen)
-/// instead of a fixed set of three. Hidden entirely until the owner has
-/// added at least one circle — see the empty-check at the call site.
+/// Centered "star icon + title" heading with an optional subtitle
+/// underneath — the shared header style for both the Services and Skills
+/// & Arts sections on Home.
+class _StarHeading extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool isMobile;
+
+  const _StarHeading({
+    required this.icon,
+    required this.title,
+    required this.isMobile,
+    this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: isMobile ? 20 : 24, color: colors.orchid),
+            SizedBox(width: isMobile ? 8 : 12),
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: AppFonts.display(color: colors.cream, size: isMobile ? 22 : 30, weight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        if (subtitle != null && subtitle!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 560,
+            child: Text(
+              subtitle!,
+              textAlign: TextAlign.center,
+              style: AppFonts.body(color: colors.creamDim, size: isMobile ? 13.5 : 15.5),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The owner-managed "Skills & Arts" row: a centered star-and-title
+/// heading with a short subtitle underneath, then a grid of horizontal
+/// image-left/text-right cards — one per owner-added item (fully
+/// open-ended, added/edited/deleted/reordered from the admin dashboard,
+/// see AdminIllustrationArtScreen). Two cards per row on wide screens,
+/// stacked full-width on mobile. Hidden entirely until the owner has
+/// added at least one item — see the empty-check at the call site.
 class _IllustrationArtSection extends StatelessWidget {
   final List<IllustrationArtItem> items;
   final bool isMobile;
@@ -731,23 +785,181 @@ class _IllustrationArtSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageController>().isArabic;
-    return _EyebrowCirclesSection(
-      icon: Icons.palette_outlined,
-      eyebrow: context.strings.illustrationArtEyebrow,
-      isMobile: isMobile,
-      desktopDiameter: 188,
-      // Always size as if there were as many circles as the Services row
-      // above (kServiceCategories.length), so these stay the same size as
-      // that row no matter how many the owner adds here later.
-      mobileSizeReferenceCount: kServiceCategories.length,
-      specs: [
-        for (var i = 0; i < items.length; i++)
-          _CircleSpec(
-            label: items[i].title(isArabic),
-            imageUrl: items[i].imageUrl,
-            onTap: () {},
+    final sidePadding = EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60);
+
+    return RevealOnScroll(
+      child: Column(
+        children: [
+          Padding(
+            padding: sidePadding,
+            child: _StarHeading(
+              icon: Icons.auto_awesome_rounded,
+              title: context.strings.illustrationArtEyebrow,
+              subtitle: context.strings.illustrationArtSubtitle,
+              isMobile: isMobile,
+            ),
           ),
-      ],
+          const SizedBox(height: 28),
+          Padding(
+            padding: sidePadding,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Two cards per row once there's room for both at a
+                // sensible minimum width; otherwise (mobile / narrow
+                // desktop) they stack full-width, one per line.
+                final twoUp = constraints.maxWidth >= 620;
+                if (!twoUp) {
+                  return Column(
+                    children: [
+                      for (var i = 0; i < items.length; i++) ...[
+                        _SkillArtCard(item: items[i], isArabic: isArabic),
+                        if (i != items.length - 1) const SizedBox(height: 16),
+                      ],
+                    ],
+                  );
+                }
+                return Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  children: [
+                    for (final item in items)
+                      SizedBox(
+                        width: (constraints.maxWidth - 20) / 2,
+                        child: _SkillArtCard(item: item, isArabic: isArabic),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One horizontal "Skills & Arts" card: a photo on one side, title +
+/// short description on the other — same split layout regardless of
+/// language direction (the photo always sits on the physical left, text
+/// on the right), matching the reference design.
+class _SkillArtCard extends StatefulWidget {
+  final IllustrationArtItem item;
+  final bool isArabic;
+
+  const _SkillArtCard({required this.item, required this.isArabic});
+
+  @override
+  State<_SkillArtCard> createState() => _SkillArtCardState();
+}
+
+class _SkillArtCardState extends State<_SkillArtCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final title = widget.item.title(widget.isArabic);
+    final description = widget.item.description(widget.isArabic);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: colors.border(_hovered ? 0.22 : 0.12)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        // Forces the photo-then-text order to stay physically
+        // left-to-right no matter which way the surrounding text flows,
+        // so the card reads the same in both languages.
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: SizedBox(
+                      width: 110,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [colors.violetPop.withOpacity(0.22), colors.surfaceRaised],
+                          ),
+                        ),
+                        child: widget.item.imageUrl.isNotEmpty
+                            ? Image.network(
+                                widget.item.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.palette_outlined,
+                                  color: colors.violetPop,
+                                  size: 34,
+                                ),
+                              )
+                            : Center(
+                                child: Icon(Icons.palette_outlined, color: colors.violetPop, size: 34),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 16, 18, 16),
+                    child: Directionality(
+                      // Text itself still flows per-language (Arabic
+                      // right-aligned, English left-aligned) inside the
+                      // fixed image-left / text-right shell above.
+                      textDirection: widget.isArabic ? TextDirection.rtl : TextDirection.ltr,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppFonts.body(
+                              size: 18,
+                              weight: FontWeight.w700,
+                              color: colors.orchid,
+                              text: title,
+                              boostArabicSize: false,
+                            ),
+                          ),
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              description,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppFonts.body(
+                                color: colors.creamDim,
+                                size: 13.5,
+                                height: 1.55,
+                                text: description,
+                                boostArabicSize: false,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -869,6 +1081,16 @@ class _EyebrowCirclesSection extends StatelessWidget {
   // set of tappable cards rather than the Instagram-story-style circles
   // used elsewhere (e.g. Illustration Art).
   final bool asContainer;
+  // When true (with asContainer), the row of cards stretches edge-to-edge (no side padding)
+  // instead of sharing the page's usual side margin — the eyebrow
+  // heading above it keeps the normal margin either way.
+  final bool fullWidthCircles;
+  // When true, the header above the cards is the bigger centered
+  // "star icon + title + subtitle" treatment (matching the Skills &
+  // Arts section) instead of the small eyebrow-pill-plus-divider one.
+  final bool useStarHeading;
+  // Shown under the title when [useStarHeading] is true.
+  final String? subtitle;
 
   const _EyebrowCirclesSection({
     required this.icon,
@@ -878,6 +1100,9 @@ class _EyebrowCirclesSection extends StatelessWidget {
     required this.desktopDiameter,
     this.mobileSizeReferenceCount,
     this.asContainer = false,
+    this.fullWidthCircles = false,
+    this.useStarHeading = false,
+    this.subtitle,
   });
 
   @override
@@ -988,44 +1213,52 @@ class _EyebrowCirclesSection extends StatelessWidget {
                 ],
               );
 
+    final sidePadding = EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60);
+
     final content = Column(
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: isMobile ? 14 : 17, color: colors.orchid),
-            SizedBox(width: isMobile ? 7 : 10),
-            Text(eyebrow,
-                style: AppFonts.label(
-                  color: colors.orchid,
-                  size: isMobile ? 15 : 19,
-                  letterSpacing: isMobile ? 1.2 : 3.0,
-                )),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Container(
-          height: 1,
-          width: 60,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.transparent,
-                colors.border(0.14),
-                Colors.transparent,
-              ],
-            ),
-          ),
+        Padding(
+          padding: sidePadding,
+          child: useStarHeading
+              ? _StarHeading(icon: icon, title: eyebrow, subtitle: subtitle, isMobile: isMobile)
+              : Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, size: isMobile ? 14 : 17, color: colors.orchid),
+                        SizedBox(width: isMobile ? 7 : 10),
+                        Text(eyebrow,
+                            style: AppFonts.label(
+                              color: colors.orchid,
+                              size: isMobile ? 15 : 19,
+                              letterSpacing: isMobile ? 1.2 : 3.0,
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      height: 1,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            colors.border(0.14),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
         ),
         const SizedBox(height: 26),
-        circlesArea,
+        fullWidthCircles ? circlesArea : Padding(padding: sidePadding, child: circlesArea),
       ],
     );
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
-      child: RevealOnScroll(child: content),
-    );
+    return RevealOnScroll(child: content);
   }
 }
 

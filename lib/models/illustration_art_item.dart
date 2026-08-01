@@ -6,6 +6,10 @@ class IllustrationArtItem {
   final String id;
   final String titleEn;
   final String titleAr;
+  // Short blurb shown under the title on the "Skills & Arts" card —
+  // optional, same fallback behaviour as the title itself.
+  final String descriptionEn;
+  final String descriptionAr;
   final String imageUrl;
   final int sortOrder;
 
@@ -13,6 +17,8 @@ class IllustrationArtItem {
     required this.id,
     required this.titleEn,
     required this.titleAr,
+    this.descriptionEn = '',
+    this.descriptionAr = '',
     required this.imageUrl,
     this.sortOrder = 0,
   });
@@ -24,10 +30,18 @@ class IllustrationArtItem {
     return titleEn.isNotEmpty ? titleEn : titleAr;
   }
 
+  /// Same fallback behaviour as [title], for the description.
+  String description(bool isArabic) {
+    if (isArabic) return descriptionAr.isNotEmpty ? descriptionAr : descriptionEn;
+    return descriptionEn.isNotEmpty ? descriptionEn : descriptionAr;
+  }
+
   factory IllustrationArtItem.fromRow(Map<String, dynamic> row) => IllustrationArtItem(
         id: row['id'] as String,
         titleEn: (row['title'] as String?) ?? '',
         titleAr: (row['title_ar'] as String?) ?? '',
+        descriptionEn: (row['description'] as String?) ?? '',
+        descriptionAr: (row['description_ar'] as String?) ?? '',
         imageUrl: (row['image_url'] as String?) ?? '',
         sortOrder: (row['sort_order'] as num?)?.toInt() ?? 0,
       );

@@ -44,8 +44,8 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
       setState(() => _error = 'Connect Supabase first (see lib/config/supabase_config.dart).');
       return;
     }
-    final titles = await _promptTitles(context);
-    if (titles == null) return;
+    final details = await _promptItemDetails(context);
+    if (details == null) return;
 
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -66,8 +66,10 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
     try {
       final url = await StorageService.uploadIllustrationArtImage(bytes, file.name);
       await IllustrationArtRepository.addItem(
-        titleEn: titles.$1,
-        titleAr: titles.$2,
+        titleEn: details.$1,
+        titleAr: details.$2,
+        descriptionEn: details.$3,
+        descriptionAr: details.$4,
         imageUrl: url,
         sortOrder: _items.length,
       );
@@ -80,10 +82,24 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
   }
 
   Future<void> _editItem(IllustrationArtItem item) async {
-    final titles = await _promptTitles(context, initialEn: item.titleEn, initialAr: item.titleAr);
-    if (titles == null) return;
+    final details = await _promptItemDetails(
+      context,
+      initialEn: item.titleEn,
+      initialAr: item.titleAr,
+      initialDescEn: item.descriptionEn,
+      initialDescAr: item.descriptionAr,
+      initialImageUrl: item.imageUrl,
+    );
+    if (details == null) return;
     try {
-      await IllustrationArtRepository.updateItem(item.id, titleEn: titles.$1, titleAr: titles.$2);
+      await IllustrationArtRepository.updateItem(
+        item.id,
+        titleEn: details.$1,
+        titleAr: details.$2,
+        descriptionEn: details.$3,
+        descriptionAr: details.$4,
+        imageUrl: details.$5,
+      );
       await _load();
     } catch (e) {
       if (!mounted) return;
@@ -93,65 +109,192 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
     }
   }
 
-  /// Simple two-field dialog for the English/Arabic title. Returns null if
-  /// cancelled.
-  Future<(String, String)?> _promptTitles(
+  /// Dialog for the English/Arabic title, short description, and — when
+  /// [initialImageUrl] is given (i.e. editing an existing card) — the
+  /// photo itself, tap-to-replace. Returns (titleEn, titleAr,
+  /// descriptionEn, descriptionAr, newImageUrl), where newImageUrl is
+  /// null if the photo wasn't changed (or this is the add flow, which
+  /// still picks its first photo afterward). Returns null if cancelled.
+  Future<(String, String, String, String, String?)?> _promptItemDetails(
     BuildContext context, {
     String initialEn = '',
     String initialAr = '',
+    String initialDescEn = '',
+    String initialDescAr = '',
+    String? initialImageUrl,
   }) {
     final enController = TextEditingController(text: initialEn);
     final arController = TextEditingController(text: initialAr);
-    return showDialog<(String, String)>(
+    final descEnController = TextEditingController(text: initialDescEn);
+    final descArController = TextEditingController(text: initialDescAr);
+    String? newImageUrl;
+    bool uploadingPhoto = false;
+
+    return showDialog<(String, String, String, String, String?)>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: context.colors.surfaceRaised,
-        title: Text('Circle title', style: AppFonts.body(size: 16, color: context.colors.cream)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: enController,
-              minLines: 1,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
-              style: AppFonts.body(size: 14, color: context.colors.cream),
-              decoration: InputDecoration(
-                labelText: 'Title (English)',
-                labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          Future<void> pickPhoto() async {
+            final result = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+            if (result == null || result.files.isEmpty) return;
+            final bytes = result.files.first.bytes;
+            if (bytes == null) return;
+            setDialogState(() => uploadingPhoto = true);
+            try {
+              final url = await StorageService.uploadIllustrationArtImage(bytes, result.files.first.name);
+              setDialogState(() {
+                newImageUrl = url;
+                uploadingPhoto = false;
+              });
+            } catch (e) {
+              setDialogState(() => uploadingPhoto = false);
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Couldn\'t upload photo: $e')));
+            }
+          }
+
+          return AlertDialog(
+            backgroundColor: context.colors.surfaceRaised,
+            title: Text('Skill / art card', style: AppFonts.body(size: 16, color: context.colors.cream)),
+            content: SizedBox(
+              width: 380,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (initialImageUrl != null) ...[
+                      GestureDetector(
+                        onTap: uploadingPhoto ? null : pickPhoto,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 120,
+                                child: (newImageUrl ?? initialImageUrl!).isEmpty
+                                    ? Container(color: context.colors.surface)
+                                    : Image.network(
+                                        newImageUrl ?? initialImageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          color: context.colors.surface,
+                                          child: Icon(Icons.image_outlined, color: context.colors.creamDim),
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.black.withOpacity(0.35),
+                              ),
+                            ),
+                            uploadingPhoto
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.edit_outlined, size: 16, color: context.colors.cream),
+                                      const SizedBox(width: 6),
+                                      Text('Change photo',
+                                          style: AppFonts.body(
+                                              size: 13, weight: FontWeight.w600, color: context.colors.cream)),
+                                    ],
+                                  ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    TextField(
+                      controller: enController,
+                      minLines: 1,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      style: AppFonts.body(size: 14, color: context.colors.cream),
+                      decoration: InputDecoration(
+                        labelText: 'Title (English)',
+                        labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: arController,
+                      minLines: 1,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      style: AppFonts.body(size: 14, color: context.colors.cream),
+                      decoration: InputDecoration(
+                        labelText: 'Title (Arabic)',
+                        labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descEnController,
+                      minLines: 2,
+                      maxLines: 4,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      style: AppFonts.body(size: 14, color: context.colors.cream),
+                      decoration: InputDecoration(
+                        labelText: 'Short description (English)',
+                        labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descArController,
+                      minLines: 2,
+                      maxLines: 4,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      style: AppFonts.body(size: 14, color: context.colors.cream),
+                      decoration: InputDecoration(
+                        labelText: 'Short description (Arabic)',
+                        labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: arController,
-              minLines: 1,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
-              style: AppFonts.body(size: 14, color: context.colors.cream),
-              decoration: InputDecoration(
-                labelText: 'Title (Arabic)',
-                labelStyle: AppFonts.body(size: 13, color: context.colors.creamDim),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancel', style: AppFonts.body(size: 14, color: context.colors.creamDim)),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel', style: AppFonts.body(size: 14, color: context.colors.creamDim)),
-          ),
-          TextButton(
-            onPressed: () {
-              final en = enController.text.trim();
-              final ar = arController.text.trim();
-              if (en.isEmpty && ar.isEmpty) return;
-              Navigator.of(context).pop((en, ar));
-            },
-            child: Text('Save', style: AppFonts.body(size: 14, color: context.colors.orchid)),
-          ),
-        ],
+              TextButton(
+                onPressed: uploadingPhoto
+                    ? null
+                    : () {
+                        final en = enController.text.trim();
+                        final ar = arController.text.trim();
+                        if (en.isEmpty && ar.isEmpty) return;
+                        Navigator.of(context).pop((
+                          en,
+                          ar,
+                          descEnController.text.trim(),
+                          descArController.text.trim(),
+                          newImageUrl,
+                        ));
+                      },
+                child: Text('Save', style: AppFonts.body(size: 14, color: context.colors.orchid)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
