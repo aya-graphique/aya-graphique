@@ -582,7 +582,7 @@ class _HeroText extends StatelessWidget {
               ),
             ),
             TextSpan(
-              text: ' ',
+              text: AppFonts.isArabic(strings.heroWelcomeTitleAccent) ? ' ' : '\n',
               style: AppFonts.display(
                 size: isMobile ? 40 : 70,
                 weight: FontWeight.w800,

@@ -126,7 +126,7 @@ class ProductCard extends StatelessWidget {
                     product.category.toUpperCase(),
                     style: AppFonts.label(
                       color: context.colors.orchid,
-                      size: AppFonts.isArabic(product.category) ? 18 : 18,
+                      size: AppFonts.isArabic(product.category) ? 20 : 20,
                       letterSpacing: 1.6,
                       text: product.category,
                       boostArabicSize: false,
