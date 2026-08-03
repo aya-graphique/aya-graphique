@@ -61,21 +61,27 @@ class ProductCard extends StatelessWidget {
                 builder: (context, cardConstraints) => Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    product.imageUrl,
-                    // .cover fills the entire card area with no empty
-                    // gaps on the sides/top/bottom, cropping slightly
-                    // if the photo's proportions don't exactly match the
-                    // card's aspect ratio.
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(color: context.colors.surfaceRaised);
-                    },
-                    errorBuilder: (context, error, stack) => Container(
-                      color: context.colors.surfaceRaised,
-                      child: Icon(Icons.menu_book_rounded,
-                          color: context.colors.creamDim, size: 40),
+                  Container(
+                    // Background fills the card area so .contain's empty
+                    // side/top/bottom gaps (when the photo's aspect ratio
+                    // doesn't match the card's) don't show as transparent.
+                    color: context.colors.surfaceRaised,
+                    child: Image.network(
+                      product.imageUrl,
+                      // .contain shows the entire image with nothing
+                      // cropped off, letterboxing instead if the photo's
+                      // proportions don't exactly match the card's
+                      // aspect ratio.
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Container(color: context.colors.surfaceRaised);
+                      },
+                      errorBuilder: (context, error, stack) => Container(
+                        color: context.colors.surfaceRaised,
+                        child: Icon(Icons.menu_book_rounded,
+                            color: context.colors.creamDim, size: 40),
+                      ),
                     ),
                   ),
                   // Save (wishlist) + share icons — physically pinned to
