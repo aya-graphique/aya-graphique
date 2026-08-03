@@ -195,7 +195,7 @@ class ProductCard extends StatelessWidget {
                         // inside the grid, regardless of whether a second
                         // (struck-through) price line is shown.
                         child: SizedBox(
-                          height: 44,
+                          height: 60,
                           child: product.hasDiscount
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +209,7 @@ class ProductCard extends StatelessWidget {
                                         child: Text(formatPrice(product.discountedPrice),
                                           maxLines: 1,
                                           style: AppFonts.body(text: formatPrice(product.discountedPrice), 
-                                            size: AppFonts.isArabic(formatPrice(product.discountedPrice)) ? 40 : 44,
+                                            size: AppFonts.isArabic(formatPrice(product.discountedPrice)) ? 50 : 56,
                                             weight: FontWeight.w700,
                                             color: context.colors.orchidSoft,
                                             boostArabicSize: false,
@@ -224,7 +224,7 @@ class ProductCard extends StatelessWidget {
                                         child: Text(formatPrice(product.price),
                                           maxLines: 1,
                                           style: AppFonts.body(text: formatPrice(product.price), 
-                                            size: AppFonts.isArabic(formatPrice(product.price)) ? 16.2 : 29.2,
+                                            size: AppFonts.isArabic(formatPrice(product.price)) ? 22 : 37,
                                             color: context.colors.creamDim,
                                             boostArabicSize: false,
                                           ).copyWith(decoration: TextDecoration.lineThrough),
