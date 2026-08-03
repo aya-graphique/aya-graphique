@@ -86,6 +86,7 @@ class ProductCard extends StatelessWidget {
                   Positioned(
                     left: 10,
                     top: 10,
+                    right: 78,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -126,41 +127,49 @@ class ProductCard extends StatelessWidget {
                     product.category.toUpperCase(),
                     style: AppFonts.label(
                       color: context.colors.orchid,
-                      size: AppFonts.isArabic(product.category) ? 20 : 20,
+                      size: AppFonts.isArabic(product.category) ? 13 : 26,
                       letterSpacing: 1.6,
                       text: product.category,
                       boostArabicSize: false,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          product.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppFonts.display(
-                            color: context.colors.cream,
-                            size: AppFonts.isArabic(product.name) ? 17.8 : 38.9,
-                            weight: FontWeight.w700,
-                            text: product.name,
-                            boostArabicSize: false,
-                          ),
-                        ),
+                  // Name gets the full card width on its own line so it
+                  // never gets squeezed (and truncated) by the discount
+                  // pill sitting next to it.
+                  SizedBox(
+                    height: 22,
+                    child: Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppFonts.display(
+                        color: context.colors.cream,
+                        size: AppFonts.isArabic(product.name) ? 17.8 : 38.9,
+                        weight: FontWeight.w700,
+                        text: product.name,
+                        boostArabicSize: false,
                       ),
-                      if (product.hasDiscount) ...[
-                        const SizedBox(width: 6),
-                        _Pill(
-                          text:
-                              '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}% ${context.strings.saleBadge}',
-                          color: context.colors.discount,
-                          size: 11,
-                        ),
-                      ],
-                    ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Reserve this row's height on every card (discounted or
+                  // not) so the footer stays the same total height either
+                  // way — keeps the image area above identical across the
+                  // grid instead of shrinking on discounted cards.
+                  SizedBox(
+                    height: 22,
+                    child: product.hasDiscount
+                        ? Align(
+                            alignment: Alignment.centerLeft,
+                            child: _Pill(
+                              text:
+                                  '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}% ${context.strings.saleBadge}',
+                              color: context.colors.discount,
+                              size: 11,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -347,6 +356,8 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(text.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: AppFonts.label(text: text.toUpperCase(), size: size, color: Colors.white, letterSpacing: 1.2),
       ),
     );

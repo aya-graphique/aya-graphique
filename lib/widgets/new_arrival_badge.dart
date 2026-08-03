@@ -85,14 +85,18 @@ class _NewArrivalBadgeState extends State<NewArrivalBadge>
                 child: const Icon(Icons.auto_awesome_rounded, size: 16, color: Colors.white),
               ),
               const SizedBox(width: 5),
-              Text(
-                widget.text.toUpperCase(),
-                style: AppFonts.label(
-                  text: widget.text,
-                  size: 11,
-                  color: Colors.white,
-                  letterSpacing: 1.2,
-                ).copyWith(fontWeight: FontWeight.w800),
+              Flexible(
+                child: Text(
+                  widget.text.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppFonts.label(
+                    text: widget.text,
+                    size: 11,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ).copyWith(fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           ),
