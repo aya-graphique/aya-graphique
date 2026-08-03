@@ -84,9 +84,6 @@ class _ShopScreenState extends State<ShopScreen> {
     final filtered = _activeCategory == null
         ? widget.products
         : widget.products.where((p) => p.category == _activeCategory).toList();
-    // Ranked against the full, unfiltered catalog so a top seller keeps its
-    // badge no matter which category chip is active.
-    final bestSellerIds = Product.bestSellerIds(widget.products);
 
     return SingleChildScrollView(
       controller: widget.scrollController,
@@ -139,7 +136,6 @@ class _ShopScreenState extends State<ShopScreen> {
                       ProductGrid(
                         products: filtered,
                         onProductTap: _openProduct,
-                        bestSellerIds: bestSellerIds,
                       )
                     else ...[
                       // Nothing selected: each category gets its own
@@ -151,7 +147,6 @@ class _ShopScreenState extends State<ShopScreen> {
                           title: categories[i],
                           products: widget.products.where((p) => p.category == categories[i]).toList(),
                           onProductTap: _openProduct,
-                          bestSellerIds: bestSellerIds,
                         ),
                         const SizedBox(height: 48),
                       ],
@@ -178,7 +173,6 @@ class _ProductSection extends StatelessWidget {
   final String title;
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
-  final Set<String> bestSellerIds;
 
   const _ProductSection({
     required this.isMobile,
@@ -186,7 +180,6 @@ class _ProductSection extends StatelessWidget {
     required this.title,
     required this.products,
     required this.onProductTap,
-    this.bestSellerIds = const {},
   });
 
   @override
@@ -208,13 +201,21 @@ class _ProductSection extends StatelessWidget {
                     )
                   : Text(
                       title,
-                      style: AppFonts.display(color: context.colors.cream, size: isMobile ? 20 : 25, weight: FontWeight.w700, text: title),
+                      style: AppFonts.display(
+                        color: context.colors.cream,
+                        size: AppFonts.isArabic(title)
+                            ? (isMobile ? 21.6 : 27.0)
+                            : (isMobile ? 38.9 : 48.6),
+                        weight: FontWeight.w700,
+                        text: title,
+                        boostArabicSize: false,
+                      ),
                     ),
             ),
           ),
         ),
         const SizedBox(height: 22),
-        ProductGrid(products: products, onProductTap: onProductTap, bestSellerIds: bestSellerIds),
+        ProductGrid(products: products, onProductTap: onProductTap),
       ],
     );
   }
@@ -288,10 +289,11 @@ class _CategoryChip extends StatelessWidget {
         child: Text(
           label,
           style: AppFonts.label(
-            size: 14.5,
+            size: AppFonts.isArabic(label) ? 15.7 : 28.2,
             color: selected ? Colors.white : context.colors.creamDim,
             letterSpacing: 0.8,
             text: label,
+            boostArabicSize: false,
           ).copyWith(fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
         ),
       ),

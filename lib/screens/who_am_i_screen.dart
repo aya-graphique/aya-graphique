@@ -319,7 +319,7 @@ class _Profile extends StatelessWidget {
               children: [
                 Container(width: 28, height: 2, color: context.colors.orchid),
                 const SizedBox(width: 10),
-                Text(context.strings.whoAmIEyebrow, style: AppFonts.label(color: context.colors.orchid, size: 15.5, weight: FontWeight.w700)),
+                Text(context.strings.whoAmIEyebrow, style: AppFonts.label(text: context.strings.whoAmIEyebrow, color: context.colors.orchid, size: 15.5, weight: FontWeight.w700)),
                 const SizedBox(width: 10),
                 Container(width: 28, height: 2, color: context.colors.orchid),
               ],
@@ -345,10 +345,9 @@ class _Profile extends StatelessWidget {
             // read as a refined tagline rather than competing with the big
             // gradient name above it.
             const SizedBox(height: 10),
-            Text(
-              'SIMPLICITY MAKES IT ART',
+            Text('SIMPLICITY MAKES IT ART',
               textAlign: TextAlign.center,
-              style: AppFonts.label(
+              style: AppFonts.label(text: 'SIMPLICITY MAKES IT ART', 
                 color: context.colors.creamDim,
                 size: isMobile ? 12.5 : 14,
                 letterSpacing: 3,
@@ -610,9 +609,8 @@ class _PortraitAvatar extends StatelessWidget {
               width: photo,
               height: photo,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Text(
-                _initials,
-                style: AppFonts.display(color: colors.orchid, size: 60, weight: FontWeight.w800),
+              errorBuilder: (_, __, ___) => Text(_initials,
+                style: AppFonts.display(text: _initials, color: colors.orchid, size: 60, weight: FontWeight.w800),
               ),
             ),
           ),
@@ -670,7 +668,7 @@ class _MiniSectionHeader extends StatelessWidget {
       children: [
         Container(width: 22, height: 2, color: context.colors.orchid),
         const SizedBox(width: 10),
-        Text(label, style: AppFonts.label(color: context.colors.orchid, size: 16, weight: FontWeight.w700)),
+        Text(label, style: AppFonts.label(text: label, color: context.colors.orchid, size: 16, weight: FontWeight.w700)),
       ],
     );
   }
@@ -697,11 +695,10 @@ class _StatsRow extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(stats[i].value,
-                    style: AppFonts.display(color: colors.cream, size: 25, weight: FontWeight.w800)),
+                    style: AppFonts.display(text: stats[i].value, color: colors.cream, size: 25, weight: FontWeight.w800)),
                 const SizedBox(height: 4),
-                Text(
-                  stats[i].label,
-                  style: AppFonts.label(color: colors.creamDim, size: 11.5, weight: FontWeight.w700, letterSpacing: 0.6),
+                Text(stats[i].label,
+                  style: AppFonts.label(text: stats[i].label, color: colors.creamDim, size: 11.5, weight: FontWeight.w700, letterSpacing: 0.6),
                 ),
               ],
             ),
@@ -754,9 +751,8 @@ class _TimelineCard extends StatelessWidget {
                   color: colors.violetPop.withOpacity(0.14),
                   borderRadius: BorderRadius.circular(100),
                 ),
-                child: Text(
-                  entry.period,
-                  style: AppFonts.label(size: 13.5, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.4),
+                child: Text(entry.period,
+                  style: AppFonts.label(text: entry.period, size: 13.5, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.4),
                 ),
               ),
             ],
@@ -832,9 +828,8 @@ class _ContactButton extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: filled ? Colors.white : context.colors.cream),
             const SizedBox(width: 7),
-            Text(
-              label,
-              style: AppFonts.label(
+            Text(label,
+              style: AppFonts.label(text: label, 
                 size: 13.5,
                 color: filled ? Colors.white : context.colors.cream,
                 letterSpacing: 0.6,
@@ -858,10 +853,9 @@ class _EmptyProfileNotice extends StatelessWidget {
       children: [
         Icon(Icons.person_outline_rounded, size: 30, color: context.colors.creamDim),
         const SizedBox(height: 12),
-        Text(
-          context.strings.emptyProfileNotice,
+        Text(context.strings.emptyProfileNotice,
           textAlign: TextAlign.start,
-          style: AppFonts.body(size: 17.5, weight: FontWeight.w500, color: context.colors.creamDim),
+          style: AppFonts.body(text: context.strings.emptyProfileNotice, size: 17.5, weight: FontWeight.w500, color: context.colors.creamDim),
         ),
       ],
     );

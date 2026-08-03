@@ -80,10 +80,9 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  'VISUAL DESIGN · ARTS · ADVERTISING',
+                child: Text('VISUAL DESIGN · ARTS · ADVERTISING',
                   textAlign: TextAlign.center,
-                  style: AppFonts.label(color: context.colors.orchid, size: 13, letterSpacing: 2.2),
+                  style: AppFonts.label(text: 'VISUAL DESIGN · ARTS · ADVERTISING', color: context.colors.orchid, size: 13, letterSpacing: 2.2),
                 ),
               ).animate().fadeIn(duration: 600.ms, delay: 250.ms),
               const SizedBox(height: 46),
@@ -192,9 +191,8 @@ class _PortraitBadgeState extends State<_PortraitBadge>
                 height: photo,
                 decoration: BoxDecoration(gradient: colors.violetGradient, shape: BoxShape.circle),
                 alignment: Alignment.center,
-                child: Text(
-                  'AG',
-                  style: AppFonts.display(color: Colors.white, size: outer * 0.26, weight: FontWeight.w800),
+                child: Text('AG',
+                  style: AppFonts.display(text: 'AG', color: Colors.white, size: outer * 0.26, weight: FontWeight.w800),
                 ),
               ),
             ),

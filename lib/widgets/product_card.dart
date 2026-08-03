@@ -1,32 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
+import 'app_toast.dart';
 import 'mini_cart_sheet.dart';
+import 'new_arrival_badge.dart';
 import 'tilt_3d_card.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
-  // Set by ProductGrid from Product.bestSellerIds, computed off the full
-  // catalog's salesCount — true for the handful of top sellers, regardless
-  // of which category filter/section this particular card happens to be
-  // rendered under.
-  final bool isBestSeller;
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onTap,
-    this.isBestSeller = false,
   });
+
+  // Shares the product's name + price (and, on web, a link back to the
+  // storefront) through the platform share sheet. Uses `stringsRead`
+  // rather than `context.strings` since this runs from a tap callback,
+  // not a build method.
+  void _shareProduct(BuildContext context) {
+    final strings = context.stringsRead;
+    final priceText = formatPrice(product.hasDiscount ? product.discountedPrice : product.price);
+    final origin = Uri.base.origin;
+    final text = '${product.name} — $priceText\n$origin';
+    Share.share(text, subject: product.name).catchError((_) {
+      // Share sheet unavailable (e.g. some desktop browsers) — fall back
+      // to just copying the link so the tap still does *something*.
+      Clipboard.setData(ClipboardData(text: text));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(strings.shareLinkCopied)),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
     return Tilt3DCard(
       maxTiltDegrees: 6,
       liftOnHover: 6,
@@ -38,73 +57,64 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, imageConstraints) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.network(
-                        product.imageUrl,
-                        // .cover fills the entire card area with no empty
-                        // gaps on the sides/top/bottom, cropping slightly
-                        // if the photo's proportions don't exactly match the
-                        // card's aspect ratio.
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return Container(color: context.colors.surfaceRaised);
-                        },
-                        errorBuilder: (context, error, stack) => Container(
-                          color: context.colors.surfaceRaised,
-                          child: Icon(Icons.menu_book_rounded,
-                              color: context.colors.creamDim, size: 40),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    product.imageUrl,
+                    // .cover fills the entire card area with no empty
+                    // gaps on the sides/top/bottom, cropping slightly
+                    // if the photo's proportions don't exactly match the
+                    // card's aspect ratio.
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(color: context.colors.surfaceRaised);
+                    },
+                    errorBuilder: (context, error, stack) => Container(
+                      color: context.colors.surfaceRaised,
+                      child: Icon(Icons.menu_book_rounded,
+                          color: context.colors.creamDim, size: 40),
+                    ),
+                  ),
+                  // Top-left badge stack: sold-out takes priority over
+                  // the discount pill (a product can't be both "buy
+                  // now at X% off" and "can't buy it at all"), and the
+                  // "New" badge stacks underneath either one — a
+                  // product can be freshly added *and* discounted or
+                  // sold out at the same time.
+                  Positioned(
+                    left: 10,
+                    top: 10,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!product.inStock)
+                          _Pill(text: context.strings.soldOut, color: context.colors.danger),
+                        if (product.isNew) ...[
+                          if (!product.inStock) const SizedBox(height: 6),
+                          NewArrivalBadge(text: context.strings.newArrivalBadge),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Save (wishlist) + share — flush to the
+                  // card's top-right corner, side by side.
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Row(
+                      children: [
+                        _CardIconButton(
+                          icon: Icons.share_rounded,
+                          onTap: () => _shareProduct(context),
                         ),
-                      ),
-                      if (!product.inStock)
-                        Positioned(
-                          left: 10,
-                          top: 10,
-                          child: _Pill(text: context.strings.soldOut, color: context.colors.danger),
-                        ),
-                      if (product.inStock && product.hasDiscount)
-                        Positioned(
-                          left: 10,
-                          top: 10,
-                          child: _Pill(
-                            text:
-                                '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}%',
-                            color: context.colors.success,
-                          ),
-                        ),
-                      // Flush against the card's top-right corner (both
-                      // the ribbon's flat right side and its top edge),
-                      // so it never collides with the sold-out/discount
-                      // pill, which always sits top-left. Capped to the
-                      // card's own width and allowed to shrink-to-fit, so
-                      // on narrow phone cards — where two cards share the
-                      // row — the Arabic label can't blow up past the
-                      // image and swallow the whole card.
-                      if (isBestSeller)
-                        Positioned(
-                          right: 0,
-                          top: 6,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: imageConstraints.maxWidth - 10,
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: _BestSellerRibbon(
-                                label: context.strings.bestSellerBadge,
-                                compact: isMobile,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
+                        const SizedBox(width: 8),
+                        _SaveButton(product: product),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -116,22 +126,41 @@ class ProductCard extends StatelessWidget {
                     product.category.toUpperCase(),
                     style: AppFonts.label(
                       color: context.colors.orchid,
-                      size: 10.5,
+                      size: AppFonts.isArabic(product.category) ? 18 : 18,
                       letterSpacing: 1.6,
                       text: product.category,
+                      boostArabicSize: false,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppFonts.display(
-                      color: context.colors.cream,
-                      size: 16.5,
-                      weight: FontWeight.w700,
-                      text: product.name,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppFonts.display(
+                            color: context.colors.cream,
+                            size: AppFonts.isArabic(product.name) ? 17.8 : 38.9,
+                            weight: FontWeight.w700,
+                            text: product.name,
+                            boostArabicSize: false,
+                          ),
+                        ),
+                      ),
+                      if (product.hasDiscount) ...[
+                        const SizedBox(width: 6),
+                        _Pill(
+                          text:
+                              '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}% ${context.strings.saleBadge}',
+                          color: context.colors.discount,
+                          size: 11,
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -143,7 +172,7 @@ class ProductCard extends StatelessWidget {
                         // inside the grid, regardless of whether a second
                         // (struck-through) price line is shown.
                         child: SizedBox(
-                          height: 34,
+                          height: 44,
                           child: product.hasDiscount
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,13 +183,13 @@ class ProductCard extends StatelessWidget {
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
                                         alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          formatPrice(product.discountedPrice),
+                                        child: Text(formatPrice(product.discountedPrice),
                                           maxLines: 1,
-                                          style: AppFonts.body(
-                                            size: 15,
+                                          style: AppFonts.body(text: formatPrice(product.discountedPrice), 
+                                            size: AppFonts.isArabic(formatPrice(product.discountedPrice)) ? 20.5 : 36.9,
                                             weight: FontWeight.w700,
                                             color: context.colors.orchidSoft,
+                                            boostArabicSize: false,
                                           ),
                                         ),
                                       ),
@@ -169,12 +198,12 @@ class ProductCard extends StatelessWidget {
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
                                         alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          formatPrice(product.price),
+                                        child: Text(formatPrice(product.price),
                                           maxLines: 1,
-                                          style: AppFonts.body(
-                                            size: 12,
+                                          style: AppFonts.body(text: formatPrice(product.price), 
+                                            size: AppFonts.isArabic(formatPrice(product.price)) ? 16.2 : 29.2,
                                             color: context.colors.creamDim,
+                                            boostArabicSize: false,
                                           ).copyWith(decoration: TextDecoration.lineThrough),
                                         ),
                                       ),
@@ -186,12 +215,12 @@ class ProductCard extends StatelessWidget {
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      formatPrice(product.price),
+                                    child: Text(formatPrice(product.price),
                                       maxLines: 1,
-                                      style: AppFonts.body(
-                                        size: 15,
+                                      style: AppFonts.body(text: formatPrice(product.price), 
+                                        size: 20,
                                         weight: FontWeight.w700,
+                                        boostArabicSize: false,
                                         color: context.colors.orchidSoft,
                                       ),
                                     ),
@@ -244,118 +273,81 @@ class _AddToCartButton extends StatelessWidget {
   }
 }
 
-/// The "Best Seller" corner tag for top-selling products, styled as a
-/// pointed-end fabric ribbon (a hexagonal banner with arrow-like tips on
-/// both sides plus a fold crease at each tip) rather than a plain pill or
-/// rectangle — the pointed ends are what make it read as "ribbon" at a
-/// glance, even at this small corner-badge size.
-///
-/// [compact] shrinks the padding/font for narrow phone-width cards, where
-/// two cards share a row and the full-size ribbon (sized for the wider
-/// tablet/desktop cards) would otherwise dominate the card. The parent also
-/// wraps this in a FittedBox as a hard safety net, but making the base size
-/// smaller to begin with keeps it looking like a small corner tag instead
-/// of a shrunk-down big one.
-class _BestSellerRibbon extends StatelessWidget {
-  final String label;
-  final bool compact;
-  const _BestSellerRibbon({required this.label, this.compact = false});
+/// Small frosted-glass circular button used for the share icon (and as the
+/// base look for [_SaveButton]) — sits directly on top of the product
+/// photo, so it needs its own translucent backdrop to stay legible against
+/// any image underneath it.
+class _CardIconButton extends StatelessWidget {
+  final IconData icon;
+  final Color? iconColor;
+  final VoidCallback onTap;
+
+  const _CardIconButton({required this.icon, required this.onTap, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
-    // Extra left padding keeps the text clear of the inward notch the
-    // painter cuts into the left edge only; the right edge is flush/flat
-    // so no extra padding is needed there.
-    final tipAllowance = compact ? 4.0 : 5.0;
-    final base = compact ? 7.0 : 10.0;
-    return CustomPaint(
-      painter: _RibbonPainter(),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          base + tipAllowance,
-          compact ? 3 : 5,
-          base,
-          compact ? 3 : 5,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: AppFonts.label(
-                size: compact ? 7.5 : 9,
-                color: Colors.white,
-                letterSpacing: 0.5,
-                weight: FontWeight.w800,
-                text: label,
-              ),
-            ),
-            SizedBox(width: compact ? 2 : 4),
-            Icon(
-              Icons.local_fire_department_rounded,
-              size: compact ? 10 : 13,
-              color: Colors.white,
-            ),
-          ],
+    return Material(
+      color: Colors.black.withOpacity(0.32),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6.5),
+          child: Icon(icon, size: 16, color: iconColor ?? Colors.white),
         ),
       ),
     );
   }
 }
 
-/// Paints the ribbon background behind [_BestSellerRibbon]'s text: a
-/// banner with a flat, flush right edge and a V-shaped notch cut inward
-/// into the left edge only (a one-sided forked "flag tail" ribbon end)
-/// — shaded with a soft top-to-bottom gradient so it reads as a smooth
-/// strip of fabric rather than a flat cutout.
-class _RibbonPainter extends CustomPainter {
-  static const _topColor = Color(0xFFFF3B4E);
-  static const _bottomColor = Color(0xFFD4001F);
+/// Heart toggle for the wishlist. Reads/writes [FavoritesProvider] and
+/// swaps between outline and filled so the saved state is obvious at a
+/// glance without needing a label on the card itself.
+class _SaveButton extends StatelessWidget {
+  final Product product;
+  const _SaveButton({required this.product});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final tip = size.width * 0.11;
-    final midY = size.height / 2;
+  Widget build(BuildContext context) {
+    final favorites = context.watch<FavoritesProvider>();
+    final saved = favorites.isFavorite(product.id);
 
-    final ribbonPath = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..lineTo(tip, midY)
-      ..close();
-
-    canvas.drawShadow(ribbonPath, Colors.black, 4, true);
-
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [_topColor, _bottomColor],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawPath(ribbonPath, fillPaint);
+    return _CardIconButton(
+      icon: saved ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+      iconColor: saved ? context.colors.danger : Colors.white,
+      onTap: () {
+        context.read<FavoritesProvider>().toggle(product.id);
+        final strings = context.stringsRead;
+        // `saved` reflects the state *before* this tap, so if it was
+        // false we just added the item (and vice versa).
+        showAppToast(
+          context,
+          message: saved ? strings.removedFromSaved : strings.addedToSaved,
+          icon: saved ? Icons.favorite_border_rounded : Icons.favorite_rounded,
+          accentColor: saved ? context.colors.creamDim : context.colors.danger,
+        );
+      },
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant _RibbonPainter oldDelegate) => false;
 }
 
 class _Pill extends StatelessWidget {
   final String text;
   final Color color;
-  const _Pill({required this.text, required this.color});
+  final double size;
+  const _Pill({required this.text, required this.color, this.size = 9});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.85),
         borderRadius: BorderRadius.circular(100),
       ),
-      child: Text(
-        text.toUpperCase(),
-        style: AppFonts.label(size: 9.5, color: Colors.white, letterSpacing: 1.2),
+      child: Text(text.toUpperCase(),
+        style: AppFonts.label(text: text.toUpperCase(), size: size, color: Colors.white, letterSpacing: 1.2),
       ),
     );
   }

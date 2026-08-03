@@ -745,10 +745,9 @@ class _StarHeading extends StatelessWidget {
             Icon(icon, size: isMobile ? 20 : 24, color: colors.orchid),
             SizedBox(width: isMobile ? 8 : 12),
             Flexible(
-              child: Text(
-                title,
+              child: Text(title,
                 textAlign: TextAlign.center,
-                style: AppFonts.display(color: colors.cream, size: isMobile ? 22 : 30, weight: FontWeight.w700),
+                style: AppFonts.display(text: title, color: colors.cream, size: isMobile ? 22 : 30, weight: FontWeight.w700),
               ),
             ),
           ],
@@ -757,10 +756,9 @@ class _StarHeading extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: 560,
-            child: Text(
-              subtitle!,
+            child: Text(subtitle!,
               textAlign: TextAlign.center,
-              style: AppFonts.body(color: colors.creamDim, size: isMobile ? 13.5 : 15.5),
+              style: AppFonts.body(text: subtitle!, color: colors.creamDim, size: AppFonts.isArabic(subtitle!) ? (isMobile ? 13.5 : 15.5) : (isMobile ? 16 : 18)),
             ),
           ),
         ],
@@ -965,7 +963,7 @@ class _SkillArtCardState extends State<_SkillArtCard> {
                           // its card shorter than one with a long
                           // description right next to it.
                           SizedBox(
-                            height: 63,
+                            height: 70,
                             child: Align(
                               alignment: AlignmentDirectional.topStart,
                               child: Text(
@@ -974,7 +972,7 @@ class _SkillArtCardState extends State<_SkillArtCard> {
                                 overflow: TextOverflow.ellipsis,
                                 style: AppFonts.body(
                                   color: colors.creamDim,
-                                  size: 13.5,
+                                  size: AppFonts.isArabic(description) ? 13.5 : 16,
                                   height: 1.55,
                                   text: description,
                                   boostArabicSize: false,
@@ -1018,10 +1016,6 @@ class _ShopPreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // Ranked against the full catalog (before the take(8) slice) so a top
-    // seller keeps its badge even if it doesn't happen to land in Home's
-    // 8-product teaser.
-    final bestSellerIds = Product.bestSellerIds(products);
     final preview = products.take(8).toList();
 
     return Column(
@@ -1050,7 +1044,7 @@ class _ShopPreviewSection extends StatelessWidget {
           // grid ends up the same effective width — and the cards the
           // same size — on both Home and the Shop tab.
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: ProductGrid(products: preview, onProductTap: onProductTap, bestSellerIds: bestSellerIds),
+          child: ProductGrid(products: preview, onProductTap: onProductTap),
         ),
         const SizedBox(height: 40),
         MarqueeStrip(
@@ -1079,10 +1073,9 @@ class _ShopPreviewSection extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Text(
-                context.strings.shopTheCollection,
-                style: AppFonts.label(size: 16, color: Colors.white, letterSpacing: 0.5)
-                    .copyWith(fontWeight: FontWeight.w700),
+              child: Text(context.strings.shopTheCollection,
+                style: AppFonts.label(text: context.strings.shopTheCollection, size: 16, color: Colors.white, letterSpacing: 0.5)
+                    .copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ),
@@ -1261,7 +1254,7 @@ class _EyebrowCirclesSection extends StatelessWidget {
                         Icon(icon, size: isMobile ? 14 : 17, color: colors.orchid),
                         SizedBox(width: isMobile ? 7 : 10),
                         Text(eyebrow,
-                            style: AppFonts.label(
+                            style: AppFonts.label(text: eyebrow, 
                               color: colors.orchid,
                               size: isMobile ? 15 : 19,
                               letterSpacing: isMobile ? 1.2 : 3.0,
@@ -1628,21 +1621,19 @@ class _Footer extends StatelessWidget {
           // Plain solid color — see shop_nav_bar.dart / shimmer_text.dart
           // for why ShaderMask was dropped here (it wasn't painting).
           Text("Aya's Graphique",
-              style: AppFonts.display(size: 22, weight: FontWeight.w800, color: context.colors.cream)),
+              style: AppFonts.display(text: "Aya's Graphique", size: 22, weight: FontWeight.w800, color: context.colors.cream)),
           const SizedBox(height: 10),
-          Text(
-            context.strings.footerTagline,
+          Text(context.strings.footerTagline,
             textAlign: TextAlign.center,
-            style: AppFonts.body(color: context.colors.creamDim, size: 13),
+            style: AppFonts.body(text: context.strings.footerTagline, color: context.colors.creamDim, size: 13),
           ),
           const SizedBox(height: 6),
-          Text("© ${DateTime.now().year} Aya's Graphique ", style: AppFonts.body(color: context.colors.creamDim, size: 12)),
+          Text("© ${DateTime.now().year} Aya's Graphique ", style: AppFonts.body(text: "© ${DateTime.now().year} Aya's Graphique ", color: context.colors.creamDim, size: 12)),
           const SizedBox(height: 14),
           GestureDetector(
             onTap: () => _openAdmin(context),
-            child: Text(
-              context.strings.storeAdmin,
-              style: AppFonts.label(size: 11, color: context.colors.creamDim, letterSpacing: 1.2),
+            child: Text(context.strings.storeAdmin,
+              style: AppFonts.label(text: context.strings.storeAdmin, size: 11, color: context.colors.creamDim, letterSpacing: 1.2),
             ),
           ),
         ],

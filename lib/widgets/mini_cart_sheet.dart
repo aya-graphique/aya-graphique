@@ -77,9 +77,8 @@ class _MiniCartSheet extends StatelessWidget {
                         Icon(Icons.shopping_bag_rounded, color: colors.orchid, size: 22),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            strings.cartTitle,
-                            style: AppFonts.display(color: colors.cream, size: 23, weight: FontWeight.w700),
+                          child: Text(strings.cartTitle,
+                            style: AppFonts.display(text: strings.cartTitle, color: colors.cream, size: 23, weight: FontWeight.w700),
                           ),
                         ),
                         IconButton(
@@ -93,9 +92,8 @@ class _MiniCartSheet extends StatelessWidget {
                     child: cart.lines.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40),
-                            child: Text(
-                              strings.emptyCartTitle,
-                              style: AppFonts.body(color: colors.creamDim, size: 15),
+                            child: Text(strings.emptyCartTitle,
+                              style: AppFonts.body(text: strings.emptyCartTitle, color: colors.creamDim, size: 15),
                             ),
                           )
                         : SingleChildScrollView(
@@ -116,9 +114,8 @@ class _MiniCartSheet extends StatelessWidget {
                                           children: [
                                             Icon(Icons.local_shipping_outlined, size: 15, color: colors.creamDim),
                                             const SizedBox(width: 6),
-                                            Text(
-                                              strings.estimatedDelivery,
-                                              style: AppFonts.body(size: 12.5, color: colors.creamDim),
+                                            Text(strings.estimatedDelivery,
+                                              style: AppFonts.body(text: strings.estimatedDelivery, size: 12.5, color: colors.creamDim),
                                             ),
                                           ],
                                         ),
@@ -161,9 +158,8 @@ class _MiniCartSheet extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(14),
                                         ),
                                         child: Center(
-                                          child: Text(
-                                            strings.proceedToCheckout,
-                                            style: AppFonts.label(size: 15, color: Colors.white, letterSpacing: 1.0)
+                                          child: Text(strings.proceedToCheckout,
+                                            style: AppFonts.label(text: strings.proceedToCheckout, size: 15, color: Colors.white, letterSpacing: 1.0)
                                                 .copyWith(fontWeight: FontWeight.w700),
                                           ),
                                         ),
@@ -173,9 +169,8 @@ class _MiniCartSheet extends StatelessWidget {
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).maybePop(),
-                                  child: Text(
-                                    strings.continueShopping,
-                                    style: AppFonts.label(size: 13.5, color: colors.creamDim, letterSpacing: 0.4),
+                                  child: Text(strings.continueShopping,
+                                    style: AppFonts.label(text: strings.continueShopping, size: 13.5, color: colors.creamDim, letterSpacing: 0.4),
                                   ),
                                 ),
                               ],
@@ -197,12 +192,11 @@ class _MiniCartSheet extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppFonts.body(color: colors.creamDim, size: emphasize ? 16 : 15)),
-        Text(
-          value,
+        Text(label, style: AppFonts.body(text: label, color: colors.creamDim, size: emphasize ? 16 : 15)),
+        Text(value,
           style: emphasize
-              ? AppFonts.display(size: 19, weight: FontWeight.w700, color: colors.orchidSoft)
-              : AppFonts.body(size: 15, weight: FontWeight.w600, color: colors.cream),
+              ? AppFonts.display(text: value, size: 19, weight: FontWeight.w700, color: colors.orchidSoft)
+              : AppFonts.body(text: value, size: 15, weight: FontWeight.w600, color: colors.cream),
         ),
       ],
     );
@@ -258,23 +252,21 @@ class _MiniCartLine extends StatelessWidget {
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text(formatPrice(product.discountedPrice), style: AppFonts.body(size: 13.5, color: colors.orchidSoft)),
+                    Text(formatPrice(product.discountedPrice), style: AppFonts.body(text: formatPrice(product.discountedPrice), size: 13.5, color: colors.orchidSoft)),
                     const SizedBox(width: 8),
                     Icon(Icons.star_rounded, size: 14, color: colors.orchid),
                     const SizedBox(width: 2),
-                    Text(
-                      '${product.rating}',
-                      style: AppFonts.body(size: 12.5, color: colors.creamDim, weight: FontWeight.w600),
+                    Text('${product.rating}',
+                      style: AppFonts.body(text: '${product.rating}', size: 12.5, color: colors.creamDim, weight: FontWeight.w600),
                     ),
                   ],
                 ),
                 if (product.description.trim().isNotEmpty) ...[
                   const SizedBox(height: 3),
-                  Text(
-                    product.description,
+                  Text(product.description,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppFonts.body(size: 12, color: colors.creamDim.withOpacity(0.85)),
+                    style: AppFonts.body(text: product.description, size: 12, color: colors.creamDim.withOpacity(0.85)),
                   ),
                 ],
               ],
@@ -302,7 +294,7 @@ class _MiniCartLine extends StatelessWidget {
                     width: 22,
                     child: Text('${line.quantity}',
                         textAlign: TextAlign.center,
-                        style: AppFonts.body(size: 14.5, weight: FontWeight.w700, color: colors.cream)),
+                        style: AppFonts.body(text: '${line.quantity}', size: 14.5, weight: FontWeight.w700, color: colors.cream)),
                   ),
                   _stepButton(context, Icons.add_rounded, () => cart.setQuantity(product.id, line.quantity + 1)),
                 ],
@@ -387,9 +379,8 @@ class _SuggestedProductsState extends State<_SuggestedProducts> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  strings.youMightAlsoLike,
-                  style: AppFonts.display(color: colors.cream, size: 14.5, weight: FontWeight.w700),
+                child: Text(strings.youMightAlsoLike,
+                  style: AppFonts.display(text: strings.youMightAlsoLike, color: colors.cream, size: 14.5, weight: FontWeight.w700),
                 ),
               ),
               const SizedBox(height: 10),
@@ -501,9 +492,8 @@ class _SuggestedTile extends StatelessWidget {
             style: AppFonts.body(color: colors.cream, size: 12, weight: FontWeight.w700, text: product.name),
           ),
           const SizedBox(height: 2),
-          Text(
-            formatPrice(product.discountedPrice),
-            style: AppFonts.body(size: 11.5, color: colors.orchidSoft),
+          Text(formatPrice(product.discountedPrice),
+            style: AppFonts.body(text: formatPrice(product.discountedPrice), size: 11.5, color: colors.orchidSoft),
           ),
         ],
       ),

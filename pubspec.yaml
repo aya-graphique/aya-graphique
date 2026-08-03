@@ -46,6 +46,9 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
+  # Native/web share sheet for the product card's "Share" button
+  share_plus: ^10.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -68,3 +71,16 @@ flutter:
   assets:
     - assets/images/
     - assets/icon/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800

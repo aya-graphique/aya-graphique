@@ -30,6 +30,11 @@ class Product {
   // off `price` everywhere the product's price is shown or charged (see
   // [discountedPrice]).
   final double discountPercent;
+  // When this row was first created in Supabase (the table's default
+  // `created_at` timestamp). Null when the source map doesn't include it
+  // (e.g. rows built by hand in sample_products.dart) — [isNew] just
+  // treats that as "not new" instead of throwing.
+  final DateTime? createdAt;
 
   const Product({
     required this.id,
@@ -46,21 +51,18 @@ class Product {
     this.sortOrder = 0,
     this.salesCount = 0,
     this.discountPercent = 0,
+    this.createdAt,
   });
 
   bool get inStock => stock > 0;
 
-  /// The IDs of the top [topN] sellers among [products], for badging
-  /// "Bestseller" on the storefront. Ranked by [salesCount] — a product
-  /// with zero sales is never included, even if the whole catalog has
-  /// nothing sold yet (so a brand-new shop shows no badges at all instead
-  /// of tagging arbitrary products). Ties beyond [topN] are simply cut
-  /// off in list order, same as `List.take`.
-  static Set<String> bestSellerIds(List<Product> products, {int topN = 5}) {
-    final sold = products.where((p) => p.salesCount > 0).toList()
-      ..sort((a, b) => b.salesCount.compareTo(a.salesCount));
-    return sold.take(topN).map((p) => p.id).toSet();
-  }
+  // "Just arrived" badge — true for the first 14 days after the product
+  // was added from the admin dashboard. Purely presentational (never
+  // affects sorting/filtering), and simply never true for products with
+  // no [createdAt] (e.g. the bundled sample catalog).
+  static const _newWindow = Duration(days: 14);
+  bool get isNew =>
+      createdAt != null && DateTime.now().difference(createdAt!) <= _newWindow;
 
   bool get hasDiscount => discountPercent > 0;
 
@@ -94,6 +96,9 @@ class Product {
       sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
       salesCount: (map['sales_count'] as num?)?.toInt() ?? 0,
       discountPercent: (map['discount_percent'] as num?)?.toDouble() ?? 0,
+      createdAt: map['created_at'] != null
+          ? DateTime.tryParse(map['created_at'].toString())
+          : null,
     );
   }
 
@@ -127,6 +132,7 @@ class Product {
     int? sortOrder,
     int? salesCount,
     double? discountPercent,
+    DateTime? createdAt,
   }) {
     return Product(
       id: id ?? this.id,
@@ -143,6 +149,7 @@ class Product {
       sortOrder: sortOrder ?? this.sortOrder,
       salesCount: salesCount ?? this.salesCount,
       discountPercent: discountPercent ?? this.discountPercent,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

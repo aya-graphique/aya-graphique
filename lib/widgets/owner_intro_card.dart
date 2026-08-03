@@ -123,9 +123,8 @@ class OwnerIntroCard extends StatelessWidget {
             children: [
               Icon(Icons.auto_awesome_rounded, size: 17, color: colors.orchid),
               const SizedBox(width: 10),
-              Text(
-                context.strings.availableForEyebrow,
-                style: AppFonts.label(color: colors.orchid, size: 16),
+              Text(context.strings.availableForEyebrow,
+                style: AppFonts.label(text: context.strings.availableForEyebrow, color: colors.orchid, size: 16, weight: FontWeight.w800),
               ),
             ],
           ),
@@ -248,7 +247,7 @@ class _AudienceListItemState extends State<_AudienceListItem> {
                   widget.label,
                   style: AppFonts.label(
                     size: 14,
-                    weight: FontWeight.w600,
+                    weight: FontWeight.w800,
                     color: colors.cream,
                     letterSpacing: 0.2,
                     text: widget.label,

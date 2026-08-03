@@ -10,6 +10,7 @@ import '../theme/app_theme.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
+import 'favorites_screen.dart';
 import 'graphical_services_screen.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
@@ -212,6 +213,11 @@ class _MainShellState extends State<MainShell> {
                         // "View full profile" button jumps here instead
                         // (see HomeScreen.onViewProfileTap).
                         WhoAmIScreen(isMobile: isMobile),
+                        FavoritesScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          onBrowse: () => _goTo(ShopPage.shop),
+                        ),
                         CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
                       ],
                     ),

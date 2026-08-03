@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
+import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/section_heading.dart';
@@ -66,14 +67,14 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 28),
           Text(context.strings.resultsCount(results.length),
-              style: AppFonts.body(color: context.colors.creamDim, size: 13.5)),
+              style: AppFonts.body(text: context.strings.resultsCount(results.length), color: context.colors.creamDim, size: 13.5)),
           const SizedBox(height: 16),
           if (results.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 40),
               child: Center(
                 child: Text(context.strings.noResults,
-                    style: AppFonts.body(color: context.colors.creamDim, size: 14)),
+                    style: AppFonts.body(text: context.strings.noResults, color: context.colors.creamDim, size: 14)),
               ),
             )
           else
@@ -105,11 +106,19 @@ class _SearchField extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: AppFonts.body(size: 14.5, color: context.colors.cream),
+        style: AppFonts.body(
+          size: 14.5,
+          color: context.colors.cream,
+          // No fixed string to inspect here (this styles whatever the
+          // shopper types), so just follow the active storefront
+          // language instead — Cairo while Arabic is selected, Poppins
+          // otherwise.
+          text: context.isArabicLanguage ? 'ا' : 'a',
+        ),
         cursorColor: context.colors.orchid,
         decoration: InputDecoration(
           hintText: context.strings.searchHint,
-          hintStyle: AppFonts.body(size: 14, color: context.colors.creamDim),
+          hintStyle: AppFonts.body(text: context.strings.searchHint, size: 14, color: context.colors.creamDim),
           prefixIcon: Icon(Icons.search_rounded, color: context.colors.creamDim),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),

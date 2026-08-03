@@ -113,16 +113,15 @@ class _CartLineTile extends StatelessWidget {
                             spacing: 8,
                             children: [
                               Text(formatPrice(product.discountedPrice),
-                                  style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
-                              Text(
-                                formatPrice(product.price),
-                                style: AppFonts.body(size: 11.5, color: context.colors.creamDim)
+                                  style: AppFonts.body(text: formatPrice(product.discountedPrice), size: 13.5, color: context.colors.orchidSoft)),
+                              Text(formatPrice(product.price),
+                                style: AppFonts.body(text: formatPrice(product.price), size: 11.5, color: context.colors.creamDim)
                                     .copyWith(decoration: TextDecoration.lineThrough),
                               ),
                             ],
                           )
                         : Text(formatPrice(product.price),
-                            style: AppFonts.body(size: 13.5, color: context.colors.orchidSoft)),
+                            style: AppFonts.body(text: formatPrice(product.price), size: 13.5, color: context.colors.orchidSoft)),
                   ],
                 ),
               ),
@@ -145,7 +144,7 @@ class _CartLineTile extends StatelessWidget {
                   width: 26,
                   child: Text('${line.quantity}',
                       textAlign: TextAlign.center,
-                      style: AppFonts.body(size: 14, weight: FontWeight.w700, color: context.colors.cream)),
+                      style: AppFonts.body(text: '${line.quantity}', size: 14, weight: FontWeight.w700, color: context.colors.cream)),
                 ),
                 _stepButton(context, Icons.add_rounded, () => cart.setQuantity(product.id, line.quantity + 1)),
               ],
@@ -188,7 +187,7 @@ class _Summary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(context.strings.orderSummary, style: AppFonts.display(color: context.colors.cream, size: 18, weight: FontWeight.w700)),
+          Text(context.strings.orderSummary, style: AppFonts.display(text: context.strings.orderSummary, color: context.colors.cream, size: 18, weight: FontWeight.w700)),
           const SizedBox(height: 18),
           _row(context, context.strings.subtotal, formatPrice(cart.subtotal)),
           const SizedBox(height: 8),
@@ -212,9 +211,8 @@ class _Summary extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Center(
-                  child: Text(
-                    context.strings.proceedToCheckout,
-                    style: AppFonts.label(size: 13.5, color: Colors.white, letterSpacing: 1.2)
+                  child: Text(context.strings.proceedToCheckout,
+                    style: AppFonts.label(text: context.strings.proceedToCheckout, size: 13.5, color: Colors.white, letterSpacing: 1.2)
                         .copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -230,12 +228,11 @@ class _Summary extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppFonts.body(color: context.colors.creamDim, size: emphasize ? 15 : 14)),
-        Text(
-          value,
+        Text(label, style: AppFonts.body(text: label, color: context.colors.creamDim, size: emphasize ? 15 : 14)),
+        Text(value,
           style: emphasize
-              ? AppFonts.display(size: 18, weight: FontWeight.w700, color: context.colors.orchidSoft)
-              : AppFonts.body(size: 14, weight: FontWeight.w600, color: context.colors.cream),
+              ? AppFonts.display(text: value, size: 18, weight: FontWeight.w700, color: context.colors.orchidSoft)
+              : AppFonts.body(text: value, size: 14, weight: FontWeight.w600, color: context.colors.cream),
         ),
       ],
     );
@@ -254,10 +251,10 @@ class _EmptyCart extends StatelessWidget {
         children: [
           Icon(Icons.shopping_bag_outlined, size: 56, color: context.colors.creamDim),
           const SizedBox(height: 16),
-          Text(context.strings.emptyCartTitle, style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
+          Text(context.strings.emptyCartTitle, style: AppFonts.display(text: context.strings.emptyCartTitle, color: context.colors.cream, size: 20, weight: FontWeight.w700)),
           const SizedBox(height: 8),
           Text(context.strings.emptyCartSubtitle,
-              style: AppFonts.body(color: context.colors.creamDim, size: 14)),
+              style: AppFonts.body(text: context.strings.emptyCartSubtitle, color: context.colors.creamDim, size: 14)),
           const SizedBox(height: 22),
           GestureDetector(
             onTap: onBrowse,
@@ -267,9 +264,8 @@ class _EmptyCart extends StatelessWidget {
                 gradient: context.colors.violetGradient,
                 borderRadius: BorderRadius.circular(100),
               ),
-              child: Text(
-                context.strings.browseNotebooks,
-                style: AppFonts.label(size: 13, color: Colors.white, letterSpacing: 1.2)
+              child: Text(context.strings.browseNotebooks,
+                style: AppFonts.label(text: context.strings.browseNotebooks, size: 13, color: Colors.white, letterSpacing: 1.2)
                     .copyWith(fontWeight: FontWeight.w700),
               ),
             ),

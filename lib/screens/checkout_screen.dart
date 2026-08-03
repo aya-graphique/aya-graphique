@@ -250,7 +250,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    Text(context.strings.checkoutTitle, style: AppFonts.display(color: context.colors.cream, size: 26, weight: FontWeight.w700)),
+                    Text(context.strings.checkoutTitle, style: AppFonts.display(text: context.strings.checkoutTitle, color: context.colors.cream, size: 26, weight: FontWeight.w700)),
                   ],
                 ),
                 const SizedBox(height: 28),
@@ -355,7 +355,7 @@ class _ShippingForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.strings.shippingDetails, style: AppFonts.display(color: context.colors.cream, size: 18, weight: FontWeight.w700)),
+            Text(context.strings.shippingDetails, style: AppFonts.display(text: context.strings.shippingDetails, color: context.colors.cream, size: 18, weight: FontWeight.w700)),
             const SizedBox(height: 18),
             _Field(label: context.strings.fullName, controller: nameCtrl, validator: (v) => _required(context, v)),
             const SizedBox(height: 14),
@@ -395,7 +395,7 @@ class _ShippingForm extends StatelessWidget {
               validator: (v) => _required(context, v),
             ),
             const SizedBox(height: 22),
-            Text(context.strings.payment, style: AppFonts.display(color: context.colors.cream, size: 18, weight: FontWeight.w700)),
+            Text(context.strings.payment, style: AppFonts.display(text: context.strings.payment, color: context.colors.cream, size: 18, weight: FontWeight.w700)),
             const SizedBox(height: 12),
             _PaymentOption(
               label: context.strings.instapay,
@@ -521,9 +521,9 @@ class _PaymentOption extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: AppFonts.body(size: 14, weight: FontWeight.w700, color: context.colors.cream)),
+                  Text(label, style: AppFonts.body(text: label, size: 14, weight: FontWeight.w700, color: context.colors.cream)),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: AppFonts.body(size: 12, color: context.colors.creamDim)),
+                  Text(subtitle, style: AppFonts.body(text: subtitle, size: 12, color: context.colors.creamDim)),
                 ],
               ),
             ),
@@ -566,13 +566,19 @@ class _Field extends StatelessWidget {
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
-      style: AppFonts.body(size: 14.5, color: context.colors.cream),
+      style: AppFonts.body(
+        size: 14.5,
+        color: context.colors.cream,
+        // Styles whatever the shopper types — no fixed string to check,
+        // so follow the active storefront language instead.
+        text: context.isArabicLanguage ? 'ا' : 'a',
+      ),
       cursorColor: context.colors.orchid,
       decoration: InputDecoration(
         labelText: (label == null || label!.isEmpty) ? null : label,
-        labelStyle: AppFonts.body(color: context.colors.creamDim, size: 13.5),
+        labelStyle: AppFonts.body(text: label ?? '', color: context.colors.creamDim, size: 13.5),
         hintText: hintText,
-        hintStyle: AppFonts.body(color: context.colors.creamDim.withOpacity(0.6), size: 13.5),
+        hintStyle: AppFonts.body(text: hintText ?? '', color: context.colors.creamDim.withOpacity(0.6), size: 13.5),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         filled: true,
@@ -608,9 +614,8 @@ class _Field extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            helperText!,
-            style: AppFonts.body(color: context.colors.creamDim, size: 12),
+          Text(helperText!,
+            style: AppFonts.body(text: helperText!, color: context.colors.creamDim, size: 12),
           ),
           const SizedBox(height: 10),
           field,
@@ -639,7 +644,7 @@ class _OrderReview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(context.strings.orderReview, style: AppFonts.display(color: context.colors.cream, size: 18, weight: FontWeight.w700)),
+          Text(context.strings.orderReview, style: AppFonts.display(text: context.strings.orderReview, color: context.colors.cream, size: 18, weight: FontWeight.w700)),
           const SizedBox(height: 16),
           ...cart.lines.map((l) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -652,7 +657,7 @@ class _OrderReview extends StatelessWidget {
                           style: AppFonts.body(color: context.colors.creamDim, size: 13.5, text: l.product.name)),
                     ),
                     Text(formatPrice(l.lineTotal),
-                        style: AppFonts.body(size: 13.5, weight: FontWeight.w600, color: context.colors.cream)),
+                        style: AppFonts.body(text: formatPrice(l.lineTotal), size: 13.5, weight: FontWeight.w600, color: context.colors.cream)),
                   ],
                 ),
               )),
@@ -663,9 +668,9 @@ class _OrderReview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(context.strings.total, style: AppFonts.body(color: context.colors.creamDim, size: 15)),
+              Text(context.strings.total, style: AppFonts.body(text: context.strings.total, color: context.colors.creamDim, size: 15)),
               Text(formatPrice(cart.total),
-                  style: AppFonts.display(size: 20, weight: FontWeight.w700, color: context.colors.orchidSoft)),
+                  style: AppFonts.display(text: formatPrice(cart.total), size: 20, weight: FontWeight.w700, color: context.colors.orchidSoft)),
             ],
           ),
           const SizedBox(height: 20),
@@ -687,9 +692,8 @@ class _OrderReview extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                         )
-                      : Text(
-                          context.strings.placeOrder,
-                          style: AppFonts.label(size: 13.5, color: Colors.white, letterSpacing: 1.2)
+                      : Text(context.strings.placeOrder,
+                          style: AppFonts.label(text: context.strings.placeOrder, size: 13.5, color: Colors.white, letterSpacing: 1.2)
                               .copyWith(fontWeight: FontWeight.w700),
                         ),
                 ),
@@ -730,12 +734,11 @@ class _OrderSuccessDialog extends StatelessWidget {
               child: const Icon(Icons.check_rounded, color: Colors.white, size: 32),
             ),
             const SizedBox(height: 20),
-            Text(context.strings.orderPlaced, style: AppFonts.display(color: context.colors.cream, size: 20, weight: FontWeight.w700)),
+            Text(context.strings.orderPlaced, style: AppFonts.display(text: context.strings.orderPlaced, color: context.colors.cream, size: 20, weight: FontWeight.w700)),
             const SizedBox(height: 10),
-            Text(
-              context.strings.thanksMessage(name),
+            Text(context.strings.thanksMessage(name),
               textAlign: TextAlign.center,
-              style: AppFonts.body(color: context.colors.creamDim, size: 14),
+              style: AppFonts.body(text: context.strings.thanksMessage(name), color: context.colors.creamDim, size: 14),
             ),
             const SizedBox(height: 14),
             SizedBox(
@@ -750,10 +753,9 @@ class _OrderSuccessDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Center(
-                    child: Text(
-                      context.strings.openWhatsApp,
+                    child: Text(context.strings.openWhatsApp,
                       textAlign: TextAlign.center,
-                      style: AppFonts.label(size: 13, color: Colors.white, letterSpacing: 0.6)
+                      style: AppFonts.label(text: context.strings.openWhatsApp, size: 13, color: Colors.white, letterSpacing: 0.6)
                           .copyWith(fontWeight: FontWeight.w700, height: 1.3),
                     ),
                   ),
@@ -774,9 +776,8 @@ class _OrderSuccessDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Center(
-                    child: Text(
-                      context.strings.backToShop,
-                      style: AppFonts.label(size: 13, color: context.colors.creamDim, letterSpacing: 1.2)
+                    child: Text(context.strings.backToShop,
+                      style: AppFonts.label(text: context.strings.backToShop, size: 13, color: context.colors.creamDim, letterSpacing: 1.2)
                           .copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),

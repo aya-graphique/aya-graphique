@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 
-enum ShopPage { home, shop, search, services, about, cart }
+enum ShopPage { home, shop, search, services, about, favorites, cart }
 
 /// Small circular portrait shown next to the "Aya's" wordmark — a rounded
 /// avatar framed by a thin gradient ring so it reads as a deliberate brand
@@ -68,6 +69,7 @@ class ShopNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartCount = context.watch<CartProvider>().itemCount;
+    final favCount = context.watch<FavoritesProvider>().ids.length;
     final isDark = context.watch<ThemeController>().isDark;
     final isArabic = context.watch<LanguageController>().isArabic;
     final strings = context.strings;
@@ -96,9 +98,8 @@ class ShopNavBar extends StatelessWidget {
                     // color has no such dependency and always paints, and
                     // context.colors.cream already adapts correctly between
                     // the light and dark themes.
-                    Text(
-                      "Aya's",
-                      style: AppFonts.display(
+                    Text("Aya's",
+                      style: AppFonts.display(text: "Aya's", 
                         size: isMobile ? 17 : 16.5,
                         weight: FontWeight.w800,
                         color: context.colors.cream,
@@ -150,6 +151,16 @@ class ShopNavBar extends StatelessWidget {
                   active: active == ShopPage.about,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.about),
+                ),
+                _NavIconLabel(
+                  icon: active == ShopPage.favorites
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  label: strings.navFavorites,
+                  active: active == ShopPage.favorites,
+                  isMobile: isMobile,
+                  badge: favCount > 0 ? favCount : null,
+                  onTap: () => onTap(ShopPage.favorites),
                 ),
               ],
               _NavIconLabel(
@@ -203,6 +214,17 @@ class ShopNavBar extends StatelessWidget {
                   active: active == ShopPage.about,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.about),
+                ),
+                _NavIconLabel(
+                  icon: active == ShopPage.favorites
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  label: strings.navFavorites,
+                  stacked: true,
+                  active: active == ShopPage.favorites,
+                  isMobile: isMobile,
+                  badge: favCount > 0 ? favCount : null,
+                  onTap: () => onTap(ShopPage.favorites),
                 ),
               ],
               // Small divider so the theme/language toggles read as their
@@ -292,9 +314,8 @@ class ShopMobileTopBar extends StatelessWidget {
               children: [
                 const _BrandAvatar(size: 30),
                 const SizedBox(width: 8),
-                Text(
-                  "Aya's",
-                  style: AppFonts.display(
+                Text("Aya's",
+                  style: AppFonts.display(text: "Aya's", 
                     size: 20,
                     weight: FontWeight.w800,
                     color: context.colors.cream,
@@ -337,6 +358,7 @@ class ShopNavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartCount = context.watch<CartProvider>().itemCount;
+    final favCount = context.watch<FavoritesProvider>().ids.length;
     final isDark = context.watch<ThemeController>().isDark;
     final isArabic = context.watch<LanguageController>().isArabic;
     final strings = context.strings;
@@ -367,9 +389,8 @@ class ShopNavDrawer extends StatelessWidget {
                       children: [
                         const _BrandAvatar(size: 40),
                         const SizedBox(width: 12),
-                        Text(
-                          "Aya's",
-                          style: AppFonts.display(
+                        Text("Aya's",
+                          style: AppFonts.display(text: "Aya's", 
                             size: 26,
                             weight: FontWeight.w800,
                             color: context.colors.cream,
@@ -419,6 +440,15 @@ class ShopNavDrawer extends StatelessWidget {
                     label: strings.navAbout,
                     active: active == ShopPage.about,
                     onTap: () => go(ShopPage.about),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.favorites
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    label: strings.navFavorites,
+                    active: active == ShopPage.favorites,
+                    badge: favCount > 0 ? favCount : null,
+                    onTap: () => go(ShopPage.favorites),
                   ),
                   _DrawerItem(
                     icon: active == ShopPage.cart
@@ -513,10 +543,9 @@ class _DrawerItem extends StatelessWidget {
                         border: active ? Border.all(color: Colors.white, width: 1.2) : null,
                       ),
                       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                      child: Text(
-                        '$badge',
+                      child: Text('$badge',
                         textAlign: TextAlign.center,
-                        style: AppFonts.label(
+                        style: AppFonts.label(text: '$badge', 
                           size: 10.5,
                           weight: FontWeight.w700,
                           color: Colors.white,
@@ -529,13 +558,12 @@ class _DrawerItem extends StatelessWidget {
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(
-                label,
-                style: AppFonts.label(
+              child: Text(label,
+                style: AppFonts.label(text: label, 
                   size: 15,
                   color: color,
                   letterSpacing: 0.4,
-                ).copyWith(fontWeight: active ? FontWeight.w700 : FontWeight.w600),
+                ).copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ],
@@ -605,15 +633,14 @@ class _LanguageToggle extends StatelessWidget {
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: context.colors.border(0.35)),
           ),
-          child: Text(
-            isArabic ? 'EN' : 'AR',
+          child: Text(isArabic ? 'EN' : 'AR',
             // This label is always Latin ("EN"/"AR") — keep it a fixed
             // size regardless of which language is active.
-            style: AppFonts.label(
+            style: AppFonts.label(text: isArabic ? 'EN' : 'AR', 
               size: isMobile ? 11 : 11,
               color: context.colors.cream,
               letterSpacing: 1.0,
-              weight: FontWeight.w700,
+              weight: FontWeight.w800,
               boostArabicSize: false,
             ),
           ),
@@ -685,10 +712,9 @@ class _NavIconLabelState extends State<_NavIconLabel> {
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 19, minHeight: 19),
-              child: Text(
-                '${widget.badge}',
+              child: Text('${widget.badge}',
                 textAlign: TextAlign.center,
-                style: AppFonts.label(
+                style: AppFonts.label(text: '${widget.badge}', 
                   size: 11.5,
                   weight: FontWeight.w700,
                   color: Colors.white,
@@ -710,18 +736,17 @@ class _NavIconLabelState extends State<_NavIconLabel> {
               iconWithBadge,
               if (widget.label != null) ...[
                 const SizedBox(height: 4),
-                Text(
-                  widget.label!,
+                Text(widget.label!,
                   // boostArabicSize: false — nav labels stay the same
                   // compact size in Arabic as in English, matching the
                   // bar's fixed footprint instead of growing with the
                   // Arabic-mode font boost.
-                  style: AppFonts.label(
+                  style: AppFonts.label(text: widget.label!, 
                     size: 11.5,
                     color: color,
                     letterSpacing: 0.6,
                     boostArabicSize: false,
-                  ).copyWith(fontWeight: FontWeight.w700),
+                  ).copyWith(fontWeight: FontWeight.w800),
                 ),
               ],
             ],
@@ -732,16 +757,15 @@ class _NavIconLabelState extends State<_NavIconLabel> {
               iconWithBadge,
               if (widget.label != null) ...[
                 const SizedBox(width: 7),
-                Text(
-                  widget.label!,
+                Text(widget.label!,
                   // Same fix as the stacked (mobile) label above, for the
                   // desktop side-by-side layout.
-                  style: AppFonts.label(
+                  style: AppFonts.label(text: widget.label!, 
                     size: widget.isMobile ? 11.5 : 14.5,
                     color: color,
                     letterSpacing: 1.0,
                     boostArabicSize: false,
-                  ).copyWith(fontWeight: FontWeight.w600),
+                  ).copyWith(fontWeight: FontWeight.w800),
                 ),
               ],
             ],

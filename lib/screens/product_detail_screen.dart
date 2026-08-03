@@ -304,18 +304,28 @@ class _Details extends StatelessWidget {
         Text(product.category.toUpperCase(),
             style: AppFonts.label(color: context.colors.orchid, text: product.category)),
         const SizedBox(height: 12),
-        Text(product.name,
-            style: AppFonts.display(color: context.colors.cream, size: 34, height: 1.08, text: product.name)),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(product.name,
+                  style: AppFonts.display(color: context.colors.cream, size: 34, height: 1.08, text: product.name)),
+            ),
+            if (product.hasDiscount) ...[
+              const SizedBox(width: 10),
+              Icon(Icons.sell_rounded, size: 26, color: context.colors.discount),
+            ],
+          ],
+        ),
         const SizedBox(height: 14),
         Row(
           children: [
             Icon(Icons.star_rounded, size: 18, color: context.colors.orchid),
             const SizedBox(width: 4),
-            Text('${product.rating}', style: AppFonts.body(color: context.colors.creamDim, size: 14, weight: FontWeight.w600)),
+            Text('${product.rating}', style: AppFonts.body(text: '${product.rating}', color: context.colors.creamDim, size: 14, weight: FontWeight.w600)),
             const SizedBox(width: 14),
-            Text(
-              product.inStock ? context.strings.inStock : context.strings.soldOut,
-              style: AppFonts.body(
+            Text(product.inStock ? context.strings.inStock : context.strings.soldOut,
+              style: AppFonts.body(text: product.inStock ? context.strings.inStock : context.strings.soldOut, 
                 size: 13,
                 color: product.inStock ? context.colors.success : context.colors.danger,
                 weight: FontWeight.w600,
@@ -326,27 +336,24 @@ class _Details extends StatelessWidget {
         const SizedBox(height: 20),
         Row(
           children: [
-            Text(
-              formatPrice(product.discountedPrice),
-              style: AppFonts.display(size: 26, weight: FontWeight.w700, color: context.colors.orchidSoft),
+            Text(formatPrice(product.discountedPrice),
+              style: AppFonts.display(text: formatPrice(product.discountedPrice), size: 26, weight: FontWeight.w700, color: context.colors.orchidSoft),
             ),
             if (product.hasDiscount) ...[
               const SizedBox(width: 12),
-              Text(
-                formatPrice(product.price),
-                style: AppFonts.body(size: 16, color: context.colors.creamDim)
+              Text(formatPrice(product.price),
+                style: AppFonts.body(text: formatPrice(product.price), size: 16, color: context.colors.creamDim)
                     .copyWith(decoration: TextDecoration.lineThrough),
               ),
               const SizedBox(width: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: context.colors.success.withOpacity(0.85),
+                  color: context.colors.discount.withOpacity(0.85),
                   borderRadius: BorderRadius.circular(100),
                 ),
-                child: Text(
-                  '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}%',
-                  style: AppFonts.label(size: 11, color: Colors.white, letterSpacing: 0.5),
+                child: Text('-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}% ${context.strings.saleBadge}',
+                  style: AppFonts.label(text: '-${product.discountPercent.truncateToDouble() == product.discountPercent ? product.discountPercent.toStringAsFixed(0) : product.discountPercent.toStringAsFixed(1)}% ${context.strings.saleBadge}', size: 14, color: Colors.white, letterSpacing: 0.5),
                 ),
               ),
             ],
@@ -390,9 +397,8 @@ class _Details extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Center(
-                    child: Text(
-                      product.inStock ? context.strings.addToCart : context.strings.soldOut,
-                      style: AppFonts.label(
+                    child: Text(product.inStock ? context.strings.addToCart : context.strings.soldOut,
+                      style: AppFonts.label(text: product.inStock ? context.strings.addToCart : context.strings.soldOut, 
                         size: 13.5,
                         color: Colors.white,
                         letterSpacing: 1.2,
@@ -432,10 +438,9 @@ class _QuantityStepper extends StatelessWidget {
           ),
           SizedBox(
             width: 24,
-            child: Text(
-              '$quantity',
+            child: Text('$quantity',
               textAlign: TextAlign.center,
-              style: AppFonts.body(size: 15, weight: FontWeight.w700, color: context.colors.cream),
+              style: AppFonts.body(text: '$quantity', size: 15, weight: FontWeight.w700, color: context.colors.cream),
             ),
           ),
           IconButton(
@@ -483,10 +488,9 @@ class _CartHeaderBadge extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
-                      child: Text(
-                        '$count',
+                      child: Text('$count',
                         textAlign: TextAlign.center,
-                        style: AppFonts.label(size: 10.5, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0),
+                        style: AppFonts.label(text: '$count', size: 10.5, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0),
                       ),
                     ),
                   ),

@@ -27,6 +27,7 @@ class AppColors {
 
   final Color success;
   final Color danger;
+  final Color discount;
 
   final LinearGradient heroGradient;
   final LinearGradient violetGradient;
@@ -49,6 +50,7 @@ class AppColors {
     required this.creamDim,
     required this.success,
     required this.danger,
+    required this.discount,
     required this.heroGradient,
     required this.violetGradient,
     required this.violetGradientWide,
@@ -86,6 +88,7 @@ class AppColors {
     creamDim: Color(0xFFC2AED4),
     success: Color(0xFF7FE3A6),
     danger: Color(0xFFE36F8B),
+    discount: Color(0xFFE5484D),
     heroGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -141,6 +144,7 @@ class AppColors {
     creamDim: Color(0xFF241132),
     success: Color(0xFF2E9A5C),
     danger: Color(0xFFC23F63),
+    discount: Color(0xFFC0292E),
     heroGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -199,17 +203,45 @@ class AppFonts {
 
   static bool isArabic(String text) => forceArabic || _arabicPattern.hasMatch(text);
 
-  /// Small bump applied to Cairo (Arabic) text sizes only. Cairo reads a
-  /// touch smaller than Poppins at the same fontSize, so this nudges
-  /// Arabic copy up slightly to feel balanced — Latin text is untouched.
-  static const double _arabicSizeBoost = 1.08;
+  /// Shared size bump applied to *both* Cairo (Arabic) and Poppins
+  /// (English) copy, at the same passed-in `size`. Originally this only
+  /// nudged Arabic up, on the theory that Cairo reads a touch smaller
+  /// than Poppins at the same fontSize — but that left the two out of
+  /// sync with each other (Arabic ended up visibly bigger than the
+  /// English copy right next to it, e.g. after a language toggle).
+  /// Applying the same multiplier to both keeps their proportions to one
+  /// another exactly as designed while still giving each font face a
+  /// consistent, comfortably-readable size.
+  static const double _sizeBoost = 1.08;
+
+  /// Extra size multiplier applied on top of [_sizeBoost], to Latin
+  /// (Poppins) text only. Poppins has a visibly smaller x-height/cap-height
+  /// than Cairo at the same fontSize, so even after the shared [_sizeBoost]
+  /// English copy still *reads* smaller than Arabic copy next to it. This
+  /// closes that gap so English and Arabic look the same size to the eye,
+  /// not just on paper.
+  static const double _latinExtraBoost = 1.4;
+
+  /// Bumps a weight one step heavier (e.g. w400 -> w500), capped at w900,
+  /// but only for weights lighter than bold (w700+) — those are already
+  /// heavy enough, and bumping them further onto w800/w900 read as too
+  /// thick/clunky at the large sizes headlines use. Applied only to
+  /// Latin/English (Poppins) text, so English copy reads a touch bolder
+  /// without over-thickening headlines or touching the separately-tuned
+  /// Arabic weights.
+  static FontWeight _bumpLatinWeight(FontWeight weight) {
+    final index = FontWeight.values.indexOf(weight);
+    if (index >= FontWeight.values.indexOf(FontWeight.w700)) return weight;
+    final bumped = (index + 1).clamp(0, FontWeight.values.length - 1);
+    return FontWeight.values[bumped];
+  }
 
   /// Headline/display face. Latin uses Poppins; Arabic uses Cairo (Bold+)
   /// — the closest free/open equivalent to the commercial "Bahij
   /// TheSansArabic" look: a warm, modern, geometric humanist sans that
   /// still reads as a confident headline face at large sizes.
   ///
-  /// [boostArabicSize] lets a specific call opt out of the Arabic size
+  /// [boostArabicSize] lets a specific call opt out of the shared size
   /// bump (e.g. tags/pills that need to keep an exact size regardless of
   /// language).
   static TextStyle display({
@@ -223,15 +255,15 @@ class AppFonts {
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
       return GoogleFonts.cairo(
-        fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
+        fontSize: boostArabicSize ? size * _sizeBoost : size,
         fontWeight: weight,
         color: color,
         height: height,
       );
     }
     return GoogleFonts.poppins(
-      fontSize: size,
-      fontWeight: weight,
+      fontSize: boostArabicSize ? size * _sizeBoost * _latinExtraBoost : size,
+      fontWeight: _bumpLatinWeight(weight),
       color: color,
       height: height,
       letterSpacing: letterSpacing ?? -1.0,
@@ -241,7 +273,7 @@ class AppFonts {
   /// Body copy. Latin uses Poppins; Arabic uses Cairo Regular — clean and
   /// highly readable at small sizes.
   ///
-  /// [boostArabicSize] lets a specific call opt out of the Arabic size
+  /// [boostArabicSize] lets a specific call opt out of the shared size
   /// bump (e.g. tags/pills that need to keep an exact size regardless of
   /// language).
   static TextStyle body({
@@ -254,15 +286,15 @@ class AppFonts {
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
       return GoogleFonts.cairo(
-        fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
+        fontSize: boostArabicSize ? size * _sizeBoost : size,
         fontWeight: weight,
         color: color,
         height: height ?? 1.7,
       );
     }
     return GoogleFonts.poppins(
-      fontSize: size,
-      fontWeight: weight,
+      fontSize: boostArabicSize ? size * _sizeBoost * _latinExtraBoost : size,
+      fontWeight: _bumpLatinWeight(weight),
       color: color,
       height: height ?? 1.6,
     );
@@ -272,7 +304,7 @@ class AppFonts {
   /// tracking; Arabic uses Cairo SemiBold with lighter tracking, since wide
   /// letter spacing distorts connected Arabic letterforms.
   ///
-  /// [boostArabicSize] lets a specific call opt out of the Arabic size
+  /// [boostArabicSize] lets a specific call opt out of the shared size
   /// bump (e.g. tags/pills that need to keep an exact size regardless of
   /// language).
   static TextStyle label({
@@ -285,15 +317,15 @@ class AppFonts {
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
       return GoogleFonts.cairo(
-        fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
+        fontSize: boostArabicSize ? size * _sizeBoost : size,
         fontWeight: weight,
         color: color,
         letterSpacing: letterSpacing * 0.15,
       );
     }
     return GoogleFonts.poppins(
-      fontSize: size,
-      fontWeight: weight,
+      fontSize: boostArabicSize ? size * _sizeBoost * _latinExtraBoost : size,
+      fontWeight: _bumpLatinWeight(weight),
       color: color,
       letterSpacing: letterSpacing,
     );

@@ -16,7 +16,7 @@ enum AppLanguage { en, ar }
 class LanguageController extends ChangeNotifier {
   static const _prefsKey = 'aya_app_language';
 
-  AppLanguage _language = AppLanguage.en;
+  AppLanguage _language = AppLanguage.ar;
   bool _loaded = false;
 
   LanguageController() {

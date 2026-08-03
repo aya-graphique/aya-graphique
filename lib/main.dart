@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/favorites_provider.dart';
 import 'providers/language_controller.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'screens/main_shell.dart';
@@ -26,6 +27,7 @@ class AyaGraphiqueApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()..loadShipping()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()..load()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => FontController()),
         ChangeNotifierProvider(create: (_) => LanguageController()),

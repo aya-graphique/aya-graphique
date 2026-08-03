@@ -598,9 +598,8 @@ class _CategoryCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    numeral,
-                    style: AppFonts.display(
+                  Text(numeral,
+                    style: AppFonts.display(text: numeral, 
                       // Cream is near-white in dark mode, so a faint 0.14
                       // opacity still reads as a soft ghost numeral. In
                       // light mode cream is dark ink instead, and the same
@@ -738,9 +737,8 @@ class _ItemRow extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    numeral,
-                    style: AppFonts.label(color: colors.violetPop, size: 12, letterSpacing: 1, boostArabicSize: false),
+                  Text(numeral,
+                    style: AppFonts.label(text: numeral, color: colors.violetPop, size: 12, letterSpacing: 1, boostArabicSize: false),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -870,9 +868,8 @@ class _ItemRow extends StatelessWidget {
                               children: [
                                 const Icon(Icons.chat_bubble_rounded, size: 15, color: Colors.white),
                                 const SizedBox(width: 8),
-                                Text(
-                                  context.strings.bookSession,
-                                  style: AppFonts.label(size: 12, color: Colors.white, letterSpacing: 0.6, boostArabicSize: false)
+                                Text(context.strings.bookSession,
+                                  style: AppFonts.label(text: context.strings.bookSession, size: 12, color: Colors.white, letterSpacing: 0.6, boostArabicSize: false)
                                       .copyWith(fontWeight: FontWeight.w700),
                                 ),
                               ],

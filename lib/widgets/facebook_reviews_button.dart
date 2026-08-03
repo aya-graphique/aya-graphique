@@ -53,12 +53,11 @@ class FacebookReviewsButton extends StatelessWidget {
             Icon(Icons.facebook_rounded, color: Colors.white, size: isMobile ? 18 : 20),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(
-                context.strings.successPartnersReviews,
+              child: Text(context.strings.successPartnersReviews,
                 textAlign: TextAlign.center,
                 maxLines: isMobile ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppFonts.label(size: isMobile ? 13 : 15, color: Colors.white, letterSpacing: 0.3)
+                style: AppFonts.label(text: context.strings.successPartnersReviews, size: isMobile ? 13 : 15, color: Colors.white, letterSpacing: 0.3)
                     .copyWith(fontWeight: FontWeight.w700),
               ),
             ),

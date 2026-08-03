@@ -20,6 +20,7 @@ class AppText {
   String get navShop => _t('Shop', 'المتجر');
   String get navSearch => _t('Search', 'بحث');
   String get navCart => _t('Cart', 'السلة');
+  String get navFavorites => _t('Saved', 'المحفوظات');
   String get navAbout => _t('Who am I', 'من أنا');
   String get navServices => _t('Services', 'الخدمات');
 
@@ -74,14 +75,6 @@ class AppText {
         'كل شيء آخر هنا.',
       );
   String get categoryAll => _t('All', 'الكل');
-
-  // Home — best sellers
-  String get bestSellersEyebrow => _t('CUSTOMER FAVOURITES', 'الأكثر طلبًا');
-  String get bestSellersTitle => _t('Best sellers', 'الأكثر مبيعًا');
-  // Small "🔥 Bestseller" badge shown on a product card itself (Shop grid
-  // and Home's shop-preview grid), not to be confused with the section
-  // title above — this one sits on the card for the top-selling products.
-  String get bestSellerBadge => _t('Bestseller', 'الأكثر مبيعاً');
 
   // Home — "most ordered" circles (below the "available for" card)
   String get mostRequestedEyebrow => _t('MOST ORDERED', 'الأكثر طلبًا');
@@ -173,6 +166,20 @@ class AppText {
   // Product card / detail
   String get inStock => _t('In stock', 'متوفر');
   String get soldOut => _t('Sold out', 'نفدت الكمية');
+  String get saleBadge => _t('Sale', 'خصم');
+  String get newArrivalBadge => _t('New Arrival', 'وصل حديثاً');
+  String get saveProduct => _t('Save', 'حفظ');
+  String get savedProduct => _t('Saved', 'تم الحفظ');
+  String get shareProduct => _t('Share', 'مشاركة');
+  String get addedToSaved => _t('Added to your saved items', 'أُضيف إلى المحفوظات');
+  String get removedFromSaved => _t('Removed from your saved items', 'أُزيل من المحفوظات');
+  String get shareLinkCopied => _t('Product link copied', 'تم نسخ رابط المنتج');
+  String get favoritesEyebrow => _t('SAVED FOR LATER', 'محفوظ للاحقاً');
+  String get favoritesTitle => _t('Wishlist', 'المفضلة');
+  String get favoritesEmptyTitle => _t('Nothing saved yet', 'لا يوجد شيء محفوظ بعد');
+  String get favoritesEmptySubtitle =>
+      _t('Tap the heart on any notebook to save it here.', 'اضغط على أيقونة القلب في أي منتج لحفظه هنا.');
+  String get favoritesBrowseCta => _t('Browse notebooks', 'تصفح المنتجات');
   String get addToCart => _t('Add to cart', 'أضف إلى السلة');
   String addedToCart(String name) =>
       _t('Added "$name" to cart', 'تمت إضافة "$name" إلى السلة');
