@@ -19,7 +19,7 @@ class ProductGrid extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final isMobile = AppBreakpoints.isMobile(width);
     final columns = isMobile
-        ? 2
+        ? 1
         : AppBreakpoints.isTablet(width)
             ? 3
             : 4;
@@ -35,7 +35,10 @@ class ProductGrid extends StatelessWidget {
         crossAxisCount: columns,
         mainAxisSpacing: isMobile ? 14 : 20,
         crossAxisSpacing: isMobile ? 14 : 20,
-        childAspectRatio: isMobile ? 0.44 : 0.62,
+        // One wide card per row on mobile now, so it doesn't need to be
+        // nearly as tall relative to its width as the old cramped
+        // 2-per-row layout did.
+        childAspectRatio: isMobile ? 0.92 : 0.62,
       ),
       itemBuilder: (context, i) {
         final product = products[i];

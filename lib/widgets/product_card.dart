@@ -57,7 +57,8 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Stack(
+              child: LayoutBuilder(
+                builder: (context, cardConstraints) => Stack(
                 fit: StackFit.expand,
                 children: [
                   Image.network(
@@ -77,45 +78,40 @@ class ProductCard extends StatelessWidget {
                           color: context.colors.creamDim, size: 40),
                     ),
                   ),
-                  // Top row: "New" text on the far left, share + save
-                  // icons on the far right, space-between so they never
-                  // collide — the text shrinks first if a card is too
-                  // narrow to fit both comfortably.
+                  // Save (wishlist) + share icons — physically pinned to
+                  // one top corner.
                   Positioned(
-                    left: 10,
-                    right: 8,
+                    left: 8,
                     top: 8,
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (product.isNew)
-                          Flexible(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: NewArrivalBadge(text: context.strings.newArrivalBadge),
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _CardIconButton(
-                              icon: Icons.share_rounded,
-                              onTap: () => _shareProduct(context),
-                            ),
-                            const SizedBox(width: 8),
-                            _SaveButton(product: product),
-                          ],
+                        _CardIconButton(
+                          icon: Icons.share_rounded,
+                          onTap: () => _shareProduct(context),
                         ),
+                        const SizedBox(width: 8),
+                        _SaveButton(product: product),
                       ],
                     ),
                   ),
+                  // "New" text — pinned to the physically *opposite* top
+                  // corner from the icons above, with its own width cap
+                  // (and shrink-to-fit) so on a very narrow card it never
+                  // grows enough to reach them.
+                  if (product.isNew)
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: cardConstraints.maxWidth * 0.55),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: NewArrivalBadge(text: context.strings.newArrivalBadge),
+                        ),
+                      ),
+                    ),
                   // Sold-out pill sits on its own line below the top row
                   // so it never overlaps the "New" text next to it.
                   if (!product.inStock)
@@ -126,6 +122,7 @@ class ProductCard extends StatelessWidget {
                       child: _Pill(text: context.strings.soldOut, color: context.colors.danger),
                     ),
                 ],
+                ),
               ),
             ),
             Padding(
