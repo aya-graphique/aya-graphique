@@ -147,14 +147,14 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // Name gets the full card width on its own line so it
-                  // never gets squeezed (and truncated) by the discount
-                  // pill sitting next to it.
+                  // Name gets the full card width and can wrap onto a
+                  // second line — so a longer product name is always
+                  // shown in full instead of being cut off with "...".
                   SizedBox(
-                    height: 28,
+                    height: AppFonts.isArabic(product.name) ? 46 : 92,
                     child: Text(
                       product.name,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppFonts.display(
                         color: context.colors.cream,
@@ -165,7 +165,7 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   // Reserve this row's height on every card (discounted or
                   // not) so the footer stays the same total height either
                   // way — keeps the image area above identical across the

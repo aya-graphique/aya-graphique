@@ -37,8 +37,10 @@ class ProductGrid extends StatelessWidget {
         crossAxisSpacing: isMobile ? 14 : 20,
         // One wide card per row on mobile now, so it doesn't need to be
         // nearly as tall relative to its width as the old cramped
-        // 2-per-row layout did.
-        childAspectRatio: isMobile ? 0.92 : 0.62,
+        // 2-per-row layout did. Slightly taller than before (0.92 -> 0.84)
+        // to make room for the footer's extra line (product names can now
+        // wrap to 2 lines) without shrinking the product photo above it.
+        childAspectRatio: isMobile ? 0.84 : 0.62,
       ),
       itemBuilder: (context, i) {
         final product = products[i];
