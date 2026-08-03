@@ -85,8 +85,8 @@ class ProductCard extends StatelessWidget {
                   // sold out at the same time.
                   Positioned(
                     left: 10,
-                    top: 10,
-                    right: 78,
+                    top: 48,
+                    right: 10,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -152,13 +152,14 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   // Reserve this row's height on every card (discounted or
                   // not) so the footer stays the same total height either
                   // way — keeps the image area above identical across the
-                  // grid instead of shrinking on discounted cards.
+                  // grid instead of shrinking on discounted cards. Tall
+                  // enough to fit the pill's own padding without clipping.
                   SizedBox(
-                    height: 22,
+                    height: 28,
                     child: product.hasDiscount
                         ? Align(
                             alignment: Alignment.centerLeft,
