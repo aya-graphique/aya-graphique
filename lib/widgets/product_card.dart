@@ -77,44 +77,54 @@ class ProductCard extends StatelessWidget {
                           color: context.colors.creamDim, size: 40),
                     ),
                   ),
-                  // Top-left badge stack: sold-out takes priority over
-                  // the discount pill (a product can't be both "buy
-                  // now at X% off" and "can't buy it at all"), and the
-                  // "New" badge stacks underneath either one — a
-                  // product can be freshly added *and* discounted or
-                  // sold out at the same time.
+                  // Top row: "New" text on the far left, share + save
+                  // icons on the far right, space-between so they never
+                  // collide — the text shrinks first if a card is too
+                  // narrow to fit both comfortably.
                   Positioned(
                     left: 10,
-                    top: 48,
-                    right: 10,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!product.inStock)
-                          _Pill(text: context.strings.soldOut, color: context.colors.danger),
-                        if (product.isNew) ...[
-                          if (!product.inStock) const SizedBox(height: 6),
-                          NewArrivalBadge(text: context.strings.newArrivalBadge),
-                        ],
-                      ],
-                    ),
-                  ),
-                  // Save (wishlist) + share — flush to the
-                  // card's top-right corner, side by side.
-                  Positioned(
                     right: 8,
                     top: 8,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _CardIconButton(
-                          icon: Icons.share_rounded,
-                          onTap: () => _shareProduct(context),
+                        if (product.isNew)
+                          Flexible(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: NewArrivalBadge(text: context.strings.newArrivalBadge),
+                              ),
+                            ),
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _CardIconButton(
+                              icon: Icons.share_rounded,
+                              onTap: () => _shareProduct(context),
+                            ),
+                            const SizedBox(width: 8),
+                            _SaveButton(product: product),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        _SaveButton(product: product),
                       ],
                     ),
                   ),
+                  // Sold-out pill sits on its own line below the top row
+                  // so it never overlaps the "New" text next to it.
+                  if (!product.inStock)
+                    Positioned(
+                      left: 10,
+                      top: 46,
+                      right: 88,
+                      child: _Pill(text: context.strings.soldOut, color: context.colors.danger),
+                    ),
                 ],
               ),
             ),
@@ -138,7 +148,7 @@ class ProductCard extends StatelessWidget {
                   // never gets squeezed (and truncated) by the discount
                   // pill sitting next to it.
                   SizedBox(
-                    height: 22,
+                    height: 28,
                     child: Text(
                       product.name,
                       maxLines: 1,
