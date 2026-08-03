@@ -68,11 +68,11 @@ class ProductCard extends StatelessWidget {
                     color: context.colors.surfaceRaised,
                     child: Image.network(
                       product.imageUrl,
-                      // .contain shows the entire image with nothing
-                      // cropped off, letterboxing instead if the photo's
-                      // proportions don't exactly match the card's
-                      // aspect ratio.
-                      fit: BoxFit.contain,
+                      // .cover fills the entire card area with no empty
+                      // letterbox gaps, cropping the image's edges as
+                      // needed when its proportions don't exactly match
+                      // the card's aspect ratio.
+                      fit: BoxFit.cover,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
                         return Container(color: context.colors.surfaceRaised);

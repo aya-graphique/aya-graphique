@@ -76,13 +76,13 @@ class _ProductSwiperState extends State<_ProductSwiper> {
   // How much of the viewport each card takes up — leaves a sliver of the
   // neighbouring cards peeking in on both sides. Smaller than before so
   // the card itself reads as more compact on screen.
-  static const double _viewportFraction = 0.7;
-  // Width / height. Less tall than the old single-column grid's ratio so
-  // the image area (the card's remaining height above the fixed-height
-  // text footer) stays generous even though the card is now narrower —
+  static const double _viewportFraction = 0.86;
+  // Width / height. Taller than before so the image area (the card's
+  // remaining height above the fixed-height text footer) is bigger —
   // ProductCard renders the photo with BoxFit.contain, which always shows
-  // the whole image, but it still needs enough room to not look tiny.
-  static const double _cardAspectRatio = 0.72;
+  // the whole image, and now it has more room to display large instead of
+  // looking small/letterboxed inside the card.
+  static const double _cardAspectRatio = 0.60;
 
   @override
   void initState() {
