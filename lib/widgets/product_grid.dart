@@ -186,9 +186,9 @@ class _PageDots extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: active ? 20 : 6,
-          height: 6,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: active ? 28 : 9,
+          height: 9,
           decoration: BoxDecoration(
             color: active
                 ? context.colors.orchidSoft
