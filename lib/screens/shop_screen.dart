@@ -136,6 +136,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       ProductGrid(
                         products: filtered,
                         onProductTap: _openProduct,
+                        singleRowOnDesktop: true,
                       )
                     else ...[
                       // Nothing selected: each category gets its own
@@ -215,7 +216,7 @@ class _ProductSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        ProductGrid(products: products, onProductTap: onProductTap),
+        ProductGrid(products: products, onProductTap: onProductTap, singleRowOnDesktop: true),
       ],
     );
   }

@@ -30,7 +30,12 @@ class ProductCard extends StatelessWidget {
   void _shareProduct(BuildContext context) {
     final strings = context.stringsRead;
     final priceText = formatPrice(product.hasDiscount ? product.discountedPrice : product.price);
-    final origin = Uri.base.origin;
+    // Uri.base.origin only gives the scheme+domain (e.g. https://you.github.io),
+    // which drops the app's base path when hosted as a GitHub Pages project
+    // page (https://you.github.io/aya_graphique/). Uri.base.toString() keeps
+    // that path; stripping anything from '#' onward drops the hash route
+    // (e.g. '#/admin') so the shared link always lands on the storefront root.
+    final origin = Uri.base.toString().split('#').first;
     final text = '${product.name} — $priceText\n$origin';
     Share.share(text, subject: product.name).catchError((_) {
       // Share sheet unavailable (e.g. some desktop browsers) — fall back

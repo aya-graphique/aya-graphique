@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
@@ -8,10 +9,19 @@ class ProductGrid extends StatelessWidget {
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
 
+  /// When true, tablet/desktop widths get a single horizontally-swipeable
+  /// row (drag with mouse, trackpad, or touch) instead of the multi-row
+  /// grid. Mobile is unaffected either way — it already gets the
+  /// one-card-at-a-time [_ProductSwiper] below. Opt-in per call site (the
+  /// Shop tab uses this; Home's preview, Search, and Favorites keep the
+  /// regular grid).
+  final bool singleRowOnDesktop;
+
   const ProductGrid({
     super.key,
     required this.products,
     required this.onProductTap,
+    this.singleRowOnDesktop = false,
   });
 
   @override
@@ -25,6 +35,10 @@ class ProductGrid extends StatelessWidget {
     // through the whole shop.
     if (isMobile) {
       return _ProductSwiper(products: products, onProductTap: onProductTap);
+    }
+
+    if (singleRowOnDesktop) {
+      return _ProductRow(products: products, onProductTap: onProductTap);
     }
 
     final columns = AppBreakpoints.isTablet(width) ? 3 : 4;
@@ -50,6 +64,70 @@ class ProductGrid extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Flutter's default web scroll behaviour only lets touch/stylus pointers
+/// drag a scrollable — a mouse click-and-drag is ignored. This lets touch,
+/// mouse, trackpad, and stylus all drag the row, so desktop visitors can
+/// swipe it with a mouse the same way a phone visitor would with a finger.
+class _DraggableScrollBehavior extends MaterialScrollBehavior {
+  const _DraggableScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
+/// The tablet/desktop "single row" layout: every product in one
+/// horizontally-swipeable row instead of wrapping into multiple rows.
+/// Card width stays close to what the 4-column grid would give it, so
+/// switching between the grid and this row doesn't make cards look
+/// suddenly bigger or smaller.
+class _ProductRow extends StatelessWidget {
+  final List<Product> products;
+  final ValueChanged<Product> onProductTap;
+
+  const _ProductRow({required this.products, required this.onProductTap});
+
+  static const double _cardWidth = 270;
+  static const double _cardAspectRatio = 0.62;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: _cardWidth / _cardAspectRatio,
+      child: ScrollConfiguration(
+        behavior: const _DraggableScrollBehavior(),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          itemCount: products.length,
+          itemBuilder: (context, i) {
+            final product = products[i];
+            return Padding(
+              padding: EdgeInsetsDirectional.only(end: i == products.length - 1 ? 0 : 20),
+              child: SizedBox(
+                width: _cardWidth,
+                child: RevealOnScroll(
+                  delay: Duration(milliseconds: 40 * i.clamp(0, 6)),
+                  child: ProductCard(
+                    product: product,
+                    onTap: () => onProductTap(product),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
