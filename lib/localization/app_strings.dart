@@ -297,6 +297,9 @@ class AppText {
   // Home — shop preview section (teases the collection, hands off to the
   // standalone Shop tab)
   String get shopTheCollection => _t('Shop the collection', 'تسوق المجموعة');
+  // Mobile product swiper — small hint shown above the cards so first-time
+  // visitors know the products are swipeable, not just a static list.
+  String get swipeProductsHint => _t('Swipe to see products', 'اسحب لعرض المنتجات');
   // The audience circles in that same card — each taps straight through
   // to the matching category on the Services tab (see OwnerIntroCard).
   String get availableForEyebrow => _t('AVAILABLE FOR', 'متاحة للعمل مع');

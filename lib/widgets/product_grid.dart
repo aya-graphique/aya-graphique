@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../localization/app_strings.dart';
 import '../models/product.dart';
+import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import 'product_card.dart';
 import 'reveal_on_scroll.dart';
@@ -165,6 +167,10 @@ class _ProductSwiper extends StatefulWidget {
 class _ProductSwiperState extends State<_ProductSwiper> {
   late final PageController _controller;
   double _page = 0;
+  // The "swipe to see products" hint stays up until the shopper actually
+  // swipes once, then fades away for good — it's only there to teach
+  // first-time visitors the cards are draggable, not to nag afterwards.
+  bool _dismissedHint = false;
 
   // How much of the viewport each card takes up — leaves a sliver of the
   // neighbouring cards peeking in on both sides. Smaller than before so
@@ -183,7 +189,15 @@ class _ProductSwiperState extends State<_ProductSwiper> {
     _controller = PageController(viewportFraction: _viewportFraction);
     _controller.addListener(() {
       if (_controller.hasClients && _controller.page != null) {
-        setState(() => _page = _controller.page!);
+        final newPage = _controller.page!;
+        // Any noticeable movement away from the very first card counts as
+        // "they found it" — dismiss the hint for the rest of this screen's
+        // lifetime.
+        final justDismissed = !_dismissedHint && (newPage - _page).abs() > 0.03;
+        setState(() {
+          _page = newPage;
+          if (justDismissed) _dismissedHint = true;
+        });
       }
     });
   }
@@ -205,6 +219,14 @@ class _ProductSwiperState extends State<_ProductSwiper> {
 
         return Column(
           children: [
+            if (widget.products.length > 1) ...[
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 350),
+                opacity: _dismissedHint ? 0 : 1,
+                child: const _SwipeHint(),
+              ),
+              const SizedBox(height: 10),
+            ],
             SizedBox(
               height: cardHeight,
               child: PageView.builder(
@@ -241,6 +263,74 @@ class _ProductSwiperState extends State<_ProductSwiper> {
           ],
         );
       },
+    );
+  }
+}
+
+/// A small pill above the product cards that gently rocks side to side —
+/// a quiet nudge telling first-time mobile visitors the cards are
+/// swipeable, not a static stack. Fades away the moment they swipe once
+/// (see [_ProductSwiperState._dismissedHint]).
+class _SwipeHint extends StatefulWidget {
+  const _SwipeHint();
+
+  @override
+  State<_SwipeHint> createState() => _SwipeHintState();
+}
+
+class _SwipeHintState extends State<_SwipeHint> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _shift;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
+      ..repeat(reverse: true);
+    _shift = Tween<double>(begin: -5, end: 5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hint = context.strings.swipeProductsHint;
+
+    return AnimatedBuilder(
+      animation: _shift,
+      builder: (context, child) => Transform.translate(offset: Offset(_shift.value, 0), child: child),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: context.colors.orchidSoft.withOpacity(0.14),
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(color: context.colors.orchidSoft.withOpacity(0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.swipe_rounded, size: 15, color: context.colors.orchidSoft),
+            const SizedBox(width: 6),
+            Text(
+              hint,
+              style: AppFonts.label(
+                color: context.colors.creamDim,
+                size: 12,
+                weight: FontWeight.w600,
+                letterSpacing: 0.4,
+                text: hint,
+                boostArabicSize: false,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
