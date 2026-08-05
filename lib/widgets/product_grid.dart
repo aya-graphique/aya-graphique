@@ -86,48 +86,63 @@ class _DraggableScrollBehavior extends MaterialScrollBehavior {
 
 /// The tablet/desktop "single row" layout: every product in one
 /// horizontally-swipeable row instead of wrapping into multiple rows.
-/// Card width stays close to what the 4-column grid would give it, so
-/// switching between the grid and this row doesn't make cards look
-/// suddenly bigger or smaller.
+/// Card width is computed the exact same way the old grid computed it
+/// (same column count, same gaps) so switching to this row doesn't
+/// change how big the cards look — it only changes wrapping into
+/// swiping once there are more products than fit on screen.
 class _ProductRow extends StatelessWidget {
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
 
   const _ProductRow({required this.products, required this.onProductTap});
 
-  static const double _cardWidth = 270;
   static const double _cardAspectRatio = 0.62;
+  static const double _spacing = 20;
+  static const double _horizontalPadding = 24;
 
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: _cardWidth / _cardAspectRatio,
-      child: ScrollConfiguration(
-        behavior: const _DraggableScrollBehavior(),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          itemCount: products.length,
-          itemBuilder: (context, i) {
-            final product = products[i];
-            return Padding(
-              padding: EdgeInsetsDirectional.only(end: i == products.length - 1 ? 0 : 20),
-              child: SizedBox(
-                width: _cardWidth,
-                child: RevealOnScroll(
-                  delay: Duration(milliseconds: 40 * i.clamp(0, 6)),
-                  child: ProductCard(
-                    product: product,
-                    onTap: () => onProductTap(product),
+    final width = MediaQuery.of(context).size.width;
+    final columns = AppBreakpoints.isTablet(width) ? 3 : 4;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Same formula GridView.builder's SliverGridDelegateWithFixedCrossAxisCount
+        // used to size each cell: total width minus the outer padding and
+        // the gaps between columns, split evenly across the columns.
+        final available = constraints.maxWidth - (_horizontalPadding * 2) - (_spacing * (columns - 1));
+        final cardWidth = available / columns;
+
+        return SizedBox(
+          height: cardWidth / _cardAspectRatio,
+          child: ScrollConfiguration(
+            behavior: const _DraggableScrollBehavior(),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+              itemCount: products.length,
+              itemBuilder: (context, i) {
+                final product = products[i];
+                return Padding(
+                  padding: EdgeInsetsDirectional.only(end: i == products.length - 1 ? 0 : _spacing),
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: RevealOnScroll(
+                      delay: Duration(milliseconds: 40 * i.clamp(0, 6)),
+                      child: ProductCard(
+                        product: product,
+                        onTap: () => onProductTap(product),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

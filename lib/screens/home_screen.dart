@@ -1044,7 +1044,7 @@ class _ShopPreviewSection extends StatelessWidget {
           // grid ends up the same effective width — and the cards the
           // same size — on both Home and the Shop tab.
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: ProductGrid(products: preview, onProductTap: onProductTap),
+          child: ProductGrid(products: preview, onProductTap: onProductTap, singleRowOnDesktop: true),
         ),
         const SizedBox(height: 40),
         MarqueeStrip(

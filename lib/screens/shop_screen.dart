@@ -289,8 +289,13 @@ class _CategoryChip extends StatelessWidget {
         ),
         child: Text(
           label,
+          // Same literal size for every chip regardless of language — the
+          // "All" chip's Arabic label ("الكل") used to be a fixed 15.7 while
+          // English category names (Notebooks, Packaging...) got 28.2,
+          // nearly double, so the English chips looked oddly bigger/bolder
+          // than "All" even though they're all the same kind of pill.
           style: AppFonts.label(
-            size: AppFonts.isArabic(label) ? 15.7 : 28.2,
+            size: 15.7,
             color: selected ? Colors.white : context.colors.creamDim,
             letterSpacing: 0.8,
             text: label,
