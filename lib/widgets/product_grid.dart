@@ -92,22 +92,51 @@ class _DraggableScrollBehavior extends MaterialScrollBehavior {
 /// (same column count, same gaps) so switching to this row doesn't
 /// change how big the cards look — it only changes wrapping into
 /// swiping once there are more products than fit on screen.
-class _ProductRow extends StatelessWidget {
+class _ProductRow extends StatefulWidget {
   final List<Product> products;
   final ValueChanged<Product> onProductTap;
 
   const _ProductRow({required this.products, required this.onProductTap});
+
+  @override
+  State<_ProductRow> createState() => _ProductRowState();
+}
+
+class _ProductRowState extends State<_ProductRow> {
+  final ScrollController _controller = ScrollController();
+  // Same idea as the mobile swiper's hint: shown until the visitor
+  // actually drags the row once, then gone for good on this screen.
+  bool _dismissedHint = false;
 
   static const double _cardAspectRatio = 0.62;
   static const double _spacing = 20;
   static const double _horizontalPadding = 24;
 
   @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (!_dismissedHint && _controller.offset.abs() > 4) {
+        setState(() => _dismissedHint = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (products.isEmpty) return const SizedBox.shrink();
+    if (widget.products.isEmpty) return const SizedBox.shrink();
 
     final width = MediaQuery.of(context).size.width;
     final columns = AppBreakpoints.isTablet(width) ? 3 : 4;
+    // Only worth teaching people to drag if there's actually more product
+    // than fits on screen at once.
+    final needsScroll = widget.products.length > columns;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -117,32 +146,49 @@ class _ProductRow extends StatelessWidget {
         final available = constraints.maxWidth - (_horizontalPadding * 2) - (_spacing * (columns - 1));
         final cardWidth = available / columns;
 
-        return SizedBox(
-          height: cardWidth / _cardAspectRatio,
-          child: ScrollConfiguration(
-            behavior: const _DraggableScrollBehavior(),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
-              itemCount: products.length,
-              itemBuilder: (context, i) {
-                final product = products[i];
-                return Padding(
-                  padding: EdgeInsetsDirectional.only(end: i == products.length - 1 ? 0 : _spacing),
-                  child: SizedBox(
-                    width: cardWidth,
-                    child: RevealOnScroll(
-                      delay: Duration(milliseconds: 40 * i.clamp(0, 6)),
-                      child: ProductCard(
-                        product: product,
-                        onTap: () => onProductTap(product),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (needsScroll) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 350),
+                  opacity: _dismissedHint ? 0 : 1,
+                  child: const _SwipeHint(),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            SizedBox(
+              height: cardWidth / _cardAspectRatio,
+              child: ScrollConfiguration(
+                behavior: const _DraggableScrollBehavior(),
+                child: ListView.builder(
+                  controller: _controller,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                  itemCount: widget.products.length,
+                  itemBuilder: (context, i) {
+                    final product = widget.products[i];
+                    return Padding(
+                      padding: EdgeInsetsDirectional.only(end: i == widget.products.length - 1 ? 0 : _spacing),
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: RevealOnScroll(
+                          delay: Duration(milliseconds: 40 * i.clamp(0, 6)),
+                          child: ProductCard(
+                            product: product,
+                            onTap: () => widget.onProductTap(product),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
+          ],
         );
       },
     );
