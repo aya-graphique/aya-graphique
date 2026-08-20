@@ -38,11 +38,21 @@ class ServiceCategoriesRepository {
   /// icon on the storefront. Deletes the row outright rather than upserting
   /// a blank image_url, so [fetchImages] (which already skips blank URLs)
   /// doesn't need to special-case it either way.
+  ///
+  /// Chains `.select()` onto the delete and checks the returned rows:
+  /// Supabase's delete call succeeds (no exception) even when a row-level
+  /// security policy silently blocks it and zero rows are actually
+  /// removed, so without this check the UI would optimistically show the
+  /// photo as gone while it's still sitting in the database.
   static Future<void> clearImage(int categoryIndex) async {
     if (!SupabaseConfig.isConfigured) return;
-    await SupabaseService.client
+    final deleted = await SupabaseService.client
         .from('service_category_images')
         .delete()
-        .eq('category_index', categoryIndex);
+        .eq('category_index', categoryIndex)
+        .select();
+    if ((deleted as List).isEmpty) {
+      throw Exception('Photo wasn\'t removed — check delete permissions on service_category_images.');
+    }
   }
 }

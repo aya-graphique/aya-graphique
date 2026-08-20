@@ -62,8 +62,19 @@ class IllustrationArtRepository {
     await SupabaseService.client.from('illustration_art_items').update(update).eq('id', id);
   }
 
+  /// Deletes an "Illustration & Art" circle outright.
+  ///
+  /// Chains `.select()` onto the delete and checks the returned rows —
+  /// Supabase's delete call succeeds even when row-level security silently
+  /// blocks it and zero rows are actually removed, so without this check
+  /// the admin UI would show the circle as gone while it's still in the
+  /// database (and still visible on the storefront after a refresh).
   static Future<void> deleteItem(String id) async {
-    await SupabaseService.client.from('illustration_art_items').delete().eq('id', id);
+    final deleted =
+        await SupabaseService.client.from('illustration_art_items').delete().eq('id', id).select();
+    if ((deleted as List).isEmpty) {
+      throw Exception('Circle wasn\'t removed — check delete permissions on illustration_art_items.');
+    }
   }
 
   /// Persists a full reorder: called after the admin drags/moves a circle,
