@@ -213,6 +213,25 @@ class _AdminIllustrationArtScreenState extends State<AdminIllustrationArtScreen>
                           ],
                         ),
                       ),
+                      if (!uploadingPhoto && (newImageUrl ?? initialImageUrl!).isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => setDialogState(() => newImageUrl = ''),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.close_rounded, size: 14, color: Colors.redAccent),
+                                const SizedBox(width: 4),
+                                Text('Remove photo',
+                                    style: AppFonts.body(size: 12, weight: FontWeight.w600, color: Colors.redAccent)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                     ],
                     TextField(
