@@ -53,17 +53,11 @@ class _MainShellState extends State<MainShell> {
   final ShopFocusController _shopFocusController = ShopFocusController();
   late Future<List<Product>> _productsFuture;
   // Kicked off here, at the same time as _productsFuture, instead of
-  // inside HomeScreen's own initState — previously the banner fetch only
-  // *started* once HomeScreen mounted, which was itself gated behind
-  // _productsFuture resolving, so it was two network round-trips back to
-  // back (products, then banners) instead of one. Starting both together
-  // here is what actually fixes the banner slideshow feeling slow to
-  // appear; HomeScreen now just awaits whatever's passed in.
-  late Future<List<HomeBanner>> _bannersFuture;
-  // Same idea as _bannersFuture, but for the second banner strip further
-  // down Home, right above "MOST ORDERED" — its own owner-managed set of
-  // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
-  // others so it's ready by the time that part of Home scrolls into view.
+  // inside HomeScreen's own initState — starting it early is what keeps
+  // the banner strip from feeling slow to appear once Home scrolls into
+  // view. The Home page's top hero strip (HomeBannerPlacement.hero) was
+  // removed, so this is now the only banner fetch — right above "MOST
+  // ORDERED".
   late Future<List<HomeBanner>> _mostOrderedBannersFuture;
 
   @override
@@ -82,7 +76,6 @@ class _MainShellState extends State<MainShell> {
     // since either way the loading spinner is done and real content (or a
     // real empty state) is what's on screen next. See web_ready_notifier.
     _productsFuture.whenComplete(notifyAppContentReady);
-    _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
   }
@@ -128,7 +121,6 @@ class _MainShellState extends State<MainShell> {
   void _refreshProducts() {
     setState(() {
       _productsFuture = ProductsRepository.fetchAll();
-      _bannersFuture = HomeBannersRepository.fetchSlides();
       _mostOrderedBannersFuture =
           HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
     });
@@ -196,7 +188,6 @@ class _MainShellState extends State<MainShell> {
                           isMobile: isMobile,
                           scrollController: _homeScrollController,
                           onAdminReturn: _refreshProducts,
-                          bannersFuture: _bannersFuture,
                           mostOrderedBannersFuture: _mostOrderedBannersFuture,
                           onServiceCategoryTap: _openServiceCategory,
                           onShopTap: () => _goTo(ShopPage.shop),

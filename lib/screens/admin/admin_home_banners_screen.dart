@@ -6,18 +6,21 @@ import '../../services/home_banners_repository.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 
-/// Lets the owner manage the photos in one of the two promotional banner
-/// strips on the public Home page: the one near the top ([HomeBannerPlacement.hero],
-/// maps onto the hero [HomeBannerSlideshow] in `HomeScreen`) or the one
-/// right above "MOST ORDERED" ([HomeBannerPlacement.mostOrdered]).
+/// Lets the owner manage the photos in the promotional banner strip on the
+/// public Home page, right above "MOST ORDERED"
+/// ([HomeBannerPlacement.mostOrdered]). The dashboard always passes that
+/// placement explicitly now — the old top-of-page "hero" strip
+/// ([HomeBannerPlacement.hero]) was removed from Home and from the
+/// dashboard, but the `placement`/`title` params stay generic here in case
+/// another strip is added later.
 /// Nothing else on Home is editable from here.
 class AdminHomeBannersScreen extends StatefulWidget {
   final String placement;
   final String title;
   const AdminHomeBannersScreen({
     super.key,
-    this.placement = HomeBannerPlacement.hero,
-    this.title = 'Home banners',
+    this.placement = HomeBannerPlacement.mostOrdered,
+    this.title = 'Banners',
   });
 
   @override

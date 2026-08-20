@@ -33,10 +33,8 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback? onAdminReturn;
   // Started earlier, in MainShell's initState, at the same time as the
   // products fetch — see the comment there for why. HomeScreen just
-  // awaits it instead of kicking off its own fetch after mounting.
-  final Future<List<HomeBanner>> bannersFuture;
-  // Same idea as bannersFuture, but for the second, independent banner
-  // strip further down the page, right above "MOST ORDERED" — its own
+  // awaits it instead of kicking off its own fetch after mounting. This
+  // is for the banner strip right above "MOST ORDERED" — its own
   // owner-managed set of photos (see HomeBannerPlacement.mostOrdered in
   // the admin dashboard), not just a repeat of the top one.
   final Future<List<HomeBanner>> mostOrderedBannersFuture;
@@ -67,7 +65,6 @@ class HomeScreen extends StatefulWidget {
     required this.isMobile,
     required this.scrollController,
     this.onAdminReturn,
-    required this.bannersFuture,
     required this.mostOrderedBannersFuture,
     required this.onServiceCategoryTap,
     required this.onShopTap,

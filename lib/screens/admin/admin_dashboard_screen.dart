@@ -425,25 +425,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             Divider(color: context.colors.border(0.1), height: 1),
             _DrawerTile(
-              icon: Icons.view_carousel_outlined,
-              label: 'Home banners',
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AdminHomeBannersScreen()),
-                );
-              },
-            ),
-            _DrawerTile(
               icon: Icons.view_carousel_rounded,
-              label: 'Most Ordered banners',
+              label: 'Banners',
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const AdminHomeBannersScreen(
                       placement: HomeBannerPlacement.mostOrdered,
-                      title: 'Most Ordered banners',
+                      title: 'Banners',
                     ),
                   ),
                 );
@@ -514,22 +504,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             : [
           IconButton(
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminHomeBannersScreen()),
-            ),
-            icon: Icon(Icons.view_carousel_outlined, color: context.colors.creamDim),
-            tooltip: 'Home banners',
-          ),
-          IconButton(
-            onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => const AdminHomeBannersScreen(
                   placement: HomeBannerPlacement.mostOrdered,
-                  title: 'Most Ordered banners',
+                  title: 'Banners',
                 ),
               ),
             ),
             icon: Icon(Icons.view_carousel_rounded, color: context.colors.creamDim),
-            tooltip: 'Most Ordered banners',
+            tooltip: 'Banners',
           ),
           IconButton(
             onPressed: () => Navigator.of(context).push(
