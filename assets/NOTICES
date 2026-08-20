@@ -5391,7 +5391,6 @@ SUCH DAMAGE.
 --------------------------------------------------------------------------------
 cross_file
 flutter_plugin_android_lifecycle
-google_fonts
 path_provider_android
 
 Copyright 2013 The Flutter Authors
