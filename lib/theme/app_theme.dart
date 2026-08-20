@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -226,14 +225,16 @@ class AppFonts {
     bool boostArabicSize = true,
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
-      return GoogleFonts.cairo(
+      return TextStyle(
+        fontFamily: 'Cairo',
         fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
         fontWeight: weight,
         color: color,
         height: height,
       );
     }
-    return GoogleFonts.poppins(
+    return TextStyle(
+      fontFamily: 'Poppins',
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -257,14 +258,16 @@ class AppFonts {
     bool boostArabicSize = true,
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
-      return GoogleFonts.cairo(
+      return TextStyle(
+        fontFamily: 'Cairo',
         fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
         fontWeight: weight,
         color: color,
         height: height ?? 1.7,
       );
     }
-    return GoogleFonts.poppins(
+    return TextStyle(
+      fontFamily: 'Poppins',
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -288,14 +291,16 @@ class AppFonts {
     bool boostArabicSize = true,
   }) {
     if (forceArabic || (text != null && isArabic(text))) {
-      return GoogleFonts.cairo(
+      return TextStyle(
+        fontFamily: 'Cairo',
         fontSize: boostArabicSize ? size * _arabicSizeBoost : size,
         fontWeight: weight,
         color: color,
         letterSpacing: letterSpacing * 0.15,
       );
     }
-    return GoogleFonts.poppins(
+    return TextStyle(
+      fontFamily: 'Poppins',
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -429,7 +434,7 @@ ThemeData buildAppTheme(AppColors colors, {required bool isDark}) {
     useMaterial3: true,
     brightness: isDark ? Brightness.dark : Brightness.light,
     scaffoldBackgroundColor: colors.bgDeep,
-    fontFamily: GoogleFonts.poppins().fontFamily,
+    fontFamily: 'Poppins',
     colorScheme: isDark
         ? ColorScheme.dark(
             primary: colors.violetPop,

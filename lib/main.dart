@@ -5,17 +5,20 @@ import 'providers/favorites_provider.dart';
 import 'providers/language_controller.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'screens/main_shell.dart';
-import 'screens/splash_screen.dart';
+import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Supabase init used to be awaited *before* runApp — that made the very
-  // first frame wait on a network call, which is what made the app feel
-  // slow to open. Now runApp fires immediately and SplashScreen kicks off
-  // that same init itself, in the background, while showing the brand
-  // moment — so the app opens instantly and still doesn't show the shop
-  // until data is actually ready.
+  // There's no native Flutter splash screen anymore — the brand moment
+  // (portrait badge, name, tagline, loading bar) lives entirely in
+  // web/index.html's #pre_splash, which paints the instant the page loads,
+  // long before Flutter's engine/JS has even downloaded. It stays on
+  // screen until MainShell's own data is actually ready (see
+  // notifyAppContentReady in main_shell.dart), so it's safe to just await
+  // Supabase init here like a normal app instead of racing it against a
+  // fixed on-screen timer.
+  await SupabaseService.init();
   runApp(const AyaGraphiqueApp());
 }
 
@@ -46,7 +49,7 @@ class AyaGraphiqueApp extends StatelessWidget {
             // deploy where you want a bookmarkable admin link.
             initialRoute: '/',
             routes: {
-              '/': (context) => const SplashScreen(),
+              '/': (context) => const MainShell(),
               '/admin': (context) => const AdminLoginScreen(),
             },
             onUnknownRoute: (settings) => MaterialPageRoute(builder: (_) => const MainShell()),

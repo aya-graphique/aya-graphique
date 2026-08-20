@@ -7,6 +7,7 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
+import '../utils/web_ready_notifier.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
@@ -76,6 +77,11 @@ class _MainShellState extends State<MainShell> {
       if (!mounted) return;
       context.read<CartProvider>().restore(products);
     });
+    // Tell web/index.html's #pre_splash overlay it can fade out now that
+    // the home page actually has something to show — success or failure,
+    // since either way the loading spinner is done and real content (or a
+    // real empty state) is what's on screen next. See web_ready_notifier.
+    _productsFuture.whenComplete(notifyAppContentReady);
     _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);

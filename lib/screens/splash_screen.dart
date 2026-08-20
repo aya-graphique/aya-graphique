@@ -23,7 +23,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const _minDisplay = Duration(seconds: 5);
+  static const _minDisplay = Duration(milliseconds: 1500);
 
   @override
   void initState() {
