@@ -33,4 +33,16 @@ class ServiceCategoriesRepository {
         .from('service_category_images')
         .upsert({'category_index': categoryIndex, 'image_url': imageUrl});
   }
+
+  /// Clears a service category's thumbnail, falling back to its default
+  /// icon on the storefront. Deletes the row outright rather than upserting
+  /// a blank image_url, so [fetchImages] (which already skips blank URLs)
+  /// doesn't need to special-case it either way.
+  static Future<void> clearImage(int categoryIndex) async {
+    if (!SupabaseConfig.isConfigured) return;
+    await SupabaseService.client
+        .from('service_category_images')
+        .delete()
+        .eq('category_index', categoryIndex);
+  }
 }

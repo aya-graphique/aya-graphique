@@ -81,6 +81,45 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
     }
   }
 
+  Future<void> _removeCategoryImage(int categoryIndex) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: context.colors.surfaceRaised,
+        title: Text('Remove photo?', style: AppFonts.display(color: context.colors.cream, size: 16, weight: FontWeight.w700)),
+        content: Text(
+          'This category will show its default icon instead.',
+          style: AppFonts.body(size: 13.5, color: context.colors.creamDim),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: AppFonts.body(color: context.colors.creamDim)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Remove', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() {
+      _uploadingCategoryImage.add(categoryIndex);
+      _categoryImageError = null;
+    });
+    try {
+      await ServiceCategoriesRepository.clearImage(categoryIndex);
+      if (!mounted) return;
+      setState(() => _categoryImages = {..._categoryImages}..remove(categoryIndex));
+    } catch (e) {
+      setState(() => _categoryImageError = 'Couldn\'t remove photo: $e');
+    } finally {
+      if (mounted) setState(() => _uploadingCategoryImage.remove(categoryIndex));
+    }
+  }
+
   Future<void> _editItem(int categoryIndex, int itemIndex) async {
     final key = serviceItemKey(categoryIndex, itemIndex);
     final baseItem = kServiceCategories[categoryIndex].items[itemIndex];
@@ -132,7 +171,8 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
                         'Tap an item to edit its title, description, highlights, '
                         'price, or note. Leaving a field blank on the edit screen '
                         'keeps showing its original text. Tap a category\'s circle '
-                        'to give it a thumbnail photo, shown on the Home page.',
+                        'to give it a thumbnail photo, shown on the Home page. '
+                        'Long-press a circle that already has a photo to remove it.',
                         style: AppFonts.body(size: 13, color: context.colors.creamDim),
                       ),
                       if (_categoryImageError != null) ...[
@@ -150,6 +190,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
                           uploading: _uploadingCategoryImage.contains(i),
                           onEditItem: (j) => _editItem(i, j),
                           onPickImage: () => _pickCategoryImage(i),
+                          onRemoveImage: () => _removeCategoryImage(i),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -168,6 +209,7 @@ class _CategorySection extends StatelessWidget {
   final bool uploading;
   final ValueChanged<int> onEditItem;
   final VoidCallback onPickImage;
+  final VoidCallback onRemoveImage;
 
   const _CategorySection({
     required this.category,
@@ -177,6 +219,7 @@ class _CategorySection extends StatelessWidget {
     required this.uploading,
     required this.onEditItem,
     required this.onPickImage,
+    required this.onRemoveImage,
   });
 
   @override
@@ -188,6 +231,7 @@ class _CategorySection extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: uploading ? null : onPickImage,
+              onLongPress: (uploading || imageUrl == null || imageUrl!.isEmpty) ? null : onRemoveImage,
               child: Container(
                 width: 40,
                 height: 40,
