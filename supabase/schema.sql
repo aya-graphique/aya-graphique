@@ -308,6 +308,7 @@ insert into about_me (id) values (1) on conflict (id) do nothing;
 -- default and additive (existing rows are untouched) so this is safe to
 -- run against a database that already has data — the app falls back to
 -- the English (original) columns whenever these are blank.
+alter table about_me add column if not exists full_name_ar text not null default '';
 alter table about_me add column if not exists headline_ar text not null default '';
 alter table about_me add column if not exists bio_ar text not null default '';
 alter table about_me add column if not exists skills_ar text[] not null default '{}';

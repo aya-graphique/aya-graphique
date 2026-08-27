@@ -297,8 +297,8 @@ class _Profile extends StatelessWidget {
             // in the same violet-gradient ring treatment as the audience/
             // service circles elsewhere. Falls back to the lettered initials
             // badge if the asset is missing.
-            if (profile.fullName.isNotEmpty) ...[
-              _PortraitAvatar(name: profile.fullName),
+            if (profile.fullNameFor(isArabic).isNotEmpty) ...[
+              _PortraitAvatar(name: profile.fullNameFor(isArabic)),
               const SizedBox(height: 22),
             ],
             Row(
@@ -315,16 +315,16 @@ class _Profile extends StatelessWidget {
             // which is what the Services page (and every other tab) uses, so
             // the two pages open with the same visual rhythm.
             const SizedBox(height: 16),
-            if (profile.fullName.isNotEmpty)
+            if (profile.fullNameFor(isArabic).isNotEmpty)
               ShimmerHeadline(
-                text: _capitalizeWords(profile.fullName),
+                text: _capitalizeWords(profile.fullNameFor(isArabic)),
                 textAlign: TextAlign.center,
                 style: AppFonts.display(
                   color: context.colors.cream,
                   size: isMobile ? 40 : 64,
                   weight: FontWeight.w800,
                   height: 1.05,
-                  text: profile.fullName,
+                  text: profile.fullNameFor(isArabic),
                 ),
               ),
             // Fixed brand slogan — always shown under the name, independent
@@ -332,14 +332,14 @@ class _Profile extends StatelessWidget {
             // read as a refined tagline rather than competing with the big
             // gradient name above it.
             const SizedBox(height: 10),
-            Text('SIMPLICITY MAKES IT ART',
-              textAlign: TextAlign.center,
-              style: AppFonts.label(text: 'SIMPLICITY MAKES IT ART', 
-                color: context.colors.creamDim,
-                size: isMobile ? 12.5 : 14,
-                letterSpacing: 3,
-              ).copyWith(fontWeight: FontWeight.w700),
-            ).animate().fadeIn(duration: 500.ms, delay: 80.ms),
+            // Text('SIMPLICITY MAKES IT ART',
+            //   textAlign: TextAlign.center,
+            //   style: AppFonts.label(text: 'SIMPLICITY MAKES IT ART', 
+            //     color: context.colors.creamDim,
+            //     size: isMobile ? 12.5 : 14,
+            //     letterSpacing: 3,
+            //   ).copyWith(fontWeight: FontWeight.w700),
+            // ).animate().fadeIn(duration: 500.ms, delay: 80.ms),
             if (profile.headlineFor(isArabic).isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(

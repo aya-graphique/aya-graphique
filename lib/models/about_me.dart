@@ -2,17 +2,19 @@
 /// in from the admin dashboard so it can be sent as part of a proposal when
 /// pitching for other design work. Singleton row (`id = 1` in `about_me`).
 ///
-/// `headline`/`bio`/`skills` are the English (original) copy. The `*Ar`
-/// fields are optional Arabic translations the admin can add later — if
-/// left blank, [headlineFor]/[bioFor]/[skillsFor] fall back to the English
-/// version so nothing breaks for stores that never fill them in.
-/// fullName/email/phone/whatsapp/location/urls stay single-value on
-/// purpose — a name, phone number or link isn't something you "translate".
+/// `fullName`/`headline`/`bio`/`skills` are the English (original) copy.
+/// The `*Ar` fields are optional Arabic translations the admin can add
+/// later — if left blank, [fullNameFor]/[headlineFor]/[bioFor]/[skillsFor]
+/// fall back to the English version so nothing breaks for stores that
+/// never fill them in.
+/// email/phone/whatsapp/location/urls stay single-value on purpose — a
+/// phone number or link isn't something you "translate".
 /// instagramUrl/facebookUrl/tiktokUrl/linkedinUrl are optional social
 /// links shown as extra buttons in "Get in touch" — leave any of them
 /// blank and that button just doesn't show up.
 class AboutMe {
   final String fullName;
+  final String fullNameAr;
   final String headline;
   final String headlineAr;
   final String bio;
@@ -32,6 +34,7 @@ class AboutMe {
 
   const AboutMe({
     this.fullName = '',
+    this.fullNameAr = '',
     this.headline = '',
     this.headlineAr = '',
     this.bio = '',
@@ -53,14 +56,16 @@ class AboutMe {
   bool get isEmpty =>
       fullName.isEmpty && headline.isEmpty && bio.isEmpty && skills.isEmpty;
 
-  /// The headline/bio/skills to show for the given language — Arabic
+  /// The name/headline/bio/skills to show for the given language — Arabic
   /// translation if the admin added one, otherwise the English original.
+  String fullNameFor(bool isArabic) => isArabic && fullNameAr.isNotEmpty ? fullNameAr : fullName;
   String headlineFor(bool isArabic) => isArabic && headlineAr.isNotEmpty ? headlineAr : headline;
   String bioFor(bool isArabic) => isArabic && bioAr.isNotEmpty ? bioAr : bio;
   List<String> skillsFor(bool isArabic) => isArabic && skillsAr.isNotEmpty ? skillsAr : skills;
 
   factory AboutMe.fromRow(Map<String, dynamic> row) => AboutMe(
-        fullName: (row['full_name'] as String?) ?? '',
+        fullName: (row['full_name_en'] as String?) ?? '',
+        fullNameAr: (row['full_name_ar'] as String?) ?? '',
         headline: (row['headline'] as String?) ?? '',
         headlineAr: (row['headline_ar'] as String?) ?? '',
         bio: (row['bio'] as String?) ?? '',
@@ -87,7 +92,8 @@ class AboutMe {
 
   Map<String, dynamic> toRow() => {
         'id': 1,
-        'full_name': fullName,
+        'full_name_en': fullName,
+        'full_name_ar': fullNameAr,
         'headline': headline,
         'headline_ar': headlineAr,
         'bio': bio,
