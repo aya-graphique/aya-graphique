@@ -991,13 +991,14 @@ class _SkillArtCardState extends State<_SkillArtCard> {
   }
 }
 
-/// Teases the shop from Home: a handful of products in a grid, followed by
-/// a "Shop the collection" pill button that hands off to the standalone
-/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
-/// and best-sellers section all live over there now (see ShopScreen).
-/// Capped at 8 products so Home stays a teaser rather than a second full
-/// listing.
-class _ShopPreviewSection extends StatelessWidget {
+/// Teases the shop from Home: every product category gets its own labelled
+/// row (same "each category, its own horizontally-swipeable row" treatment
+/// ShopScreen uses when no filter is active — see `_ProductSection` there),
+/// capped at a handful of products per row so Home stays a teaser rather
+/// than a second full listing. Ends with a "Shop the collection" pill
+/// button that hands off to the standalone Shop tab (see
+/// [HomeScreen.onShopTap]) for the full grid, category filter, etc.
+class _ShopPreviewSection extends StatefulWidget {
   final List<Product> products;
   final bool isMobile;
   final ValueChanged<Product> onProductTap;
@@ -1011,23 +1012,52 @@ class _ShopPreviewSection extends StatelessWidget {
   });
 
   @override
+  State<_ShopPreviewSection> createState() => _ShopPreviewSectionState();
+}
+
+class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
+  // Owner-chosen category display order from the dashboard (see
+  // CategoriesRepository.updateOrder) — falls back to alphabetical for any
+  // category not in this list yet (see CategoriesRepository.orderForDisplay).
+  List<String> _knownCategoryOrder = [];
+
+  // Caps how many products show per category row here on Home — the full,
+  // uncapped list per category still lives on the standalone Shop tab.
+  static const int _maxPerCategory = 8;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategoryOrder();
+  }
+
+  Future<void> _loadCategoryOrder() async {
+    final names = await CategoriesRepository.fetchAll();
+    if (!mounted) return;
+    setState(() => _knownCategoryOrder = names);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final preview = products.take(8).toList();
+    final categories = CategoriesRepository.orderForDisplay(
+      widget.products.map((p) => p.category).toSet(),
+      _knownCategoryOrder,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+          padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
           child: Align(
             alignment: Alignment.center,
             child: RevealOnScroll(
               child: SectionHeading(
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
-                titleSize: isMobile ? 24 : 30,
-                eyebrowSize: isMobile ? 15 : 17,
+                titleSize: widget.isMobile ? 24 : 30,
+                eyebrowSize: widget.isMobile ? 15 : 17,
                 eyebrowIcon: Icons.local_fire_department_rounded,
                 align: TextAlign.center,
               ),
@@ -1035,14 +1065,25 @@ class _ShopPreviewSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Padding(
-          // Matches ShopScreen's outer horizontal inset (ProductGrid adds
-          // its own inner padding on top of this in both places) so the
-          // grid ends up the same effective width — and the cards the
-          // same size — on both Home and the Shop tab.
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: ProductGrid(products: preview, onProductTap: onProductTap, singleRowOnDesktop: true),
-        ),
+        // Matches ShopScreen's outer horizontal inset (ProductGrid adds its
+        // own inner padding on top of this in both places) so the rows end
+        // up the same effective width — and the cards the same size — on
+        // both Home and the Shop tab.
+        for (var i = 0; i < categories.length; i++) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
+            child: _CategoryRow(
+              isMobile: widget.isMobile,
+              title: categories[i],
+              products: widget.products
+                  .where((p) => p.category == categories[i])
+                  .take(_maxPerCategory)
+                  .toList(),
+              onProductTap: widget.onProductTap,
+            ),
+          ),
+          if (i != categories.length - 1) const SizedBox(height: 36),
+        ],
         const SizedBox(height: 40),
         MarqueeStrip(
           height: 60,
@@ -1056,7 +1097,7 @@ class _ShopPreviewSection extends StatelessWidget {
         const SizedBox(height: 40),
         Center(
           child: GestureDetector(
-            onTap: onShopTap,
+            onTap: widget.onShopTap,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 15),
               decoration: BoxDecoration(
@@ -1077,6 +1118,57 @@ class _ShopPreviewSection extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// One category's own labelled row on Home — just the category name as the
+/// heading (no eyebrow, since it's one of several stacked rows) followed by
+/// that category's products in a single horizontally-swipeable row. Mirrors
+/// ShopScreen's `_ProductSection`, minus the eyebrow option it doesn't need
+/// here.
+class _CategoryRow extends StatelessWidget {
+  final bool isMobile;
+  final String title;
+  final List<Product> products;
+  final ValueChanged<Product> onProductTap;
+
+  const _CategoryRow({
+    required this.isMobile,
+    required this.title,
+    required this.products,
+    required this.onProductTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: RevealOnScroll(
+              child: Text(
+                title,
+                style: AppFonts.display(
+                  color: context.colors.cream,
+                  size: AppFonts.isArabic(title)
+                      ? (isMobile ? 19.4 : 24.3)
+                      : (isMobile ? 32.4 : 40.5),
+                  weight: FontWeight.w700,
+                  text: title,
+                  boostArabicSize: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        ProductGrid(products: products, onProductTap: onProductTap, singleRowOnDesktop: true),
       ],
     );
   }
