@@ -36,17 +36,15 @@ class AppText {
   // Home — welcome hero (the very first section on Home: portrait +
   // greeting + the two "view my work" / "explore the shop" buttons)
   String get heroWelcomePillName => _t('Aya Attia', 'ايه عطية');
-  String get heroWelcomeTitleMain => _t('A Home', 'عنوان');
-  String get heroWelcomeTitleAccent => _t('for Creativity', 'للابداع');
+  String get heroWelcomeTitleMain => _t('Simply', 'ببساطة!');
+  String get heroWelcomeTitleAccent => _t('A design for an ART', 'تصميم للفن؛');
   String get heroWelcomeSubtitle =>
-      _t("Welcome to creative Aya Attia's site.", 'اهلا وسهلا بكم في موقع المبدعه ايه عطية');
+      _t("Aya Attia Abed; an Egyptian Arab designer and illustrator with a Bachelor of Applied Arts degree in Advertising.", 'آية عطية عابد؛ مصممة ورسامة مصرية عربية حاصلة على بكالريوس الفنون التطبيقية لقسم الإعلان.');
   String get heroWelcomePrimaryButton => _t('View my work', 'عرض أعمالي');
   String get heroWelcomeSecondaryButton => _t('Explore the shop', 'استكشف المتجر');
   // Home — marquee
   String get marqueeNotebooks => _t('NOTEBOOKS', 'دفاتر');
   String get marqueeCalendars => _t('YEARLY CALENDARS', 'تقويمات سنوية');
-  // String get marqueeBookmark => _t('BOOKMARK', 'فاصل كتب');
-  // String get marqueeStand => _t('CALENDAR STAND', 'حامل');
   String get marqueeDigitalArt => _t('DIGITAL ART', 'رسم رقمي');
   String get marqueeKidsGamesPrint =>
       _t('PRINTED KIDS GAMES', 'تصميم ألعاب أطفال مطبوعة');
@@ -283,13 +281,7 @@ class AppText {
       _t('Couldn\'t open Contacts: $err', 'تعذر فتح جهات الاتصال: $err');
   String couldntPlaceOrder(String err) =>
       _t('Couldn\'t place the order: $err', 'تعذر تنفيذ الطلب: $err');
-
-  // Who am I — page chrome. Note: fullName, headline, bio, skills,
-  // location and contact info all come from the admin dashboard as free
-  // text, so they're shown exactly as the admin typed them (in whichever
-  // language that was) — only the surrounding labels below are translated.
   String get whoAmIEyebrow => _t('WHO AM I?', 'من أنا');
-  // Home's compact "available for" card (see OwnerIntroCard) — sits where
   // the embedded Services section used to, links down to the full "Who am
   // I" section below.
   String get viewFullProfile => _t('View full profile', 'شاهد الملف الشخصي كاملاً');
@@ -297,11 +289,7 @@ class AppText {
   // Home — shop preview section (teases the collection, hands off to the
   // standalone Shop tab)
   String get shopTheCollection => _t('Shop the collection', 'تسوق المجموعة');
-  // Mobile product swiper — small hint shown above the cards so first-time
-  // visitors know the products are swipeable, not just a static list.
   String get swipeProductsHint => _t('Swipe to see products', 'اسحب لعرض المنتجات');
-  // The audience circles in that same card — each taps straight through
-  // to the matching category on the Services tab (see OwnerIntroCard).
   String get availableForEyebrow => _t('AVAILABLE FOR', 'متاحة للعمل مع');
   String get restaurantOwnersLabel => _t('Restaurant owners', 'أصحاب المطاعم');
   String get hotelOwnersLabel => _t('Hotel owners', 'أصحاب الفنادق');
@@ -336,13 +324,6 @@ class AppText {
 }
 
 extension AppTextContextX on BuildContext {
-  /// Storefront copy in the currently-selected language. Never use this
-  /// inside admin/* screens — they should stay hardcoded in English.
   AppText get strings => AppText(isArabicLanguage);
-
-  /// Same as [strings] but doesn't subscribe to [LanguageController]
-  /// (via `read` instead of `watch`), so it's safe to call from event
-  /// handlers (onTap/onPressed callbacks, etc.) instead of only from
-  /// build methods.
   AppText get stringsRead => AppText(languageController.isArabic);
 }
