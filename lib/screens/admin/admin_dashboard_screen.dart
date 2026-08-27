@@ -301,6 +301,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  /// Swaps the category at [index] with its neighbor in [direction] (-1 for
+  /// up/earlier, +1 for down/later) and persists the whole new order — this
+  /// is what lets the owner control display order from the dashboard
+  /// instead of it always being alphabetical (see CategoriesRepository).
+  Future<void> _moveCategory(int index, int direction) async {
+    final target = index + direction;
+    if (target < 0 || target >= _categories.length) return;
+    final reordered = [..._categories];
+    final moved = reordered.removeAt(index);
+    reordered.insert(target, moved);
+    setState(() => _categories = reordered);
+    await CategoriesRepository.updateOrder(reordered.map((c) => c.name).toList());
+  }
+
   Future<void> _deleteCategory(String name) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -595,6 +609,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   onDeleteCategory: _deleteCategory,
                   onSetCategoryImage: _setCategoryImage,
                   uploadingCategoryImage: _uploadingCategoryImage,
+                  onMoveCategory: _moveCategory,
                   shippingController: _shippingController,
                   loadingShipping: _loadingShipping,
                   savingShipping: _savingShipping,
@@ -691,6 +706,9 @@ class _StoreSettingsPanel extends StatefulWidget {
   final ValueChanged<String> onDeleteCategory;
   final ValueChanged<String> onSetCategoryImage;
   final String? uploadingCategoryImage;
+  // (index, direction) — direction is -1 to move a category earlier in the
+  // storefront's display order, +1 to move it later.
+  final void Function(int index, int direction) onMoveCategory;
   final TextEditingController shippingController;
   final bool loadingShipping;
   final bool savingShipping;
@@ -723,6 +741,7 @@ class _StoreSettingsPanel extends StatefulWidget {
     required this.onDeleteCategory,
     required this.onSetCategoryImage,
     required this.uploadingCategoryImage,
+    required this.onMoveCategory,
     required this.shippingController,
     required this.loadingShipping,
     required this.savingShipping,
@@ -1136,8 +1155,10 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                   const SizedBox(height: 4),
                   Text(
                     'Tap a category\'s photo to set the thumbnail shown on the storefront\'s '
-                    'category circles. Deleting a category deletes every product filed under '
-                    'it too, so double-check before you do.',
+                    'category circles. Use the arrows to change the order categories appear '
+                    'in on the storefront — it\'s no longer just alphabetical. Deleting a '
+                    'category deletes every product filed under it too, so double-check '
+                    'before you do.',
                     style: AppFonts.body(size: 12, color: context.colors.creamDim),
                   ),
                   const SizedBox(height: 10),
@@ -1153,17 +1174,22 @@ class _StoreSettingsPanelState extends State<_StoreSettingsPanel> {
                   else if (widget.categories.isEmpty)
                     Text('No categories yet.', style: AppFonts.body(size: 13, color: context.colors.creamDim))
                   else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: widget.categories
-                          .map((c) => _CategoryTag(
-                                category: c,
-                                uploading: widget.uploadingCategoryImage == c.name,
-                                onDelete: () => widget.onDeleteCategory(c.name),
-                                onSetImage: () => widget.onSetCategoryImage(c.name),
-                              ))
-                          .toList(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = 0; i < widget.categories.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _CategoryTag(
+                              category: widget.categories[i],
+                              uploading: widget.uploadingCategoryImage == widget.categories[i].name,
+                              onDelete: () => widget.onDeleteCategory(widget.categories[i].name),
+                              onSetImage: () => widget.onSetCategoryImage(widget.categories[i].name),
+                              onMoveUp: i == 0 ? null : () => widget.onMoveCategory(i, -1),
+                              onMoveDown: i == widget.categories.length - 1 ? null : () => widget.onMoveCategory(i, 1),
+                            ),
+                          ),
+                      ],
                     ),
                 ],
               ),
@@ -1179,11 +1205,17 @@ class _CategoryTag extends StatelessWidget {
   final bool uploading;
   final VoidCallback onDelete;
   final VoidCallback onSetImage;
+  // Null when this category is already first/last, which disables (and
+  // dims) that arrow instead of hiding it, so the row width stays steady.
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
   const _CategoryTag({
     required this.category,
     required this.uploading,
     required this.onDelete,
     required this.onSetImage,
+    required this.onMoveUp,
+    required this.onMoveDown,
   });
 
   @override
@@ -1198,6 +1230,35 @@ class _CategoryTag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: onMoveUp,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    Icons.keyboard_arrow_up_rounded,
+                    size: 15,
+                    color: onMoveUp == null ? context.colors.creamDim.withOpacity(0.3) : context.colors.creamDim,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onMoveDown,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 15,
+                    color: onMoveDown == null ? context.colors.creamDim.withOpacity(0.3) : context.colors.creamDim,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 2),
           GestureDetector(
             onTap: uploading ? null : onSetImage,
             child: Tooltip(

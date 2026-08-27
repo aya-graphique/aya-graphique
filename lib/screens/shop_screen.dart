@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
+import '../services/categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
@@ -46,17 +47,28 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> {
   String? _activeCategory;
+  // Owner-chosen category display order from the dashboard (see
+  // CategoriesRepository.updateOrder) — falls back to alphabetical for any
+  // category not in this list yet (see CategoriesRepository.orderForDisplay).
+  List<String> _knownCategoryOrder = [];
 
   @override
   void initState() {
     super.initState();
     widget.focusController?.addListener(_onFocusRequest);
+    _loadCategoryOrder();
   }
 
   @override
   void dispose() {
     widget.focusController?.removeListener(_onFocusRequest);
     super.dispose();
+  }
+
+  Future<void> _loadCategoryOrder() async {
+    final names = await CategoriesRepository.fetchAll();
+    if (!mounted) return;
+    setState(() => _knownCategoryOrder = names);
   }
 
   void _onFocusRequest() {
@@ -80,7 +92,10 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = widget.products.map((p) => p.category).toSet().toList()..sort();
+    final categories = CategoriesRepository.orderForDisplay(
+      widget.products.map((p) => p.category).toSet(),
+      _knownCategoryOrder,
+    );
     final filtered = _activeCategory == null
         ? widget.products
         : widget.products.where((p) => p.category == _activeCategory).toList();

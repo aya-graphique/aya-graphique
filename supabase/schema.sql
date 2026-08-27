@@ -56,12 +56,18 @@ create table if not exists categories (
   id          uuid primary key default gen_random_uuid(),
   name        text not null unique,
   image_url   text not null default '',
+  sort_order  integer not null default 0,
   created_at  timestamptz not null default now()
 );
 
 -- Migrating an existing database created before `image_url` existed?
 -- Uncomment and run this once:
 -- alter table categories add column if not exists image_url text not null default '';
+
+-- Migrating an existing database created before `sort_order` existed?
+-- Uncomment and run this once (existing rows all start at 0, i.e. they'll
+-- sort alphabetically as a tiebreak until the dashboard reorders them):
+-- alter table categories add column if not exists sort_order integer not null default 0;
 
 alter table categories enable row level security;
 
