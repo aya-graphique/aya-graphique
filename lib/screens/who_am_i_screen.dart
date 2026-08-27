@@ -8,20 +8,6 @@ import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/shimmer_text.dart';
 
-/// A standalone bio/portfolio page — the owner's own words, organized into
-/// clear labelled sections (stats, bio, skills, experience, education,
-/// contact). Meant to be sent (or its link shared) as part of a proposal
-/// when pitching for other design work — the admin-editable fields
-/// (name/headline/bio/skills/contact/location) are set from the admin
-/// dashboard, no code changes needed. Deliberately photo-free — an
-/// initials avatar stands in for a portrait (see [_InitialsAvatar]) rather
-/// than wiring up owner photo uploads here.
-
-/// Static content — not wired to the dashboard on purpose. Edit these
-/// lists directly in code whenever the experience/education changes.
-/// Each entry carries both an English and an Arabic version so it follows
-/// the storefront language toggle the same way the dashboard-driven
-/// content does.
 List<_TimelineEntry> kExperience(bool isArabic) => [
       _TimelineEntry(
         title: isArabic ? 'مصممة جرافيك أول' : 'Senior Graphic Designer',
@@ -125,9 +111,10 @@ class _StatItem {
 }
 
 List<_StatItem> kStats(bool isArabic) => [
-      _StatItem('5+', isArabic ? 'سنوات خبرة' : 'Years experience'),
+      _StatItem('8+', isArabic ? 'سنوات خبرة' : 'Years experience'),
       _StatItem('30+', isArabic ? 'مشروع هوية بصرية' : 'Brand projects'),
       _StatItem('98%', isArabic ? 'رضا العملاء' : 'Client satisfaction'),
+      _StatItem('1000+', isArabic ? 'عدد المُتدربين' : 'Number of clients trained'),
     ];
 
 /// Capitalizes the first letter of each word, leaving the rest of the word
