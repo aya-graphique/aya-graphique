@@ -7,11 +7,9 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
-import '../utils/web_ready_notifier.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
-import 'favorites_screen.dart';
 import 'graphical_services_screen.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
@@ -53,11 +51,17 @@ class _MainShellState extends State<MainShell> {
   final ShopFocusController _shopFocusController = ShopFocusController();
   late Future<List<Product>> _productsFuture;
   // Kicked off here, at the same time as _productsFuture, instead of
-  // inside HomeScreen's own initState — starting it early is what keeps
-  // the banner strip from feeling slow to appear once Home scrolls into
-  // view. The Home page's top hero strip (HomeBannerPlacement.hero) was
-  // removed, so this is now the only banner fetch — right above "MOST
-  // ORDERED".
+  // inside HomeScreen's own initState — previously the banner fetch only
+  // *started* once HomeScreen mounted, which was itself gated behind
+  // _productsFuture resolving, so it was two network round-trips back to
+  // back (products, then banners) instead of one. Starting both together
+  // here is what actually fixes the banner slideshow feeling slow to
+  // appear; HomeScreen now just awaits whatever's passed in.
+  late Future<List<HomeBanner>> _bannersFuture;
+  // Same idea as _bannersFuture, but for the second banner strip further
+  // down Home, right above "MOST ORDERED" — its own owner-managed set of
+  // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
+  // others so it's ready by the time that part of Home scrolls into view.
   late Future<List<HomeBanner>> _mostOrderedBannersFuture;
 
   @override
@@ -71,11 +75,7 @@ class _MainShellState extends State<MainShell> {
       if (!mounted) return;
       context.read<CartProvider>().restore(products);
     });
-    // Tell web/index.html's #pre_splash overlay it can fade out now that
-    // the home page actually has something to show — success or failure,
-    // since either way the loading spinner is done and real content (or a
-    // real empty state) is what's on screen next. See web_ready_notifier.
-    _productsFuture.whenComplete(notifyAppContentReady);
+    _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
   }
@@ -121,6 +121,7 @@ class _MainShellState extends State<MainShell> {
   void _refreshProducts() {
     setState(() {
       _productsFuture = ProductsRepository.fetchAll();
+      _bannersFuture = HomeBannersRepository.fetchSlides();
       _mostOrderedBannersFuture =
           HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
     });
@@ -167,84 +168,80 @@ class _MainShellState extends State<MainShell> {
           // for a drawer to open there.
           drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
           body: AnimatedBackdrop(
-          child: FutureBuilder<List<Product>>(
-            future: _productsFuture,
-            builder: (context, snapshot) {
-              final products = snapshot.data ?? const [];
-              final loading = snapshot.connectionState == ConnectionState.waiting;
+            child: FutureBuilder<List<Product>>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                final products = snapshot.data ?? const [];
+                final loading = snapshot.connectionState == ConnectionState.waiting;
 
-              return Stack(
-                children: [
-                  if (loading)
-                    Center(
-                      child: CircularProgressIndicator(color: context.colors.orchid),
-                    )
-                  else
-                    IndexedStack(
-                      index: _page.index,
-                      children: [
-                        HomeScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          scrollController: _homeScrollController,
-                          onAdminReturn: _refreshProducts,
-                          mostOrderedBannersFuture: _mostOrderedBannersFuture,
-                          onServiceCategoryTap: _openServiceCategory,
-                          onShopTap: () => _goTo(ShopPage.shop),
-                          onCategoryTap: _openShopCategory,
-                          onViewProfileTap: () => _goTo(ShopPage.about),
-                        ),
-                        ShopScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          scrollController: _shopScrollController,
-                          focusController: _shopFocusController,
-                        ),
-                        SearchScreen(products: products, isMobile: isMobile),
-                        GraphicalServicesScreen(
-                          isMobile: isMobile,
-                          focusController: _servicesFocusController,
-                        ),
-                        // Standalone "Who am I" tab — Home no longer
-                        // embeds this inline; the owner-intro card's
-                        // "View full profile" button jumps here instead
-                        // (see HomeScreen.onViewProfileTap).
-                        WhoAmIScreen(isMobile: isMobile),
-                        FavoritesScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          onBrowse: () => _goTo(ShopPage.shop),
-                        ),
-                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
-                      ],
+                return Stack(
+                  children: [
+                    if (loading)
+                      Center(
+                        child: CircularProgressIndicator(color: context.colors.orchid),
+                      )
+                    else
+                      IndexedStack(
+                        index: _page.index,
+                        children: [
+                          HomeScreen(
+                            products: products,
+                            isMobile: isMobile,
+                            scrollController: _homeScrollController,
+                            onAdminReturn: _refreshProducts,
+                            bannersFuture: _bannersFuture,
+                            mostOrderedBannersFuture: _mostOrderedBannersFuture,
+                            onServiceCategoryTap: _openServiceCategory,
+                            onShopTap: () => _goTo(ShopPage.shop),
+                            onCategoryTap: _openShopCategory,
+                            onViewProfileTap: () => _goTo(ShopPage.about),
+                          ),
+                          ShopScreen(
+                            products: products,
+                            isMobile: isMobile,
+                            scrollController: _shopScrollController,
+                            focusController: _shopFocusController,
+                          ),
+                          SearchScreen(products: products, isMobile: isMobile),
+                          GraphicalServicesScreen(
+                            isMobile: isMobile,
+                            focusController: _servicesFocusController,
+                          ),
+                          // Standalone "Who am I" tab — Home no longer
+                          // embeds this inline; the owner-intro card's
+                          // "View full profile" button jumps here instead
+                          // (see HomeScreen.onViewProfileTap).
+                          WhoAmIScreen(isMobile: isMobile),
+                          CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
+                        ],
+                      ),
+                    Positioned(
+                      top: 20,
+                      left: isMobile ? 10 : 0,
+                      right: isMobile ? 10 : 0,
+                      child: Center(
+                        // Mobile swaps the full pill nav for the compact top
+                        // bar (menu button + logo + cart) that opens
+                        // ShopNavDrawer; desktop is unchanged.
+                        child: isMobile
+                            ? ShopMobileTopBar(
+                                active: _page,
+                                onTap: _goTo,
+                                onMenuTap: () =>
+                                    _scaffoldKey.currentState?.openDrawer(),
+                              )
+                            : ShopNavBar(
+                                active: _page,
+                                onTap: _goTo,
+                                isMobile: isMobile,
+                              ),
+                      ),
                     ),
-                  Positioned(
-                    top: 20,
-                    left: isMobile ? 10 : 0,
-                    right: isMobile ? 10 : 0,
-                    child: Center(
-                      // Mobile swaps the full pill nav for the compact top
-                      // bar (menu button + logo + cart) that opens
-                      // ShopNavDrawer; desktop is unchanged.
-                      child: isMobile
-                          ? ShopMobileTopBar(
-                              active: _page,
-                              onTap: _goTo,
-                              onMenuTap: () =>
-                                  _scaffoldKey.currentState?.openDrawer(),
-                            )
-                          : ShopNavBar(
-                              active: _page,
-                              onTap: _goTo,
-                              isMobile: isMobile,
-                            ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
-        ),
         ),
       ),
     );

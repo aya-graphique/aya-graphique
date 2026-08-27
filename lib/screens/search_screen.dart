@@ -1,8 +1,7 @@
+import 'package:aya_graphique/providers/language_controller.dart';
 import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
-import '../providers/language_controller.dart';
-import '../services/categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/section_heading.dart';
@@ -22,21 +21,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
   String _query = '';
   String? _category;
-  // Owner-chosen category display order from the dashboard — see
-  // ShopScreen, which uses the same pattern.
-  List<String> _knownCategoryOrder = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCategoryOrder();
-  }
-
-  Future<void> _loadCategoryOrder() async {
-    final names = await CategoriesRepository.fetchAll();
-    if (!mounted) return;
-    setState(() => _knownCategoryOrder = names);
-  }
 
   @override
   void dispose() {
@@ -46,10 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = CategoriesRepository.orderForDisplay(
-      widget.products.map((p) => p.category).toSet(),
-      _knownCategoryOrder,
-    );
+    final categories = widget.products.map((p) => p.category).toSet().toList()..sort();
     final results = widget.products.where((p) {
       final matchesQuery = _query.isEmpty ||
           p.name.toLowerCase().contains(_query.toLowerCase()) ||

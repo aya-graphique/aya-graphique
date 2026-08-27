@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -8,7 +21,7 @@
   <meta name="description" content="Simplicity makes it Art">
 
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="aya_graphique">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
@@ -16,146 +29,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <!-- This matches the Scaffold background in SplashScreen (context.colors.bgDeep)
-       so the browser tab / native chrome / overscroll never flashes white. -->
-  <meta name="theme-color" content="#0D0512">
-
   <title>aya_graphique</title>
   <link rel="manifest" href="manifest.json">
-
-  <style>
-    /* Paint the final background colour immediately, before any CSS/JS
-       has a chance to load. This alone removes most of the "white flash". */
-    html, body {
-      background-color: #0D0512;
-      height: 100%;
-      margin: 0;
-    }
-
-    /* A tiny, dependency-free copy of lib/screens/splash_screen.dart,
-       inlined directly in the HTML so it paints the instant the page
-       loads - no waiting on Flutter's engine/JS download at all.
-       It is removed the moment Flutter paints its own first frame,
-       so visually the two hand off seamlessly. */
-    #pre_splash {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #0D0512;
-      z-index: 9999;
-      transition: opacity .35s ease;
-    }
-
-    #pre_splash .badge {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 0 46px 6px rgba(155, 63, 209, .45);
-      animation: pre_splash_pop .5s ease both;
-    }
-
-    #pre_splash .brand {
-      margin-top: 22px;
-      font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #F4E9F7;
-      font-size: 19px;
-      letter-spacing: .3px;
-      opacity: 0;
-      animation: pre_splash_fade .5s ease .12s forwards;
-    }
-
-    #pre_splash .tagline {
-      margin-top: 6px;
-      font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #C183EE;
-      font-size: 11px;
-      letter-spacing: 2px;
-      opacity: 0;
-      animation: pre_splash_fade .5s ease .2s forwards;
-    }
-
-    #pre_splash .track {
-      margin-top: 38px;
-      width: 130px;
-      height: 3px;
-      border-radius: 100px;
-      background: rgba(255, 255, 255, .08);
-      overflow: hidden;
-      opacity: 0;
-      animation: pre_splash_fade .5s ease .28s forwards;
-    }
-
-    #pre_splash .track span {
-      display: block;
-      height: 100%;
-      width: 40%;
-      border-radius: 100px;
-      background: linear-gradient(90deg, #9B3FD1, #C183EE);
-      animation: pre_splash_load 1.1s ease-in-out infinite;
-    }
-
-    #pre_splash.pre_splash_hide {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    @keyframes pre_splash_pop {
-      from { opacity: 0; transform: scale(.85); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes pre_splash_fade {
-      to { opacity: 1; }
-    }
-
-    @keyframes pre_splash_load {
-      0%   { transform: translateX(-120%); }
-      100% { transform: translateX(280%); }
-    }
-  </style>
 </head>
 <body>
-
-  <!-- This *is* the splash screen now - there's no separate Flutter
-       SplashScreen widget/route to hand off to any more. It's removed
-       automatically once MainShell actually has something real to show
-       (see the 'app-content-ready' listener below, dispatched from
-       lib/utils/web_ready_notifier_web.dart), not on Flutter's own
-       'flutter-first-frame' event - that fires on MainShell's loading
-       spinner too, which would make this overlay disappear a beat early
-       and show a second, bare loading state underneath it. -->
-  <div id="pre_splash">
-    <img class="badge" src="icons/aya_portrait.png" alt=""
-         onerror="this.style.display='none'">
-    <div class="brand">Aya's Graphique</div>
-    <div class="tagline">VISUAL DESIGN &middot; ARTS &middot; ADVERTISING</div>
-    <div class="track"><span></span></div>
-  </div>
-
-  <script>
-    (function () {
-      var hidden = false;
-      function hidePreSplash() {
-        if (hidden) return;
-        hidden = true;
-        var el = document.getElementById('pre_splash');
-        if (!el) return;
-        el.classList.add('pre_splash_hide');
-        setTimeout(function () { el.remove(); }, 350);
-      }
-      window.addEventListener('app-content-ready', hidePreSplash);
-      // Safety net: if something goes wrong before the app can dispatch
-      // 'app-content-ready' (slow network, an unexpected error, an older
-      // build without the event), don't leave a visitor staring at the
-      // splash forever.
-      setTimeout(hidePreSplash, 12000);
-    })();
-  </script>
-
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
