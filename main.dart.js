@@ -50458,7 +50458,7 @@ A.Ie.prototype={
 D(a){var s=this.c
 return A.aT(A.aeV("assets/images/aya_hero_flag_photo.png",null,B.nX,null,null),s*1.12,s)}}
 A.YY.prototype={
-D(a0){var s,r,q,p=null,o="Aya Attia",n="\u0627\u064a\u0647 \u0639\u0637\u064a\u0629",m="for Creativity",l="\u0644\u0644\u0627\u0628\u062f\u0627\u0639",k="Welcome to creative Aya Attia's site.",j="\u0627\u0647\u0644\u0627 \u0648\u0633\u0647\u0644\u0627 \u0628\u0643\u0645 \u0641\u064a \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u0628\u062f\u0639\u0647 \u0627\u064a\u0647 \u0639\u0637\u064a\u0629",i=A.c(a0,!0,t.f).a===B.l,h=this.c,g=h?B.t:B.I,f=h?B.aq:B.ab,e=A.a9(20,B.n.n()>>>16&255,B.n.n()>>>8&255,B.n.n()&255),d=A.an(100),c=A.bq(A.a9(41,B.n.n()>>>16&255,B.n.n()>>>8&255,B.n.n()&255),1),b=i?n:o,a=t.D
+D(a0){var s,r,q,p=null,o="Aya Attia",n="\u0627\u064a\u0647 \u0639\u0637\u064a\u0629",m="A design for an ART",l="\u062a\u0635\u0645\u064a\u0645 \u0644\u0644\u0641\u0646\u061b",k="Aya Attia Abed; an Egyptian Arab designer and illustrator with a Bachelor of Applied Arts degree in Advertising.",j="\u0622\u064a\u0629 \u0639\u0637\u064a\u0629 \u0639\u0627\u0628\u062f\u061b \u0645\u0635\u0645\u0645\u0629 \u0648\u0631\u0633\u0627\u0645\u0629 \u0645\u0635\u0631\u064a\u0629 \u0639\u0631\u0628\u064a\u0629 \u062d\u0627\u0635\u0644\u0629 \u0639\u0644\u0649 \u0628\u0643\u0627\u0644\u0631\u064a\u0648\u0633 \u0627\u0644\u0641\u0646\u0648\u0646 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u064a\u0629 \u0644\u0642\u0633\u0645 \u0627\u0644\u0625\u0639\u0644\u0627\u0646.",i=A.c(a0,!0,t.f).a===B.l,h=this.c,g=h?B.t:B.I,f=h?B.aq:B.ab,e=A.a9(20,B.n.n()>>>16&255,B.n.n()>>>8&255,B.n.n()&255),d=A.an(100),c=A.bq(A.a9(41,B.n.n()>>>16&255,B.n.n()>>>8&255,B.n.n()&255),1),b=i?n:o,a=t.D
 d=A.a5(p,A.aG(A.a([B.KJ,B.bf,A.y(b,p,p,p,A.b8(!0,B.n,0.4,13,i?n:o,B.B),p,p)],a),B.t,p,B.k,B.Q),B.i,p,p,new A.a7(e,p,c,d,p,p,B.u),p,p,p,p,B.J3,p,p,p)
 e=A.aT(p,h?18:24,p)
 c=i?l:m
@@ -50469,9 +50469,9 @@ if(!$.di){s=$.fZ()
 b=s.b.test(b)}else b=!0
 b=b?" ":"\n"
 b=A.cW(p,A.c3(!0,B.n,p,p,h?40:70,p,B.aB),b)
-s=i?"\u0639\u0646\u0648\u0627\u0646":"A Home"
+s=i?"\u0628\u0628\u0633\u0627\u0637\u0629!":"Simply"
 r=h?40:70
-c=A.aUO(A.cW(A.a([c,b,A.cW(p,A.c3(!0,B.Hn,p,p,r,i?"\u0639\u0646\u0648\u0627\u0646":"A Home",B.aB),s)],t.VO),p,p),p,f)
+c=A.aUO(A.cW(A.a([c,b,A.cW(p,A.c3(!0,B.Hn,p,p,r,i?"\u0628\u0628\u0633\u0627\u0637\u0629!":"Simply",B.aB),s)],t.VO),p,p),p,f)
 b=A.aT(p,h?14:18,p)
 s=i?j:k
 r=h?15:18
