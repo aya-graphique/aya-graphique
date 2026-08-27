@@ -51317,9 +51317,9 @@ q=e?16:40
 p=e?24:36
 e=e?16:32
 o=t.f
-n=A.c(a,!0,o).a===B.l?"\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629":"THE COLLECTION"
-m=A.c(a,!0,o).a===B.l?"\u062f\u0641\u0627\u062a\u0631 \u062a\u0633\u062a\u062d\u0642\n\u0623\u0646 \u062a\u0645\u062a\u062f \u0644\u0647\u0627 \u064a\u062f\u0643.":"Notebooks worth\nreaching for."
-o=A.c(a,!0,o).a===B.l?"\u0623\u0646\u0648\u0627\u0639 \u0627\u0644\u0648\u0631\u0642 \u0648\u0627\u0644\u062a\u062c\u0644\u064a\u062f \u0648\u0627\u0644\u0623\u063a\u0644\u0641\u0629 \u0645\u062e\u062a\u0627\u0631\u0629 \u0628\u0639\u0646\u0627\u064a\u0629\u060c \u062a\u0645\u0627\u0645\u064b\u0627 \u0643\u0645\u0627 \u0646\u062e\u062a\u0627\u0631 \u0643\u0644 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0647\u0646\u0627.":"Paper stocks, bindings, and covers chosen the way we choose everything else here \u2014 deliberately."
+n=A.c(a,!0,o).a===B.l?"\u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a":"THE PRODUCTS"
+m=A.c(a,!0,o).a===B.l?"\u0641\u0646 \u064a\u0639\u0628\u0631 \u0639\u0646\u0643 \u0641\u064a \u0643\u0644 \u0644\u062d\u0638\u0629 \u0628\u064a\u0646 \u064a\u062f\u064a\u0643 \u0648\u064a\u0631\u0627\u0641\u0642\u0643 \u0625\u0644\u0649 \u0627\u0644\u0623\u0628\u062f.":"Art expresses you in every moment\nbetween your hands and accompanies you forever. "
+o=A.c(a,!0,o).a===B.l?"\u0623\u062e\u062a\u0631 \u0627\u0644\u0641\u0646 \u0627\u0644\u0630\u064a \u064a\u0639\u0628\u0631 \u0639\u0646\u0643\u061b \u0644\u0643 \u0648\u0644\u0645\u0646 \u062a\u064f\u062d\u0628.":"Choose the art that expresses you;For you and your loved ones."
 l=t.D
 m=A.a([new A.ad(new A.S(e,0,e,0),new A.cS(B.dr,g,g,A.F4(B.ab,!0,n,g,g,o,m,h.a.d?28:34),g),g)],l)
 if(f.length>1){e=h.a.d?16:32
