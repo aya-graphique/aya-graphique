@@ -33,8 +33,10 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback? onAdminReturn;
   // Started earlier, in MainShell's initState, at the same time as the
   // products fetch — see the comment there for why. HomeScreen just
-  // awaits it instead of kicking off its own fetch after mounting. This
-  // is for the banner strip right above "MOST ORDERED" — its own
+  // awaits it instead of kicking off its own fetch after mounting.
+  final Future<List<HomeBanner>> bannersFuture;
+  // Same idea as bannersFuture, but for the second, independent banner
+  // strip further down the page, right above "MOST ORDERED" — its own
   // owner-managed set of photos (see HomeBannerPlacement.mostOrdered in
   // the admin dashboard), not just a repeat of the top one.
   final Future<List<HomeBanner>> mostOrderedBannersFuture;
@@ -65,6 +67,7 @@ class HomeScreen extends StatefulWidget {
     required this.isMobile,
     required this.scrollController,
     this.onAdminReturn,
+    required this.bannersFuture,
     required this.mostOrderedBannersFuture,
     required this.onServiceCategoryTap,
     required this.onShopTap,
@@ -161,9 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
             onPrimaryTap: widget.onViewProfileTap,
             onSecondaryTap: widget.onShopTap,
           ),
-          // Extra space here clears the portrait's bottom overflow (which
-          // now hangs lower than the card thanks to the added paint
-          // offset) so the flag tail doesn't overlap the marquee below.
           SizedBox(height: widget.isMobile ? 40 : 110),
           MarqueeStrip(
             height: 60,
@@ -171,8 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
             words: [
               context.strings.marqueeNotebooks,
               context.strings.marqueeCalendars,
-              // context.strings.marqueeBookmark,
-              // context.strings.marqueeStand,
               context.strings.marqueeDigitalArt,
               context.strings.marqueeKidsGamesPrint,
               context.strings.marqueeCommercialPrint,
@@ -288,19 +286,7 @@ class _HeroState extends State<_Hero> {
 
   @override
   Widget build(BuildContext context) {
-    // Banners are one owner-uploaded photo — no separate mobile/desktop
-    // crop — so the frame now keeps one fixed aspect ratio at every screen
-    // size instead of sizing off viewport height. That old approach (55%
-    // of screen height on phone, 92% on desktop) gave the container a
-    // completely different shape on each, so a photo cropped well on one
-    // came out wrong on the other. A 16:9 frame is the same relative crop
-    // everywhere — only the overall size scales with the available width.
-    // Clamped at both ends so very narrow phones and very wide desktop
-    // monitors still get a sensible height.
     final screenWidth = MediaQuery.of(context).size.width;
-    // Mobile now keeps a small side gutter (instead of going fully
-    // edge-to-edge) so the rounded corners read clearly against the
-    // screen edge; desktop keeps its original, larger inset frame.
     final horizontalPadding = isMobile ? 16.0 : 60.0;
     final availableWidth = screenWidth - horizontalPadding * 2;
     const bannerAspectRatio = 16 / 9;
@@ -311,9 +297,6 @@ class _HeroState extends State<_Hero> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Both the wordmark and the "NOTEBOOKS & CALENDARS" eyebrow line
-          // are gone now — the sliders are the very first thing in the
-          // hero, with the dots directly underneath them.
           if (banners.isNotEmpty) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(isMobile ? 16 : 28),
@@ -350,14 +333,7 @@ class _HeroState extends State<_Hero> {
   }
 }
 
-/// The very first thing on Home: a static, hand-built welcome hero (no
-/// longer an owner-uploaded photo banner) — a purple card with Aya's
-/// portrait laid over a red flag/ribbon backdrop on one side, and a
-/// greeting pill, two-tone headline, subtitle, and the "view my work" /
-/// "explore the shop" button pair on the other. The old photo-slideshow
-/// [_Hero] above still powers the second banner strip further down the
-/// page (right before "MOST ORDERED"), which keeps its own owner-managed
-/// photos — only this top slot changed.
+
 class _WelcomeHero extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPrimaryTap;
@@ -380,9 +356,6 @@ class _WelcomeHero extends StatelessWidget {
       onSecondaryTap: onSecondaryTap,
     );
 
-    // Mobile keeps the simple stacked layout, portrait sized to fit
-    // normally inside the card (no room to break out of it on a narrow
-    // screen without covering the text).
     if (isMobile) {
       final portrait = _HeroPortrait(size: 240);
       return Padding(
@@ -414,10 +387,6 @@ class _WelcomeHero extends StatelessWidget {
         ),
       );
     }
-
-    // Desktop: the portrait sits with a small gap from the card's top
-    // edge (topGap) and breaks out past the card's bottom edge
-    // (overflowBottom), matching the reference.
     const portraitSize = 470.0;
     const portraitHeight = portraitSize * 1.12;
     const topGap = 50.0;
@@ -516,9 +485,6 @@ class _HeroPortrait extends StatelessWidget {
     );
   }
 }
-
-/// The greeting pill, two-tone headline, subtitle, and the "view my
-/// work" / "explore the shop" button pair on the text side of the hero.
 class _HeroText extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPrimaryTap;
@@ -549,7 +515,7 @@ class _HeroText extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFFE7D4F5)),
+              // const Icon(Icons.yard, size: 14, color: Color(0xFFE7D4F5)),
               const SizedBox(width: 8),
               Text(
                 strings.heroWelcomePillName,
@@ -572,16 +538,16 @@ class _HeroText extends StatelessWidget {
             TextSpan(
               text: strings.heroWelcomeTitleAccent,
               style: AppFonts.display(
-                size: isMobile ? 40 : 70,
+                size: isMobile ? 20 : 35,
                 weight: FontWeight.w800,
                 color: Colors.white,
                 text: strings.heroWelcomeTitleAccent,
               ),
             ),
             TextSpan(
-              text: AppFonts.isArabic(strings.heroWelcomeTitleAccent) ? ' ' : '\n',
+              text: ' ',
               style: AppFonts.display(
-                size: isMobile ? 40 : 70,
+                size: isMobile ? 20 : 35,
                 weight: FontWeight.w800,
                 color: Colors.white,
               ),
@@ -991,14 +957,13 @@ class _SkillArtCardState extends State<_SkillArtCard> {
   }
 }
 
-/// Teases the shop from Home: every product category gets its own labelled
-/// row (same "each category, its own horizontally-swipeable row" treatment
-/// ShopScreen uses when no filter is active — see `_ProductSection` there),
-/// capped at a handful of products per row so Home stays a teaser rather
-/// than a second full listing. Ends with a "Shop the collection" pill
-/// button that hands off to the standalone Shop tab (see
-/// [HomeScreen.onShopTap]) for the full grid, category filter, etc.
-class _ShopPreviewSection extends StatefulWidget {
+/// Teases the shop from Home: a handful of products in a grid, followed by
+/// a "Shop the collection" pill button that hands off to the standalone
+/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
+/// and best-sellers section all live over there now (see ShopScreen).
+/// Capped at 8 products so Home stays a teaser rather than a second full
+/// listing.
+class _ShopPreviewSection extends StatelessWidget {
   final List<Product> products;
   final bool isMobile;
   final ValueChanged<Product> onProductTap;
@@ -1012,52 +977,23 @@ class _ShopPreviewSection extends StatefulWidget {
   });
 
   @override
-  State<_ShopPreviewSection> createState() => _ShopPreviewSectionState();
-}
-
-class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
-  // Owner-chosen category display order from the dashboard (see
-  // CategoriesRepository.updateOrder) — falls back to alphabetical for any
-  // category not in this list yet (see CategoriesRepository.orderForDisplay).
-  List<String> _knownCategoryOrder = [];
-
-  // Caps how many products show per category row here on Home — the full,
-  // uncapped list per category still lives on the standalone Shop tab.
-  static const int _maxPerCategory = 8;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCategoryOrder();
-  }
-
-  Future<void> _loadCategoryOrder() async {
-    final names = await CategoriesRepository.fetchAll();
-    if (!mounted) return;
-    setState(() => _knownCategoryOrder = names);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final categories = CategoriesRepository.orderForDisplay(
-      widget.products.map((p) => p.category).toSet(),
-      _knownCategoryOrder,
-    );
+    final preview = products.take(8).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
           child: Align(
             alignment: Alignment.center,
             child: RevealOnScroll(
               child: SectionHeading(
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
-                titleSize: widget.isMobile ? 24 : 30,
-                eyebrowSize: widget.isMobile ? 15 : 17,
+                titleSize: isMobile ? 24 : 30,
+                eyebrowSize: isMobile ? 15 : 17,
                 eyebrowIcon: Icons.local_fire_department_rounded,
                 align: TextAlign.center,
               ),
@@ -1065,25 +1001,14 @@ class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
           ),
         ),
         const SizedBox(height: 24),
-        // Matches ShopScreen's outer horizontal inset (ProductGrid adds its
-        // own inner padding on top of this in both places) so the rows end
-        // up the same effective width — and the cards the same size — on
-        // both Home and the Shop tab.
-        for (var i = 0; i < categories.length; i++) ...[
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
-            child: _CategoryRow(
-              isMobile: widget.isMobile,
-              title: categories[i],
-              products: widget.products
-                  .where((p) => p.category == categories[i])
-                  .take(_maxPerCategory)
-                  .toList(),
-              onProductTap: widget.onProductTap,
-            ),
-          ),
-          if (i != categories.length - 1) const SizedBox(height: 36),
-        ],
+        Padding(
+          // Matches ShopScreen's outer horizontal inset (ProductGrid adds
+          // its own inner padding on top of this in both places) so the
+          // grid ends up the same effective width — and the cards the
+          // same size — on both Home and the Shop tab.
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
+          child: ProductGrid(products: preview, onProductTap: onProductTap),
+        ),
         const SizedBox(height: 40),
         MarqueeStrip(
           height: 60,
@@ -1097,7 +1022,7 @@ class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
         const SizedBox(height: 40),
         Center(
           child: GestureDetector(
-            onTap: widget.onShopTap,
+            onTap: onShopTap,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 15),
               decoration: BoxDecoration(
@@ -1118,57 +1043,6 @@ class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-/// One category's own labelled row on Home — just the category name as the
-/// heading (no eyebrow, since it's one of several stacked rows) followed by
-/// that category's products in a single horizontally-swipeable row. Mirrors
-/// ShopScreen's `_ProductSection`, minus the eyebrow option it doesn't need
-/// here.
-class _CategoryRow extends StatelessWidget {
-  final bool isMobile;
-  final String title;
-  final List<Product> products;
-  final ValueChanged<Product> onProductTap;
-
-  const _CategoryRow({
-    required this.isMobile,
-    required this.title,
-    required this.products,
-    required this.onProductTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (products.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: RevealOnScroll(
-              child: Text(
-                title,
-                style: AppFonts.display(
-                  color: context.colors.cream,
-                  size: AppFonts.isArabic(title)
-                      ? (isMobile ? 19.4 : 24.3)
-                      : (isMobile ? 32.4 : 40.5),
-                  weight: FontWeight.w700,
-                  text: title,
-                  boostArabicSize: false,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        ProductGrid(products: products, onProductTap: onProductTap, singleRowOnDesktop: true),
       ],
     );
   }
