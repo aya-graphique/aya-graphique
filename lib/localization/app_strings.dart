@@ -65,14 +65,14 @@ class AppText {
   String get marqueeGamesShort => _t('GAMES', 'ألعاب');
 
   // Home — collection section
-  String get collectionEyebrow => _t('THE COLLECTION', 'المجموعة');
+  String get collectionEyebrow => _t('THE PRODUCTS', 'المنتجات');
   String get collectionTitle =>
-      _t('Notebooks worth\nreaching for.', 'دفاتر تستحق\nأن تمتد لها يدك.');
+      _t('Art expresses you in every moment\nbetween your hands and accompanies you forever. ','فن يعبر عنك في كل لحظة بين يديك ويرافقك إلى الأبد.');
   String get collectionSubtitle => _t(
-        'Paper stocks, bindings, and covers chosen the way we choose '
-        'everything else here — deliberately.',
-        'أنواع الورق والتجليد والأغلفة مختارة بعناية، تمامًا كما نختار '
-        'كل شيء آخر هنا.',
+        'Choose the art that expresses you;'
+        'For you and your loved ones.',
+        'أختر الفن الذي يعبر عنك؛ '
+        'لك ولمن تُحب.',
       );
   String get categoryAll => _t('All', 'الكل');
 
