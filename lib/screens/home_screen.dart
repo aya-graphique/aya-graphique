@@ -505,31 +505,6 @@ class _HeroText extends StatelessWidget {
     return Column(
       crossAxisAlignment: crossAlign,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: Colors.white.withOpacity(0.16)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // const Icon(Icons.yard, size: 14, color: Color(0xFFE7D4F5)),
-              const SizedBox(width: 8),
-              Text(
-                strings.heroWelcomePillName,
-                style: AppFonts.label(
-                  size: 13,
-                  color: Colors.white,
-                  letterSpacing: 0.4,
-                  text: strings.heroWelcomePillName,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: isMobile ? 18 : 24),
         Text.rich(
           TextSpan(children: [
             // Order and colors swapped from before: the accent word now
@@ -538,7 +513,7 @@ class _HeroText extends StatelessWidget {
             TextSpan(
               text: strings.heroWelcomeTitleAccent,
               style: AppFonts.display(
-                size: isMobile ? 20 : 35,
+                size: isMobile ? 32 : 35,
                 weight: FontWeight.w800,
                 color: Colors.white,
                 text: strings.heroWelcomeTitleAccent,
@@ -547,7 +522,7 @@ class _HeroText extends StatelessWidget {
             TextSpan(
               text: ' ',
               style: AppFonts.display(
-                size: isMobile ? 20 : 35,
+                size: isMobile ? 32 : 35,
                 weight: FontWeight.w800,
                 color: Colors.white,
               ),
@@ -555,7 +530,7 @@ class _HeroText extends StatelessWidget {
             TextSpan(
               text: strings.heroWelcomeTitleMain,
               style: AppFonts.display(
-                size: isMobile ? 40 : 70,
+                size: isMobile ? 32 : 70,
                 weight: FontWeight.w800,
                 color: const Color(0xFFD11B34),
                 text: strings.heroWelcomeTitleMain,
