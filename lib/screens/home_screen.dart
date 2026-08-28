@@ -505,39 +505,46 @@ class _HeroText extends StatelessWidget {
     return Column(
       crossAxisAlignment: crossAlign,
       children: [
-        Text.rich(
-          TextSpan(children: [
-            // Order and colors swapped from before: the accent word now
-            // comes first and is white, the main word now comes second
-            // and is pink.
-            TextSpan(
-              text: strings.heroWelcomeTitleAccent,
-              style: AppFonts.display(
-                size: isMobile ? 32 : 35,
-                weight: FontWeight.w800,
-                color: Colors.white,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: isMobile ? Alignment.center : Alignment.centerLeft,
+          child: Text.rich(
+            TextSpan(children: [
+              // Order and colors swapped from before: the accent word now
+              // comes first and is white, the main word now comes second
+              // and is pink. Both spans share one size so the whole title
+              // reads as a single visual line on every breakpoint.
+              TextSpan(
                 text: strings.heroWelcomeTitleAccent,
+                style: AppFonts.display(
+                  size: isMobile ? 32 : 45,
+                  weight: FontWeight.w800,
+                  color: Colors.white,
+                  text: strings.heroWelcomeTitleAccent,
+                ),
               ),
-            ),
-            TextSpan(
-              text: ' ',
-              style: AppFonts.display(
-                size: isMobile ? 32 : 35,
-                weight: FontWeight.w800,
-                color: Colors.white,
+              TextSpan(
+                text: ' ',
+                style: AppFonts.display(
+                  size: isMobile ? 32 : 45,
+                  weight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            TextSpan(
-              text: strings.heroWelcomeTitleMain,
-              style: AppFonts.display(
-                size: isMobile ? 32 : 70,
-                weight: FontWeight.w800,
-                color: const Color(0xFFD11B34),
+              TextSpan(
                 text: strings.heroWelcomeTitleMain,
+                style: AppFonts.display(
+                  size: isMobile ? 32 : 45,
+                  weight: FontWeight.w800,
+                  color: const Color(0xFFD11B34),
+                  text: strings.heroWelcomeTitleMain,
+                ),
               ),
-            ),
-          ]),
-          textAlign: textAlign,
+            ]),
+            textAlign: textAlign,
+            maxLines: 1,
+            softWrap: false,
+          ),
         ),
         SizedBox(height: isMobile ? 14 : 18),
         Text(
