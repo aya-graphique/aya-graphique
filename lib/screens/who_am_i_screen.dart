@@ -7,6 +7,7 @@ import '../providers/language_controller.dart';
 import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/shimmer_text.dart';
+import '../widgets/tilt_3d_card.dart';
 
 List<_TimelineEntry> kExperience(bool isArabic) => [
       _TimelineEntry(
@@ -80,6 +81,69 @@ List<_TimelineEntry> kEducation(bool isArabic) => [
         subtitle: isArabic ? 'منصة تدريب أونلاين' : 'Online Training Platform',
         period: '2020',
         description: '',
+      ),
+    ];
+
+/// One portfolio project — plain static data (not admin-editable, same idea
+/// as [kExperience]/[kEducation]/[kStats] above): to add a new project just
+/// add another `_ProjectItem(...)` entry to [kProjects] below and drop its
+/// image into assets/images/.
+class _ProjectItem {
+  final String title;
+  final String category;
+  final String description;
+  // Path under assets/images/, e.g. 'assets/images/project_wedding_invite.png'.
+  // Leave empty and the card shows a plain violet gradient plate instead.
+  final String imageAsset;
+  // Optional external link (behance/instagram/drive/etc.) — leave empty to
+  // make the card non-tappable.
+  final String url;
+  const _ProjectItem({
+    required this.title,
+    this.category = '',
+    this.description = '',
+    this.imageAsset = '',
+    this.url = '',
+  });
+}
+
+// ---------------------------------------------------------------------
+// ✏️ عدّلي هنا يدويًا: كل مشروع جديد ضيفيه كـ _ProjectItem في الليستة دي.
+// - title / description: بالعربي والانجليزي حسب isArabic زي باقي الصفحة.
+// - category: نوع الشغل (هوية بصرية / تغليف / سوشيال ميديا...) بيظهر كـ
+//   تاج صغير فوق الصورة.
+// - imageAsset: حطي صورة المشروع في assets/images/ واكتبي مسارها هنا
+//   (وسجّليها في pubspec.yaml لو مش متسجلة أصلاً)، أو سيبيها فاضية عشان
+//   يظهر بلاطة بنفسجية بدال الصورة.
+// - url: رابط خارجي اختياري (بيهافيور/انستجرام/درايف...) أو سيبيه فاضي.
+// ---------------------------------------------------------------------
+List<_ProjectItem> kProjects(bool isArabic) => [
+      _ProjectItem(
+        title: isArabic ? 'اسم المشروع الأول' : 'First Project Name',
+        category: isArabic ? 'هوية بصرية' : 'Brand Identity',
+        description: isArabic
+            ? 'وصف مختصر للمشروع: إيه اللي اتعمل فيه وليه.'
+            : 'A short description of the project: what it is and why.',
+        imageAsset: '',
+        url: '',
+      ),
+      _ProjectItem(
+        title: isArabic ? 'اسم المشروع الثاني' : 'Second Project Name',
+        category: isArabic ? 'تغليف' : 'Packaging',
+        description: isArabic
+            ? 'وصف مختصر للمشروع التاني.'
+            : 'A short description of the second project.',
+        imageAsset: '',
+        url: '',
+      ),
+      _ProjectItem(
+        title: isArabic ? 'اسم المشروع الثالث' : 'Third Project Name',
+        category: isArabic ? 'مطبوعات' : 'Print',
+        description: isArabic
+            ? 'وصف مختصر للمشروع التالت.'
+            : 'A short description of the third project.',
+        imageAsset: '',
+        url: '',
       ),
     ];
 
@@ -267,6 +331,7 @@ class _Profile extends StatelessWidget {
     final skills = profile.skillsFor(isArabic);
     final experience = kExperience(isArabic);
     final education = kEducation(isArabic);
+    final projects = kProjects(isArabic);
     final hasContact = profile.whatsapp.isNotEmpty ||
         profile.email.isNotEmpty ||
         profile.phone.isNotEmpty ||
@@ -425,6 +490,29 @@ class _Profile extends StatelessWidget {
                       .toList(),
                 ),
               ],
+            ),
+          ),
+        ],
+        if (projects.isNotEmpty) ...[
+          const SizedBox(height: 32),
+          _MiniSectionHeader(label: context.strings.projectsLabel),
+          const SizedBox(height: 20),
+          // A horizontal reel instead of a boxed grid — it reads like
+          // flipping through a physical portfolio rather than another
+          // bordered card section, and lets a poster-shaped image be the
+          // whole card instead of a thumbnail stacked above plain text.
+          SizedBox(
+            height: isMobile ? 360 : 420,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              clipBehavior: Clip.none,
+              itemCount: projects.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 18),
+              itemBuilder: (context, i) => SizedBox(
+                width: isMobile ? 250 : 300,
+                child: _ProjectCard(project: projects[i], onOpenUrl: onOpenUrl),
+              ),
             ),
           ),
         ],
@@ -778,6 +866,122 @@ class _TimelineCard extends StatelessWidget {
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// One project tile in the manual Projects grid — image on top (or a
+/// placeholder icon if [_ProjectItem.imageAsset] is empty), title,
+/// description, and an optional "view" tap-through if a url was given.
+/// One project poster in the horizontal Projects reel — the image (or a
+/// gradient plate if none was given) fills the whole card, full-bleed,
+/// with the title and category set directly over it behind a bottom scrim
+/// — like a printed piece pinned to a portfolio wall, rather than a
+/// thumbnail-plus-text list item. Wrapped in the same pointer-tilt
+/// treatment used on the shop's product cards, so browsing her own work
+/// carries the same tactile feel as browsing a product to buy.
+class _ProjectCard extends StatelessWidget {
+  final _ProjectItem project;
+  final ValueChanged<String> onOpenUrl;
+  const _ProjectCard({required this.project, required this.onOpenUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final hasUrl = project.url.trim().isNotEmpty;
+    final hasImage = project.imageAsset.trim().isNotEmpty;
+
+    return Tilt3DCard(
+      maxTiltDegrees: 6,
+      liftOnHover: 8,
+      borderRadius: BorderRadius.circular(20),
+      onTap: hasUrl ? () => onOpenUrl(project.url) : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Base layer: the artwork itself, or a violet gradient plate
+            // standing in for it — never a plain grey/white placeholder,
+            // since this section is meant to look finished even before
+            // real images are dropped in.
+            if (hasImage)
+              Image.asset(
+                project.imageAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
+              )
+            else
+              Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
+
+            // Bottom scrim so the title stays legible over any artwork.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.35, 1.0],
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.72)],
+                ),
+              ),
+            ),
+
+            // Category tag, top-start — real content (what kind of work
+            // this is), not decoration.
+            if (project.category.isNotEmpty)
+              Positioned(
+                top: 14,
+                left: 14,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.32),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: Colors.white.withOpacity(0.18)),
+                  ),
+                  child: Text(project.category,
+                    style: AppFonts.label(text: project.category, size: 12, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
+                  ),
+                ),
+              ),
+
+            if (hasUrl)
+              Positioned(
+                top: 14,
+                right: 14,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.32), shape: BoxShape.circle),
+                  child: const Icon(Icons.north_east_rounded, size: 15, color: Colors.white),
+                ),
+              ),
+
+            // Title + description, bottom-start, sitting on the scrim.
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(project.title,
+                    style: AppFonts.body(size: 19, weight: FontWeight.w800, color: Colors.white, text: project.title),
+                  ),
+                  if (project.description.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(project.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppFonts.body(size: 13.5, weight: FontWeight.w500, height: 1.4, color: Colors.white.withOpacity(0.82), text: project.description),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

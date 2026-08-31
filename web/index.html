@@ -31,6 +31,20 @@
 
   <title>aya_graphique</title>
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D0512">
+
+  <!-- No branded splash overlay anymore: while Flutter downloads and boots,
+       the page background is the app's real brand background (the same
+       deep violet the app opens into in dark mode, its default theme)
+       instead of stark white, so there's no white flash and no mismatched
+       color hand-off once Flutter paints. -->
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #0D0512;
+    }
+  </style>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

@@ -10,14 +10,10 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // There's no native Flutter splash screen anymore — the brand moment
-  // (portrait badge, name, tagline, loading bar) lives entirely in
-  // web/index.html's #pre_splash, which paints the instant the page loads,
-  // long before Flutter's engine/JS has even downloaded. It stays on
-  // screen until MainShell's own data is actually ready (see
-  // notifyAppContentReady in main_shell.dart), so it's safe to just await
-  // Supabase init here like a normal app instead of racing it against a
-  // fixed on-screen timer.
+  // No splash screen: while the page/engine is loading, the browser just
+  // shows a plain brand-colored background (set in web/index.html) instead
+  // of a white flash or a dedicated splash widget. The app opens directly
+  // into MainShell as soon as it's ready.
   await SupabaseService.init();
   runApp(const AyaGraphiqueApp());
 }
