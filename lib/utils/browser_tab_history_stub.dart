@@ -6,4 +6,4 @@
 
 void pushTabHistoryEntry() {}
 
-void Function() listenForBack(void Function(int depth) onBack) => () {};
+void Function() listenForBack(void Function() onBack) => () {};
