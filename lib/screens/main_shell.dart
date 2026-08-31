@@ -7,6 +7,7 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
+import '../utils/browser_tab_history.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
@@ -63,6 +64,10 @@ class _MainShellState extends State<MainShell> {
   // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
   // others so it's ready by the time that part of Home scrolls into view.
   late Future<List<HomeBanner>> _mostOrderedBannersFuture;
+  // Cancels the browser-back listener set up in initState — see
+  // browser_tab_history.dart for why MainShell needs this at all on top
+  // of PopScope below.
+  late final void Function() _cancelBackListener;
 
   @override
   void initState() {
@@ -78,10 +83,12 @@ class _MainShellState extends State<MainShell> {
     _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
+    _cancelBackListener = listenForBack(_handleBrowserBack);
   }
 
   @override
   void dispose() {
+    _cancelBackListener();
     _homeScrollController.dispose();
     _shopScrollController.dispose();
     _servicesFocusController.dispose();
@@ -95,6 +102,9 @@ class _MainShellState extends State<MainShell> {
       _navHistory.add(_page);
       _page = page;
     });
+    // Keeps the browser's own back button in step with _navHistory — see
+    // browser_tab_history.dart.
+    pushTabHistoryEntry();
   }
 
   // Retraces the user's actual path one step at a time, instead of
@@ -102,6 +112,15 @@ class _MainShellState extends State<MainShell> {
   void _goBack() {
     if (_navHistory.isEmpty) return;
     setState(() => _page = _navHistory.removeLast());
+  }
+
+  // Called when the phone's native back button/gesture fires — see
+  // browser_tab_history.dart. Left alone (not called) once _navHistory is
+  // empty, so that next back press behaves normally instead of getting
+  // stuck unable to ever leave Home.
+  void _handleBrowserBack() {
+    if (_navHistory.isEmpty) return;
+    _goBack();
   }
 
   // Called from Home's service circles: switch to the Services tab and
