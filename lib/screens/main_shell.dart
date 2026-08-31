@@ -7,8 +7,6 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
-import '../main.dart' show rootNavigatorKey;
-import '../utils/browser_tab_history.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
@@ -35,7 +33,8 @@ class _MainShellState extends State<MainShell> {
   // (Shop -> Cart -> back goes to Shop) instead of always jumping to
   // Home. Popped one at a time in _goBack(); empty means Home is the
   // only stop so far, and a back press should behave normally (exit the
-  // app / leave the page) — see canPop below.
+  // app / leave the page) — see canPop below. Kept in lockstep with the
+  // real Navigator's marker-route stack (see _goTo).
   final List<ShopPage> _navHistory = [];
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
@@ -65,10 +64,6 @@ class _MainShellState extends State<MainShell> {
   // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
   // others so it's ready by the time that part of Home scrolls into view.
   late Future<List<HomeBanner>> _mostOrderedBannersFuture;
-  // Cancels the browser-back listener set up in initState — see
-  // browser_tab_history.dart for why MainShell needs this at all on top
-  // of PopScope below.
-  late final void Function() _cancelBackListener;
 
   @override
   void initState() {
@@ -84,12 +79,10 @@ class _MainShellState extends State<MainShell> {
     _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
-    _cancelBackListener = listenForBack(_handleBrowserBack);
   }
 
   @override
   void dispose() {
-    _cancelBackListener();
     _homeScrollController.dispose();
     _shopScrollController.dispose();
     _servicesFocusController.dispose();
@@ -97,55 +90,42 @@ class _MainShellState extends State<MainShell> {
     super.dispose();
   }
 
+  // Switches tabs, and pushes an invisible marker route onto the *real*
+  // Navigator so a phone back-press/gesture (and the desktop browser's
+  // back button) has something genuine to pop.
+  //
+  // Earlier this hand-rolled its own window.history entries to fake
+  // this, but that fought against Flutter Web's own built-in browser-history
+  // integration — both listened to the same physical back press, and
+  // Flutter's own listener kept winning, resetting everything to Home
+  // regardless of what our custom code decided. Pushing a real
+  // (invisible) route instead means there's no separate system to keep
+  // in sync — Flutter's Navigator already reports its own pushes/pops to
+  // the browser correctly on web, so back just naturally pops this
+  // marker first, and _MarkerRoute's onRemoved callback below (fired the
+  // instant that happens) retraces to the previous tab.
   void _goTo(ShopPage page) {
     if (page == _page) return;
     setState(() {
       _navHistory.add(_page);
       _page = page;
     });
-    // Keeps the browser's own back button in step with _navHistory — see
-    // browser_tab_history.dart.
-    pushTabHistoryEntry();
+    // The Future returned by push() completes exactly once, whenever
+    // this route leaves the Navigator — which in practice is always a
+    // real back-press, since nothing here ever pops it programmatically
+    // (each later _goTo just pushes another marker on top instead).
+    Navigator.of(context).push(_tabMarkerRoute()).then((_) => _goBack());
   }
 
   // Retraces the user's actual path one step at a time, instead of
-  // always dropping them back on Home. Used by PopScope below, for
-  // Flutter's own system-back handling (e.g. Android predictive back) —
-  // separate from the raw browser popstate path, which goes through
-  // _handleBrowserBack instead since it needs the absolute depth, not
-  // just "one step".
+  // always dropping them back on Home. Called both by PopScope below
+  // (system back on the base Home tab, once every marker route has
+  // already been popped) and by each _TabMarkerRoute's onRemoved, once
+  // per real back-press.
   void _goBack() {
+    if (!mounted) return;
     if (_navHistory.isEmpty) return;
     setState(() => _page = _navHistory.removeLast());
-  }
-
-  // Called when the phone's native back button/gesture fires — see
-  // browser_tab_history.dart. A pushed screen (product detail, checkout,
-  // admin, ...) sits on top of MainShell in the *real* Navigator, so it
-  // must be popped first — otherwise this only ever knew about tab
-  // switches and a back press from one of those screens skipped straight
-  // past it to Home.
-  //
-  // `depth` is the absolute position browser_tab_history_web.dart just
-  // read back out of history.state, not a "go back one" signal — some
-  // mobile browsers fire an extra/stale popstate that doesn't match a
-  // real user back-press, and treating every event as exactly one tab
-  // step is what let that desync the visible tab from the real history
-  // position (jumping straight to Home instead of one tab back). Popping
-  // _navHistory down to that exact depth self-corrects regardless of how
-  // many (if any) real steps actually happened.
-  void _handleBrowserBack(int depth) {
-    final nav = rootNavigatorKey.currentState;
-    if (nav != null && nav.canPop()) {
-      nav.pop();
-      return;
-    }
-    if (depth >= _navHistory.length) return;
-    setState(() {
-      while (_navHistory.length > depth) {
-        _page = _navHistory.removeLast();
-      }
-    });
   }
 
   // Called from Home's service circles: switch to the Services tab and
@@ -190,13 +170,12 @@ class _MainShellState extends State<MainShell> {
     AppFonts.forceArabic = context.watch<FontController>().arabicMode;
 
     return PopScope(
-      // Tab switches inside this shell (_goTo) are plain setState calls,
-      // not Navigator pushes, so they never land on the back stack. Without
-      // this, pressing back on any tab would close the app (or leave the
-      // site, on web) instead of retracing the user's own path through the
-      // tabs. canPop is only true once _navHistory is empty (i.e. Home is
-      // the only stop so far), so that back press then behaves normally
-      // (exits the app / leaves the page).
+      // A marker route (see _goTo/_tabMarkerRoute) sits on the real
+      // Navigator for every tab switch, so system/hardware back already
+      // pops those correctly on its own. This PopScope only matters once
+      // every marker has been popped and Home is the only stop left —
+      // canPop is true then, so that back press behaves normally (exits
+      // the app / leaves the page) instead of getting stuck.
       canPop: _navHistory.isEmpty,
       onPopInvoked: (didPop) {
         if (didPop) return;
@@ -290,4 +269,21 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+}
+
+// An invisible, zero-duration route pushed by MainShell._goTo purely so
+// the browser/hardware back button has a real Navigator entry to pop —
+// see _goTo's doc comment for why this replaced a hand-rolled
+// window.history approach. opaque: false and a transparent body mean
+// MainShell's own IndexedStack (already showing the newly-selected tab,
+// underneath this route) stays fully visible; this route contributes no
+// UI of its own.
+PageRouteBuilder<void> _tabMarkerRoute() {
+  return PageRouteBuilder<void>(
+    opaque: false,
+    barrierDismissible: false,
+    transitionDuration: Duration.zero,
+    reverseTransitionDuration: Duration.zero,
+    pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+  );
 }
