@@ -33,6 +33,19 @@ import 'who_am_i_screen.dart';
 // instead of reaching the real nav bar underneath. Overriding
 // buildModalBarrier() to render nothing means there's genuinely nothing
 // left on top of the real UI, so taps pass straight through.
+//
+// Each instance also gets its own unique RouteSettings.name (see the
+// counter below). Flutter Web's router only pushes a *new* browser
+// history entry when a route's identity actually looks different from
+// the previous one — every earlier version of this marker was an
+// anonymous, nameless route, so the second, third, etc. tab switch in a
+// row all looked identical to the router and only the very first one
+// ever registered with the browser. That's what made back only work a
+// single time on both mobile and desktop. Giving every push a distinct
+// name makes each one a genuinely new entry, so back works for as many
+// hops as the person has actually taken.
+int _tabMarkerSeq = 0;
+
 class _TabMarkerRoute extends PageRouteBuilder<void> {
   _TabMarkerRoute()
       : super(
@@ -40,6 +53,7 @@ class _TabMarkerRoute extends PageRouteBuilder<void> {
           maintainState: false,
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
+          settings: RouteSettings(name: '/__tab-marker-${_tabMarkerSeq++}'),
           pageBuilder: (_, __, ___) => const SizedBox.shrink(),
         );
 
