@@ -109,7 +109,11 @@ class _MainShellState extends State<MainShell> {
   }
 
   // Retraces the user's actual path one step at a time, instead of
-  // always dropping them back on Home.
+  // always dropping them back on Home. Used by PopScope below, for
+  // Flutter's own system-back handling (e.g. Android predictive back) —
+  // separate from the raw browser popstate path, which goes through
+  // _handleBrowserBack instead since it needs the absolute depth, not
+  // just "one step".
   void _goBack() {
     if (_navHistory.isEmpty) return;
     setState(() => _page = _navHistory.removeLast());
@@ -120,18 +124,28 @@ class _MainShellState extends State<MainShell> {
   // admin, ...) sits on top of MainShell in the *real* Navigator, so it
   // must be popped first — otherwise this only ever knew about tab
   // switches and a back press from one of those screens skipped straight
-  // past it to Home. Only once there's nothing left to pop there do we
-  // fall back to retracing the tab history; left alone (not called) once
-  // _navHistory is also empty, so the next back press behaves normally
-  // instead of getting stuck unable to ever leave Home.
-  void _handleBrowserBack() {
+  // past it to Home.
+  //
+  // `depth` is the absolute position browser_tab_history_web.dart just
+  // read back out of history.state, not a "go back one" signal — some
+  // mobile browsers fire an extra/stale popstate that doesn't match a
+  // real user back-press, and treating every event as exactly one tab
+  // step is what let that desync the visible tab from the real history
+  // position (jumping straight to Home instead of one tab back). Popping
+  // _navHistory down to that exact depth self-corrects regardless of how
+  // many (if any) real steps actually happened.
+  void _handleBrowserBack(int depth) {
     final nav = rootNavigatorKey.currentState;
     if (nav != null && nav.canPop()) {
       nav.pop();
       return;
     }
-    if (_navHistory.isEmpty) return;
-    _goBack();
+    if (depth >= _navHistory.length) return;
+    setState(() {
+      while (_navHistory.length > depth) {
+        _page = _navHistory.removeLast();
+      }
+    });
   }
 
   // Called from Home's service circles: switch to the Services tab and
