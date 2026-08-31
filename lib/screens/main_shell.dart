@@ -7,6 +7,7 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
+import '../main.dart' show rootNavigatorKey;
 import '../utils/browser_tab_history.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
@@ -115,10 +116,20 @@ class _MainShellState extends State<MainShell> {
   }
 
   // Called when the phone's native back button/gesture fires — see
-  // browser_tab_history.dart. Left alone (not called) once _navHistory is
-  // empty, so that next back press behaves normally instead of getting
-  // stuck unable to ever leave Home.
+  // browser_tab_history.dart. A pushed screen (product detail, checkout,
+  // admin, ...) sits on top of MainShell in the *real* Navigator, so it
+  // must be popped first — otherwise this only ever knew about tab
+  // switches and a back press from one of those screens skipped straight
+  // past it to Home. Only once there's nothing left to pop there do we
+  // fall back to retracing the tab history; left alone (not called) once
+  // _navHistory is also empty, so the next back press behaves normally
+  // instead of getting stuck unable to ever leave Home.
   void _handleBrowserBack() {
+    final nav = rootNavigatorKey.currentState;
+    if (nav != null && nav.canPop()) {
+      nav.pop();
+      return;
+    }
     if (_navHistory.isEmpty) return;
     _goBack();
   }
