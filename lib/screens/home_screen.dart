@@ -334,6 +334,72 @@ class _HeroState extends State<_Hero> {
 }
 
 
+/// Horizontal scroller for the rare case the fixed-size hero card doesn't
+/// fit (narrow window, or extreme browser zoom). Starts centered instead
+/// of at the reading-direction edge, so neither the photo nor the text is
+/// the one left fully hidden off-screen by default — both partially show,
+/// with the rest reachable via a short drag either way.
+class _CenteredOverflowScroller extends StatefulWidget {
+  final Widget child;
+  final double childWidth;
+  final double availableWidth;
+
+  const _CenteredOverflowScroller({
+    required this.child,
+    required this.childWidth,
+    required this.availableWidth,
+  });
+
+  @override
+  State<_CenteredOverflowScroller> createState() => _CenteredOverflowScrollerState();
+}
+
+class _CenteredOverflowScrollerState extends State<_CenteredOverflowScroller> {
+  late final ScrollController _controller;
+
+  double _centerOffset() {
+    final overflow = widget.childWidth - widget.availableWidth;
+    return overflow > 0 ? overflow / 2 : 0;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController(initialScrollOffset: _centerOffset());
+  }
+
+  @override
+  void didUpdateWidget(covariant _CenteredOverflowScroller oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Window resized or zoom level changed since the last frame (e.g. the
+    // user zoomed further in/out) — re-center on the new overflow amount
+    // rather than leaving the old offset, which could now point at empty
+    // space or the wrong spot entirely.
+    if (oldWidget.availableWidth != widget.availableWidth || oldWidget.childWidth != widget.childWidth) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_controller.hasClients) return;
+        final target = _centerOffset().clamp(0.0, _controller.position.maxScrollExtent);
+        _controller.jumpTo(target);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: _controller,
+      scrollDirection: Axis.horizontal,
+      child: widget.child,
+    );
+  }
+}
+
 class _WelcomeHero extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPrimaryTap;
@@ -412,19 +478,21 @@ class _WelcomeHero extends StatelessWidget {
       builder: (context, outerConstraints) {
         // Available width for the whole hero card once the page's side
         // padding is removed.
-        final cardWidth = outerConstraints.maxWidth - horizontalPadding * 2;
+        // Clamped so an extreme browser zoom that shrinks maxWidth below
+        // the side padding can never leave SizedBox a negative width.
+        final cardWidth = (outerConstraints.maxWidth - horizontalPadding * 2).clamp(1.0, double.infinity);
 
         // The card's insides (text sizes, button sizes, portrait size) are
         // all authored below as fixed pixel values tuned for this one
-        // reference width, then the whole thing is scaled up or down as a
-        // single unit to match whatever `cardWidth` actually is (see the
-        // FittedBox at the bottom). Previously the portrait scaled with
-        // cardWidth but the text didn't, so at in-between widths — e.g. a
-        // zoomed-in browser, which shrinks the effective logical width —
-        // the text would wrap awkwardly onto many lines while the photo
-        // stayed comparatively huge. Scaling everything together means
-        // zooming just makes the whole card bigger or smaller as one
-        // picture, with the same line breaks and proportions every time.
+        // reference width, and the whole card stays at that fixed width no
+        // matter what (see `fixedCard` below) — it never shrinks. Previously
+        // the portrait scaled with the available width but the text didn't,
+        // so at in-between widths — e.g. a zoomed-in browser, which shrinks
+        // the effective logical width — the text would wrap awkwardly onto
+        // many lines while the photo stayed comparatively huge. Keeping
+        // everything at fixed pixel sizes inside one fixed-width card means
+        // the photo and text always keep the exact same proportions and
+        // line breaks relative to each other, at any zoom level.
         const designWidth = 1300.0;
         const portraitSize = 460.0;
         // The source photo is almost perfectly square (1146×1142). Keeping
@@ -511,9 +579,10 @@ class _WelcomeHero extends StatelessWidget {
           ),
         );
 
-        // Always the fixed design width now — it no longer stretches to
-        // fill extra space, and no longer shrinks for less (whether that's
-        // a genuinely narrow window or a zoomed-in browser).
+        // Always the fixed design width — never shrinks, no matter how
+        // high the browser zoom goes. Zooming naturally makes it render
+        // bigger on screen (more physical pixels per logical pixel); it
+        // never gets smaller than this.
         final fixedCard = SizedBox(width: designWidth, child: cardContent);
 
         return Padding(
@@ -526,12 +595,16 @@ class _WelcomeHero extends StatelessWidget {
           child: RevealOnScroll(
             child: cardWidth >= designWidth
                 ? fixedCard
-                // Only when there isn't enough room for the fixed size —
-                // narrow window or high browser zoom — does it become
-                // horizontally scrollable instead of squeezing the text or
-                // the photo.
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                // Only when there truly isn't room for the fixed size —
+                // narrow window or extreme browser zoom — does it need a
+                // horizontal scroller. Centered by default (instead of
+                // starting at the reading-direction edge) so the photo
+                // is never the one hidden off-screen; both the photo and
+                // some text are visible right away, with the rest a
+                // short drag away.
+                : _CenteredOverflowScroller(
+                    childWidth: designWidth,
+                    availableWidth: cardWidth,
                     child: fixedCard,
                   ),
           ),

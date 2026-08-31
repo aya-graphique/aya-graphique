@@ -100,7 +100,7 @@ class AppText {
 
   // Home — footer
   String get footerTagline =>
-      _t('Notebooks & calendars, simplicity makes it art.', 'دفاتر وتقويمات، البساطة تصنع الفن.');
+      _t('Simplicity makes it art', 'Simplicity makes it art');
   String get storeAdmin => _t('Store admin →', 'إدارة المتجر ←');
 
   // Graphical Services
