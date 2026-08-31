@@ -511,6 +511,11 @@ class _WelcomeHero extends StatelessWidget {
           ),
         );
 
+        // Always the fixed design width now — it no longer stretches to
+        // fill extra space, and no longer shrinks for less (whether that's
+        // a genuinely narrow window or a zoomed-in browser).
+        final fixedCard = SizedBox(width: designWidth, child: cardContent);
+
         return Padding(
           padding: EdgeInsets.only(
             left: horizontalPadding,
@@ -519,14 +524,16 @@ class _WelcomeHero extends StatelessWidget {
             bottom: 20,
           ),
           child: RevealOnScroll(
-            child: SizedBox(
-              width: cardWidth,
-              child: FittedBox(
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.topCenter,
-                child: SizedBox(width: designWidth, child: cardContent),
-              ),
-            ),
+            child: cardWidth >= designWidth
+                ? fixedCard
+                // Only when there isn't enough room for the fixed size —
+                // narrow window or high browser zoom — does it become
+                // horizontally scrollable instead of squeezing the text or
+                // the photo.
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: fixedCard,
+                  ),
           ),
         );
       },
