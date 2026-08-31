@@ -411,32 +411,105 @@ class _WelcomeHero extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, outerConstraints) {
         // Available width for the whole hero card once the page's side
-        // padding is removed. The portrait scales down proportionally to
-        // this instead of staying a fixed 470px — previously a fixed size
-        // meant that at in-between widths (e.g. a zoomed-in desktop browser,
-        // which effectively shrinks the logical viewport) the reserved
-        // space for the image ate into the text column, forcing the
-        // paragraph to wrap into a very narrow, cramped block. Scaling both
-        // together keeps the same proportions the design has at full width.
+        // padding is removed.
         final cardWidth = outerConstraints.maxWidth - horizontalPadding * 2;
-        // Bigger than before (was clamped to 300–470) so the portrait reads
-        // as a real focal point on wide screens instead of a small inset.
-        final portraitSize = (cardWidth * 0.34).clamp(360.0, 600.0);
+
+        // The card's insides (text sizes, button sizes, portrait size) are
+        // all authored below as fixed pixel values tuned for this one
+        // reference width, then the whole thing is scaled up or down as a
+        // single unit to match whatever `cardWidth` actually is (see the
+        // FittedBox at the bottom). Previously the portrait scaled with
+        // cardWidth but the text didn't, so at in-between widths — e.g. a
+        // zoomed-in browser, which shrinks the effective logical width —
+        // the text would wrap awkwardly onto many lines while the photo
+        // stayed comparatively huge. Scaling everything together means
+        // zooming just makes the whole card bigger or smaller as one
+        // picture, with the same line breaks and proportions every time.
+        const designWidth = 1300.0;
+        const portraitSize = 460.0;
         // The source photo is almost perfectly square (1146×1142). Keeping
         // this box ratio close to 1:1 is what avoids cropping — pushing it
         // much taller than the image's own ratio forces BoxFit.cover to
         // zoom in hard to cover the extra height, which eats into both the
         // left and right edges of the photo. A near-square box crops
-        // almost nothing on any side.
-        // Kept just under the source photo's own near-square ratio
-        // (1146×1142), same reasoning as the mobile version: fitWidth
-        // below renders the photo very slightly taller than this box, so
-        // the sliver that gets trimmed is off the bottom — never the sides.
+        // almost nothing on any side. Kept just under that ratio so
+        // BoxFit.fitWidth below renders the photo very slightly taller
+        // than this box — the sliver trimmed off is from the bottom,
+        // never the sides.
         const heightRatio = 0.99;
-        final minPortraitHeight = portraitSize * heightRatio;
+        const minPortraitHeight = portraitSize * heightRatio;
         const topGap = 50.0;
         const leftInset = 0.0;
         final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+        final cardContent = DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF250B3A).withOpacity(0.4),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: double.infinity,
+                  constraints: const BoxConstraints(
+                    minHeight: topGap + minPortraitHeight,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 48),
+                  color: const Color(0xFF411A59),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: textColumn),
+                      // Reserves the space the overlaid portrait sits over,
+                      // so the text never runs underneath it.
+                      const SizedBox(width: leftInset + portraitSize - 56),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  // The image always sits on the opposite side from the text
+                  // (the "end" edge of the row): left in Arabic/RTL, right in
+                  // English/LTR.
+                  left: isRtl ? leftInset : null,
+                  right: isRtl ? null : leftInset,
+                  top: 0,
+                  bottom: 0,
+                  child: LayoutBuilder(
+                    builder: (context, boxConstraints) {
+                      // noSideCrop (BoxFit.fitWidth) on the portrait
+                      // guarantees the left/right edges are never
+                      // cropped, no matter what height this box ends up
+                      // with — any excess length is trimmed off the
+                      // bottom only. The cap below just keeps the box
+                      // itself from growing absurdly tall on unusually
+                      // tall cards (small gap above the photo instead).
+                      final cappedHeight = boxConstraints.hasBoundedHeight
+                          ? minPortraitHeight.clamp(0.0, boxConstraints.maxHeight)
+                          : minPortraitHeight;
+                      return Align(
+                        alignment: Alignment.bottomCenter,
+                        child: SizedBox(
+                          width: portraitSize,
+                          height: cappedHeight,
+                          child: _HeroPortrait(fill: true, noSideCrop: true),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
 
         return Padding(
           padding: EdgeInsets.only(
@@ -446,72 +519,12 @@ class _WelcomeHero extends StatelessWidget {
             bottom: 20,
           ),
           child: RevealOnScroll(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(radius),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF250B3A).withOpacity(0.4),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      constraints: BoxConstraints(
-                        minHeight: topGap + minPortraitHeight,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 48),
-                      color: const Color(0xFF411A59),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(child: textColumn),
-                          // Reserves the space the overlaid portrait sits over,
-                          // so the text never runs underneath it.
-                          SizedBox(width: leftInset + portraitSize - 56),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      // The image always sits on the opposite side from the text
-                      // (the "end" edge of the row): left in Arabic/RTL, right in
-                      // English/LTR.
-                      left: isRtl ? leftInset : null,
-                      right: isRtl ? null : leftInset,
-                      top: 0,
-                      bottom: 0,
-                      child: LayoutBuilder(
-                        builder: (context, boxConstraints) {
-                          // noSideCrop (BoxFit.fitWidth) on the portrait
-                          // guarantees the left/right edges are never
-                          // cropped, no matter what height this box ends up
-                          // with — any excess length is trimmed off the
-                          // bottom only. The cap below just keeps the box
-                          // itself from growing absurdly tall on unusually
-                          // tall cards (small gap above the photo instead).
-                          final cappedHeight = boxConstraints.hasBoundedHeight
-                              ? (portraitSize * heightRatio).clamp(0.0, boxConstraints.maxHeight)
-                              : portraitSize * heightRatio;
-                          return Align(
-                            alignment: Alignment.bottomCenter,
-                            child: SizedBox(
-                              width: portraitSize,
-                              height: cappedHeight,
-                              child: _HeroPortrait(fill: true, noSideCrop: true),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+            child: SizedBox(
+              width: cardWidth,
+              child: FittedBox(
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.topCenter,
+                child: SizedBox(width: designWidth, child: cardContent),
               ),
             ),
           ),
