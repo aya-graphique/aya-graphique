@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -392,12 +393,29 @@ class _CenteredOverflowScrollerState extends State<_CenteredOverflowScroller> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _controller,
-      scrollDirection: Axis.horizontal,
-      child: widget.child,
+    return ScrollConfiguration(
+      // Default web scroll behaviour only lets touch/stylus drag a
+      // scrollable — this lets mouse and trackpad drag it too, on
+      // desktop, with no arrows, fades, or other visible hint. Just a
+      // plain click-and-drag.
+      behavior: _MouseDragScrollBehavior(),
+      child: SingleChildScrollView(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        child: widget.child,
+      ),
     );
   }
+}
+
+class _MouseDragScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
 }
 
 class _WelcomeHero extends StatelessWidget {
