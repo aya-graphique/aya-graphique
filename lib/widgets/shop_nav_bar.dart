@@ -365,9 +365,16 @@ class ShopNavDrawer extends StatelessWidget {
 
     // Closes the drawer first, then navigates — otherwise the drawer stays
     // open (or its close animation visibly races the page swap) instead of
-    // reading as one clean "pick a page" tap.
+    // reading as one clean "pick a page" tap. Uses Scaffold.closeDrawer()
+    // specifically (not Navigator.pop()) — Navigator.pop() pops whatever
+    // is topmost on the *whole* Navigator stack, which since MainShell's
+    // tab switches now push their own invisible back-button marker route
+    // (see _goTo/_TabMarkerRoute in main_shell.dart) would pop that marker
+    // instead of closing the drawer once any tab switch had happened,
+    // leaving the drawer stuck open. closeDrawer() only ever touches this
+    // drawer, so it can't collide with that.
     void go(ShopPage page) {
-      Navigator.of(context).pop();
+      Scaffold.of(context).closeDrawer();
       onTap(page);
     }
 

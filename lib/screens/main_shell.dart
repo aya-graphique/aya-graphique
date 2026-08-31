@@ -7,15 +7,45 @@ import '../providers/language_controller.dart';
 import '../services/home_banners_repository.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
-import '../utils/browser_tab_history.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
 import 'cart_screen.dart';
+import 'favorites_screen.dart';
 import 'graphical_services_screen.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
 import 'shop_screen.dart';
 import 'who_am_i_screen.dart';
+
+// A Navigator route that exists purely so a physical/browser back press
+// has a real, genuine route entry of ours to pop for each tab switch —
+// it never shows anything and never blocks a single tap.
+//
+// Note this is NOT the same as just passing barrierColor: null to a
+// plain PageRouteBuilder: every ModalRoute (which PageRouteBuilder is)
+// installs an invisible full-screen "modal barrier" whose entire job is
+// to swallow taps aimed at whatever's behind it — that's how a dialog
+// stops you from tapping the screen behind it. barrierColor only
+// controls whether that barrier is painted; it still intercepts every
+// tap even when null. Left as the default, that barrier is what made
+// the site "freeze" after switching tabs once — the very next tap on
+// any icon was being silently absorbed by this marker route's barrier
+// instead of reaching the real nav bar underneath. Overriding
+// buildModalBarrier() to render nothing means there's genuinely nothing
+// left on top of the real UI, so taps pass straight through.
+class _TabMarkerRoute extends PageRouteBuilder<void> {
+  _TabMarkerRoute()
+      : super(
+          opaque: false,
+          maintainState: false,
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+        );
+
+  @override
+  Widget buildModalBarrier() => const SizedBox.shrink();
+}
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -30,11 +60,20 @@ class _MainShellState extends State<MainShell> {
   // lives on its own standalone Shop tab (see ShopScreen).
   ShopPage _page = ShopPage.home;
   // Tracks the tabs visited before the current one, most recent last, so
-  // the system/hardware back button can retrace the user's actual path
+  // the physical/browser back button can retrace the user's actual path
   // (Shop -> Cart -> back goes to Shop) instead of always jumping to
-  // Home. Popped one at a time in _goBack(); empty means Home is the
-  // only stop so far, and a back press should behave normally (exit the
-  // app / leave the page) — see canPop below.
+  // Home or leaving the site. Each entry here has a matching invisible
+  // route pushed onto the Navigator (see _goTo) — that's what actually
+  // gives a browser back press / phone back gesture something of ours to
+  // pop, riding the exact same Navigator-push mechanism that already
+  // reliably handles back for ProductDetailScreen and CheckoutScreen on
+  // both mobile and desktop, instead of the hand-rolled dart:html
+  // history.pushState/popstate listener this used to use (which behaved
+  // inconsistently between mobile and desktop browsers). Popped one at a
+  // time in the push's .then callback below; empty means Home is the
+  // only stop so far, so with no marker route left to pop, the next back
+  // press correctly falls through to normal browser behaviour (leave the
+  // page).
   final List<ShopPage> _navHistory = [];
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
@@ -64,10 +103,6 @@ class _MainShellState extends State<MainShell> {
   // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
   // others so it's ready by the time that part of Home scrolls into view.
   late Future<List<HomeBanner>> _mostOrderedBannersFuture;
-  // Cancels the browser-back listener set up in initState — see
-  // browser_tab_history.dart for why MainShell needs this at all on top
-  // of PopScope below.
-  late final void Function() _cancelBackListener;
 
   @override
   void initState() {
@@ -83,12 +118,10 @@ class _MainShellState extends State<MainShell> {
     _bannersFuture = HomeBannersRepository.fetchSlides();
     _mostOrderedBannersFuture =
         HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
-    _cancelBackListener = listenForBack(_handleBrowserBack);
   }
 
   @override
   void dispose() {
-    _cancelBackListener();
     _homeScrollController.dispose();
     _shopScrollController.dispose();
     _servicesFocusController.dispose();
@@ -98,29 +131,24 @@ class _MainShellState extends State<MainShell> {
 
   void _goTo(ShopPage page) {
     if (page == _page) return;
+    final previous = _page;
     setState(() {
-      _navHistory.add(_page);
+      _navHistory.add(previous);
       _page = page;
     });
-    // Keeps the browser's own back button in step with _navHistory — see
-    // browser_tab_history.dart.
-    pushTabHistoryEntry();
-  }
-
-  // Retraces the user's actual path one step at a time, instead of
-  // always dropping them back on Home.
-  void _goBack() {
-    if (_navHistory.isEmpty) return;
-    setState(() => _page = _navHistory.removeLast());
-  }
-
-  // Called when the phone's native back button/gesture fires — see
-  // browser_tab_history.dart. Left alone (not called) once _navHistory is
-  // empty, so that next back press behaves normally instead of getting
-  // stuck unable to ever leave Home.
-  void _handleBrowserBack() {
-    if (_navHistory.isEmpty) return;
-    _goBack();
+    // Push a zero-size, fully transparent route so a physical/browser
+    // back press has a real Navigator entry of ours to pop before it
+    // reaches anything else. This is the same push mechanism already
+    // used for ProductDetailScreen/CheckoutScreen — letting Flutter's own
+    // Navigator/Router own the browser history entry is what makes back
+    // behave consistently across both mobile and desktop browsers.
+    // Nothing ever pops this programmatically; it only comes off the
+    // stack when the user actually goes back, which is exactly when we
+    // want to retrace one tab.
+    Navigator.of(context).push(_TabMarkerRoute()).then((_) {
+      if (!mounted || _navHistory.isEmpty) return;
+      setState(() => _page = _navHistory.removeLast());
+    });
   }
 
   // Called from Home's service circles: switch to the Services tab and
@@ -164,102 +192,108 @@ class _MainShellState extends State<MainShell> {
     // Arabic.
     AppFonts.forceArabic = context.watch<FontController>().arabicMode;
 
-    return PopScope(
-      // Tab switches inside this shell (_goTo) are plain setState calls,
-      // not Navigator pushes, so they never land on the back stack. Without
-      // this, pressing back on any tab would close the app (or leave the
-      // site, on web) instead of retracing the user's own path through the
-      // tabs. canPop is only true once _navHistory is empty (i.e. Home is
-      // the only stop so far), so that back press then behaves normally
-      // (exits the app / leaves the page).
-      canPop: _navHistory.isEmpty,
-      onPopInvoked: (didPop) {
-        if (didPop) return;
-        _goBack();
-      },
-      child: Directionality(
-        textDirection: textDirection,
-        child: Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: context.colors.bgDeep,
-          // The drawer only exists on mobile — desktop keeps the full pill
-          // nav bar floating over the content instead, so there's nothing
-          // for a drawer to open there.
-          drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
-          body: AnimatedBackdrop(
-            child: FutureBuilder<List<Product>>(
-              future: _productsFuture,
-              builder: (context, snapshot) {
-                final products = snapshot.data ?? const [];
-                final loading = snapshot.connectionState == ConnectionState.waiting;
+    // No PopScope needed here anymore: every tab switch now pushes a real
+    // (invisible) Navigator route in _goTo, so the browser back button /
+    // phone back gesture already has a genuine route of ours to pop —
+    // handled by Flutter's own Navigator, the same well-tested path that
+    // already makes back work correctly for ProductDetailScreen and
+    // CheckoutScreen. When _navHistory is empty there's no marker route
+    // left, so a back press correctly falls through to leaving the page.
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: context.colors.bgDeep,
+        // The drawer only exists on mobile — desktop keeps the full pill
+        // nav bar floating over the content instead, so there's nothing
+        // for a drawer to open there.
+        drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
+        body: AnimatedBackdrop(
+          child: FutureBuilder<List<Product>>(
+            future: _productsFuture,
+            builder: (context, snapshot) {
+              final products = snapshot.data ?? const [];
+              final loading = snapshot.connectionState == ConnectionState.waiting;
 
-                return Stack(
-                  children: [
-                    if (loading)
-                      Center(
-                        child: CircularProgressIndicator(color: context.colors.orchid),
-                      )
-                    else
-                      IndexedStack(
-                        index: _page.index,
-                        children: [
-                          HomeScreen(
-                            products: products,
-                            isMobile: isMobile,
-                            scrollController: _homeScrollController,
-                            onAdminReturn: _refreshProducts,
-                            bannersFuture: _bannersFuture,
-                            mostOrderedBannersFuture: _mostOrderedBannersFuture,
-                            onServiceCategoryTap: _openServiceCategory,
-                            onShopTap: () => _goTo(ShopPage.shop),
-                            onCategoryTap: _openShopCategory,
-                            onViewProfileTap: () => _goTo(ShopPage.about),
-                          ),
-                          ShopScreen(
-                            products: products,
-                            isMobile: isMobile,
-                            scrollController: _shopScrollController,
-                            focusController: _shopFocusController,
-                          ),
-                          SearchScreen(products: products, isMobile: isMobile),
-                          GraphicalServicesScreen(
-                            isMobile: isMobile,
-                            focusController: _servicesFocusController,
-                          ),
-                          // Standalone "Who am I" tab — Home no longer
-                          // embeds this inline; the owner-intro card's
-                          // "View full profile" button jumps here instead
-                          // (see HomeScreen.onViewProfileTap).
-                          WhoAmIScreen(isMobile: isMobile),
-                          CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
-                        ],
-                      ),
-                    Positioned(
-                      top: 20,
-                      left: isMobile ? 10 : 0,
-                      right: isMobile ? 10 : 0,
-                      child: Center(
-                        // Mobile swaps the full pill nav for the compact top
-                        // bar (menu button + logo + cart) that opens
-                        // ShopNavDrawer; desktop is unchanged.
-                        child: isMobile
-                            ? ShopMobileTopBar(
-                                active: _page,
-                                onTap: _goTo,
-                                onMenuTap: () =>
-                                    _scaffoldKey.currentState?.openDrawer(),
-                              )
-                            : ShopNavBar(
-                                active: _page,
-                                onTap: _goTo,
-                                isMobile: isMobile,
-                              ),
-                      ),
+              return Stack(
+                children: [
+                  if (loading)
+                    Center(
+                      child: CircularProgressIndicator(color: context.colors.orchid),
+                    )
+                  else
+                    IndexedStack(
+                      index: _page.index,
+                      children: [
+                        HomeScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          scrollController: _homeScrollController,
+                          onAdminReturn: _refreshProducts,
+                          bannersFuture: _bannersFuture,
+                          mostOrderedBannersFuture: _mostOrderedBannersFuture,
+                          onServiceCategoryTap: _openServiceCategory,
+                          onShopTap: () => _goTo(ShopPage.shop),
+                          onCategoryTap: _openShopCategory,
+                          onViewProfileTap: () => _goTo(ShopPage.about),
+                        ),
+                        ShopScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          scrollController: _shopScrollController,
+                          focusController: _shopFocusController,
+                        ),
+                        SearchScreen(products: products, isMobile: isMobile),
+                        GraphicalServicesScreen(
+                          isMobile: isMobile,
+                          focusController: _servicesFocusController,
+                        ),
+                        // Standalone "Who am I" tab — Home no longer
+                        // embeds this inline; the owner-intro card's
+                        // "View full profile" button jumps here instead
+                        // (see HomeScreen.onViewProfileTap).
+                        WhoAmIScreen(isMobile: isMobile),
+                        // ShopPage.favorites — must sit at this exact
+                        // position (index 5) to line up with the enum
+                        // order in shop_nav_bar.dart. This was previously
+                        // missing entirely, which made IndexedStack throw
+                        // an out-of-range assertion (and freeze the whole
+                        // app) the moment anyone tapped the Favorites icon
+                        // or landed on Cart, since every page after it
+                        // was silently shifted one index short.
+                        FavoritesScreen(
+                          products: products,
+                          isMobile: isMobile,
+                          onBrowse: () => _goTo(ShopPage.shop),
+                        ),
+                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ),
+                  Positioned(
+                    top: 20,
+                    left: isMobile ? 10 : 0,
+                    right: isMobile ? 10 : 0,
+                    child: Center(
+                      // Mobile swaps the full pill nav for the compact top
+                      // bar (menu button + logo + cart) that opens
+                      // ShopNavDrawer; desktop is unchanged.
+                      child: isMobile
+                          ? ShopMobileTopBar(
+                              active: _page,
+                              onTap: _goTo,
+                              onMenuTap: () =>
+                                  _scaffoldKey.currentState?.openDrawer(),
+                            )
+                          : ShopNavBar(
+                              active: _page,
+                              onTap: _goTo,
+                              isMobile: isMobile,
+                            ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
