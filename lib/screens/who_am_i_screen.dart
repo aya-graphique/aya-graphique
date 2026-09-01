@@ -7,7 +7,95 @@ import '../providers/language_controller.dart';
 import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/shimmer_text.dart';
-import '../widgets/tilt_3d_card.dart';
+
+// ---------------------------------------------------------------------
+// ✏️ Hardcoded "About me" copy — no longer pulled from the about_me
+// table in Supabase. Edit the strings directly here (kBioIntro for the
+// opening paragraph, kBioSections for the headed paragraphs below it) —
+// same pattern as kExperience/kEducation/kProjects further down.
+// ---------------------------------------------------------------------
+String kBioIntro(bool isArabic) => isArabic
+    ? 'رسامة ومصممة متخصصة في تصميم الإعلانات التجارية، حاصلة على درجة '
+        'البكالوريوس في الفنون التطبيقية، قسم الإعلان. وُلدت عام ١٩٩٧ '
+        'ميلادي وبدأت دراسة مجال التصميم والإعلان عام 2015، وبدأت العمل '
+        'بشكل فعلي في المجال عام 2017.\n'
+        'خلال مسيرتي المهنية، تنوعت خبراتي بين عدة مجالات وقطاعات، من '
+        'بينها شركات التصميم المعماري، المطاعم، الحلويات، المستشفيات، '
+        'الأزياء والإكسسوارات والتعليم؛ وهو ما منحني رؤية متنوعة لطبيعة '
+        'العلامات التجارية واحتياجاتها البصرية وكيفية ظهورها لدى الجمهور '
+        'المستهدف.'
+    : "I'm an illustrator and designer specializing in commercial "
+        'advertising. I hold a Bachelor of Applied Arts degree in '
+        'Advertising. Born in 1997, I began studying design and '
+        'advertising in 2015 and started working in the field in 2017.\n'
+        'Throughout my career, my experience has spanned several sectors, '
+        'including architectural design firms, restaurants, confectionery, '
+        'hospitals, fashion and accessories, and education. This diverse '
+        'experience has given me a broad perspective on the nature of '
+        'brands, their visual needs, and how they present themselves to '
+        'their target audience.';
+
+/// One headed paragraph in the "About me" section, shown under the
+/// intro (see [kBioIntro]) — e.g. "My vision:" / "My goal:".
+class _BioSection {
+  final String heading;
+  final String body;
+  const _BioSection({required this.heading, required this.body});
+}
+
+List<_BioSection> kBioSections(bool isArabic) => isArabic
+    ? const [
+        _BioSection(
+          heading: 'من شغف الطفولة إلى صناعة الإعلان:',
+          body: 'بدأت رحلتي، مثل كثير من الأطفال، بشغف بسيط تجاه الرسم؛ '
+              'أقلام تتحرك بعفوية على الجدران، دون أفكار محدودة أو قواعد '
+              'أو قيود؛ ومع الوقت، قادني هذا الشغف إلى كلية الفنون '
+              'التطبيقية، حيث اكتشفت عالمًا مختلفًا من الفن، وتعلمت أن '
+              'الرسم يمكن أن يتحول من مجرد تعبير عفوي إلى فكرة، ومفهوم، '
+              'ورسالة، وتصميم نستهدف به شريحة كاملة من الجمهور لنقدم لهم '
+              'احتياجاتهم بفكرة واضحة ومختصرة.',
+        ),
+        _BioSection(
+          heading: 'رؤيتي:',
+          body: 'ماذا لو جمعنا بين شغف طفولة لم يعرف القيود، وخبرة مصمم '
+              'تعلم كيف يحوّل الأفكار إلى رسائل بصرية مصممة خصيصا لوظيفة '
+              'تحقق الهدف؟',
+        ),
+        _BioSection(
+          heading: 'هدفي:',
+          body: 'الجمع بين الفكرة، الفن، والاستراتيجية لصناعة تصميم '
+              'إعلاني لا يكتفي بأن يكون جميلًا، بل يُرى، ويُفهم، ويترك '
+              'أثرًا ويؤدي وظيفته للعلامة التجارية ويزيد من انتشارها.',
+        ),
+      ]
+    : const [
+        _BioSection(
+          heading: 'From childhood passion to advertising:',
+          body: 'Like many children, my journey began with a simple '
+              'passion for drawing; pens moving spontaneously across '
+              'walls, without limited ideas, rules, or restrictions. '
+              'Over time, this passion led me to the Faculty of Applied '
+              'Arts, where I discovered a different world of art. I '
+              'learned that drawing can transform from a spontaneous '
+              'expression into an idea, a concept, a message, and a '
+              'design that targets an entire segment of the audience, '
+              'addressing their needs with a clear and concise message.',
+        ),
+        _BioSection(
+          heading: 'My vision:',
+          body: 'What if we combined the boundless passion of childhood '
+              'with the expertise of a designer who has learned how to '
+              'transform ideas into visually compelling messages '
+              'tailored to a specific function and objective?',
+        ),
+        _BioSection(
+          heading: 'My goal:',
+          body: 'To combine concept, artistry, and strategy to create '
+              'advertising designs that are not only beautiful but also '
+              'visually appealing, understandable, impactful, and '
+              'effective for the brand, thereby increasing its reach.',
+        ),
+      ];
 
 List<_TimelineEntry> kExperience(bool isArabic) => [
       _TimelineEntry(
@@ -327,7 +415,8 @@ class _Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.isArabicLanguage;
-    final bio = profile.bioFor(isArabic);
+    final bio = kBioIntro(isArabic);
+    final bioSections = kBioSections(isArabic);
     final skills = profile.skillsFor(isArabic);
     final experience = kExperience(isArabic);
     final education = kEducation(isArabic);
@@ -452,6 +541,38 @@ class _Profile extends StatelessWidget {
               ),
             ),
           ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+          // Headed paragraphs (see kBioSections) — "From childhood
+          // passion...", "My vision:", "My goal:" — left/right-aligned
+          // with the rest of the page (not centered like the intro
+          // above it), each heading in the same accent-violet weight
+          // used for section headers elsewhere on this page.
+          if (bioSections.isNotEmpty) ...[
+            const SizedBox(height: 30),
+            for (var i = 0; i < bioSections.length; i++) ...[
+              if (i != 0) const SizedBox(height: 22),
+              Text(
+                bioSections[i].heading,
+                style: AppFonts.body(
+                  color: context.colors.violetLight,
+                  size: isMobile ? 17 : 18.5,
+                  weight: FontWeight.w800,
+                  height: 1.4,
+                  text: bioSections[i].heading,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                bioSections[i].body,
+                style: AppFonts.body(
+                  color: context.colors.creamDim,
+                  size: isMobile ? 16.5 : 18,
+                  weight: FontWeight.w500,
+                  height: 1.55,
+                  text: bioSections[i].body,
+                ),
+              ),
+            ],
+          ],
         ],
         if (skills.isNotEmpty) ...[
           const SizedBox(height: 40),
@@ -497,24 +618,12 @@ class _Profile extends StatelessWidget {
           const SizedBox(height: 32),
           _MiniSectionHeader(label: context.strings.projectsLabel),
           const SizedBox(height: 20),
-          // A horizontal reel instead of a boxed grid — it reads like
-          // flipping through a physical portfolio rather than another
-          // bordered card section, and lets a poster-shaped image be the
-          // whole card instead of a thumbnail stacked above plain text.
-          SizedBox(
-            height: isMobile ? 360 : 420,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              clipBehavior: Clip.none,
-              itemCount: projects.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 18),
-              itemBuilder: (context, i) => SizedBox(
-                width: isMobile ? 250 : 300,
-                child: _ProjectCard(project: projects[i], onOpenUrl: onOpenUrl),
-              ),
-            ),
-          ),
+          // A Behance-style masonry grid: covers of slightly different
+          // heights sit in fixed columns, image full-bleed, with the
+          // title/category set as plain text underneath the artwork
+          // instead of overlaid on it — closer to how a Behance profile's
+          // Projects tab reads than the old single-row poster reel.
+          _ProjectsMasonryGrid(projects: projects, isMobile: isMobile, onOpenUrl: onOpenUrl),
         ],
         if (experience.isNotEmpty) ...[
           const SizedBox(height: 32),
@@ -874,118 +983,205 @@ class _TimelineCard extends StatelessWidget {
 /// One project tile in the manual Projects grid — image on top (or a
 /// placeholder icon if [_ProjectItem.imageAsset] is empty), title,
 /// description, and an optional "view" tap-through if a url was given.
-/// One project poster in the horizontal Projects reel — the image (or a
-/// gradient plate if none was given) fills the whole card, full-bleed,
-/// with the title and category set directly over it behind a bottom scrim
-/// — like a printed piece pinned to a portfolio wall, rather than a
-/// thumbnail-plus-text list item. Wrapped in the same pointer-tilt
-/// treatment used on the shop's product cards, so browsing her own work
-/// carries the same tactile feel as browsing a product to buy.
-class _ProjectCard extends StatelessWidget {
-  final _ProjectItem project;
+/// Lays [projects] out the way a Behance profile's "Projects" tab does:
+/// fixed columns (2 on mobile, more as the screen widens), each project a
+/// cover image of its own height with the title/category printed as plain
+/// text underneath — rather than one uniform row of poster cards with the
+/// caption overlaid on the artwork.
+///
+/// There's no masonry-grid package in this project, so the staggering is
+/// done by hand: items are dealt round-robin into N side-by-side Columns,
+/// and each cover's aspect ratio is picked deterministically from its
+/// index so the columns naturally drift out of sync with each other —
+/// exactly the uneven-height look a real masonry layout would produce,
+/// without pulling in a new dependency.
+class _ProjectsMasonryGrid extends StatelessWidget {
+  final List<_ProjectItem> projects;
+  final bool isMobile;
   final ValueChanged<String> onOpenUrl;
-  const _ProjectCard({required this.project, required this.onOpenUrl});
+
+  const _ProjectsMasonryGrid({
+    required this.projects,
+    required this.isMobile,
+    required this.onOpenUrl,
+  });
+
+  // A small repeating cycle of aspect ratios (width / height) so covers
+  // read as photographed/designed pieces of varying shape — tall poster,
+  // square, and wide landscape — the same mix you'd see scrolling a real
+  // Behance grid, instead of every tile being identically cropped.
+  static const List<double> _aspectCycle = [0.78, 1.0, 0.62, 0.9];
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final columns = isMobile
+        ? 2
+        : AppBreakpoints.isTablet(width)
+            ? 3
+            : 4;
+
+    final columnItems = List.generate(columns, (_) => <int>[]);
+    for (var i = 0; i < projects.length; i++) {
+      columnItems[i % columns].add(i);
+    }
+
+    const gap = 16.0;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var c = 0; c < columns; c++) ...[
+          if (c != 0) const SizedBox(width: gap),
+          Expanded(
+            child: Column(
+              children: [
+                for (final i in columnItems[c]) ...[
+                  if (i >= columns) const SizedBox(height: gap),
+                  _ProjectCard(
+                    project: projects[i],
+                    aspectRatio: _aspectCycle[i % _aspectCycle.length],
+                    onOpenUrl: onOpenUrl,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// One project cover, Behance-card style: the artwork fills a fixed-ratio
+/// frame with a category tag pinned over it top-start, and — like hovering
+/// a Behance cover before it takes you to the case study — a soft dark
+/// veil plus a centered "view" glyph fades in only on hover/press. The
+/// title and category live as plain text *underneath* the frame, the way
+/// a Behance grid item's title sits below its cover rather than stamped
+/// across it.
+class _ProjectCard extends StatefulWidget {
+  final _ProjectItem project;
+  final double aspectRatio;
+  final ValueChanged<String> onOpenUrl;
+  const _ProjectCard({
+    required this.project,
+    required this.aspectRatio,
+    required this.onOpenUrl,
+  });
+
+  @override
+  State<_ProjectCard> createState() => _ProjectCardState();
+}
+
+class _ProjectCardState extends State<_ProjectCard> {
+  bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final project = widget.project;
     final hasUrl = project.url.trim().isNotEmpty;
     final hasImage = project.imageAsset.trim().isNotEmpty;
 
-    return Tilt3DCard(
-      maxTiltDegrees: 6,
-      liftOnHover: 8,
-      borderRadius: BorderRadius.circular(20),
-      onTap: hasUrl ? () => onOpenUrl(project.url) : null,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          fit: StackFit.expand,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: hasUrl ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        onTap: hasUrl ? () => widget.onOpenUrl(project.url) : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Base layer: the artwork itself, or a violet gradient plate
-            // standing in for it — never a plain grey/white placeholder,
-            // since this section is meant to look finished even before
-            // real images are dropped in.
-            if (hasImage)
-              Image.asset(
-                project.imageAsset,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
-              )
-            else
-              Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: AspectRatio(
+                aspectRatio: widget.aspectRatio,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Base layer: the artwork itself, or a violet gradient
+                    // plate standing in for it — never a plain grey/white
+                    // placeholder, since this section should look
+                    // finished even before real images are dropped in.
+                    if (hasImage)
+                      AnimatedScale(
+                        scale: _hovering ? 1.05 : 1.0,
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOut,
+                        child: Image.asset(
+                          project.imageAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
+                        ),
+                      )
+                    else
+                      Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
 
-            // Bottom scrim so the title stays legible over any artwork.
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.35, 1.0],
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.72)],
-                ),
-              ),
-            ),
+                    // Category tag, top-start — real content (what kind
+                    // of work this is), not decoration.
+                    if (project.category.isNotEmpty)
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.32),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: Colors.white.withOpacity(0.18)),
+                          ),
+                          child: Text(project.category,
+                            style: AppFonts.label(text: project.category, size: 11, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
+                          ),
+                        ),
+                      ),
 
-            // Category tag, top-start — real content (what kind of work
-            // this is), not decoration.
-            if (project.category.isNotEmpty)
-              Positioned(
-                top: 14,
-                left: 14,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.32),
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: Colors.white.withOpacity(0.18)),
-                  ),
-                  child: Text(project.category,
-                    style: AppFonts.label(text: project.category, size: 12, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
-                  ),
-                ),
-              ),
-
-            if (hasUrl)
-              Positioned(
-                top: 14,
-                right: 14,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.32), shape: BoxShape.circle),
-                  child: const Icon(Icons.north_east_rounded, size: 15, color: Colors.white),
-                ),
-              ),
-
-            // Title + description, bottom-start, sitting on the scrim.
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(project.title,
-                    style: AppFonts.body(size: 19, weight: FontWeight.w800, color: Colors.white, text: project.title),
-                  ),
-                  if (project.description.isNotEmpty) ...[
-                    const SizedBox(height: 5),
-                    Text(project.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppFonts.body(size: 13.5, weight: FontWeight.w500, height: 1.4, color: Colors.white.withOpacity(0.82), text: project.description),
-                    ),
+                    // Hover veil + "view" glyph — mirrors the darken +
+                    // centered eye/arrow treatment a Behance cover shows
+                    // on hover, right before it opens the project. Only
+                    // meaningful (and only fades in) when the tile is
+                    // actually tappable.
+                    if (hasUrl)
+                      AnimatedOpacity(
+                        opacity: _hovering ? 1 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: Colors.black.withOpacity(0.38)),
+                          child: const Center(
+                            child: Icon(Icons.north_east_rounded, size: 26, color: Colors.white),
+                          ),
+                        ),
+                      ),
                   ],
-                ],
+                ),
               ),
             ),
+            const SizedBox(height: 10),
+            // Title + category, printed plainly below the frame — the
+            // caption lives in the page's own text flow now, not as an
+            // overlay competing with the artwork.
+            Text(project.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppFonts.body(size: 15.5, weight: FontWeight.w700, color: colors.cream, text: project.title),
+            ),
+            if (project.category.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(project.category,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppFonts.body(size: 13, weight: FontWeight.w500, color: colors.creamDim, text: project.category),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 }
+
 
 class _ContactButton extends StatelessWidget {
   final IconData icon;

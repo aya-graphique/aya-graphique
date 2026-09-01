@@ -5,6 +5,7 @@ import 'providers/favorites_provider.dart';
 import 'providers/language_controller.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'screens/main_shell.dart';
+import 'screens/product_link_screen.dart';
 import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
 
@@ -47,6 +48,20 @@ class AyaGraphiqueApp extends StatelessWidget {
             routes: {
               '/': (context) => const MainShell(),
               '/admin': (context) => const AdminLoginScreen(),
+            },
+            // '/product/<id>' isn't a fixed route (the id varies per
+            // product), so it can't live in the static `routes` map above —
+            // it's handled here instead. This is what makes a shared
+            // product link (see ProductCard._shareProduct) open straight to
+            // that product instead of just the storefront root.
+            onGenerateRoute: (settings) {
+              final name = settings.name ?? '/';
+              const prefix = '/product/';
+              if (name.startsWith(prefix) && name.length > prefix.length) {
+                final id = Uri.decodeComponent(name.substring(prefix.length));
+                return MaterialPageRoute(builder: (_) => ProductLinkScreen(productId: id));
+              }
+              return null;
             },
             onUnknownRoute: (settings) => MaterialPageRoute(builder: (_) => const MainShell()),
           );

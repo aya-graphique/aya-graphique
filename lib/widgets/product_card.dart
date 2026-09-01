@@ -23,20 +23,26 @@ class ProductCard extends StatelessWidget {
     required this.onTap,
   });
 
-  // Shares the product's name + price (and, on web, a link back to the
-  // storefront) through the platform share sheet. Uses `stringsRead`
-  // rather than `context.strings` since this runs from a tap callback,
-  // not a build method.
+  // Shares the product's name + price (and, on web, a deep link straight
+  // to this product's page) through the platform share sheet. Uses
+  // `stringsRead` rather than `context.strings` since this runs from a
+  // tap callback, not a build method.
   void _shareProduct(BuildContext context) {
     final strings = context.stringsRead;
     final priceText = formatPrice(product.hasDiscount ? product.discountedPrice : product.price);
     // Uri.base.origin only gives the scheme+domain (e.g. https://you.github.io),
     // which drops the app's base path when hosted as a GitHub Pages project
     // page (https://you.github.io/aya_graphique/). Uri.base.toString() keeps
-    // that path; stripping anything from '#' onward drops the hash route
-    // (e.g. '#/admin') so the shared link always lands on the storefront root.
-    final origin = Uri.base.toString().split('#').first;
-    final text = '${product.name} — $priceText\n$origin';
+    // that path; stripping anything from '#' onward drops whatever hash
+    // route the shopper happens to be on right now (e.g. '#/shop') so we
+    // can rebuild it ourselves below, pointed at this exact product instead
+    // of wherever they were browsing from.
+    final base = Uri.base.toString().split('#').first;
+    // '#/product/<id>' is picked up by MainShell via ProductLinkScreen (see
+    // main.dart's onGenerateRoute), which opens straight to this product's
+    // detail page instead of just landing on the storefront root.
+    final productLink = '$base#/product/${Uri.encodeComponent(product.id)}';
+    final text = '${product.name} — $priceText\n$productLink';
     Share.share(text, subject: product.name).catchError((_) {
       // Share sheet unavailable (e.g. some desktop browsers) — fall back
       // to just copying the link so the tap still does *something*.
