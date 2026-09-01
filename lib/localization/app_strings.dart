@@ -305,6 +305,8 @@ class AppText {
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get skillsLabel => _t('SKILLS', 'المهارات');
+  String get certificatesLabel => _t('CERTIFICATES', 'الشهادات');
+  String get tapToFlipHint => _t('View certificate', 'اعرض الشهادة');
   String get getInTouchLabel => _t('GET IN TOUCH', 'تواصل معايا');
   String get whatsappLabel => _t('WhatsApp', 'واتساب');
   String get contactNowLabel => _t('Contact now!', 'تواصل الآن!');

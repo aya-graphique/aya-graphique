@@ -1,12 +1,35 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
 import '../models/about_me.dart';
+import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
+import '../widgets/reveal_on_scroll.dart';
 import '../widgets/shimmer_text.dart';
+import '../widgets/tilt_3d_card.dart';
+import 'project_detail_screen.dart';
+
+/// A representative glyph per project category, used only to give an
+/// empty (no-image-yet) project cover something more designed than a
+/// flat gradient — a large, faint watermark hinting at the kind of work
+/// it is, rather than a blank plate.
+IconData _iconForCategory(ProjectCategory category) {
+  switch (category) {
+    case ProjectCategory.logoIdentity:
+      return Icons.auto_awesome_outlined;
+    case ProjectCategory.packaging:
+      return Icons.inventory_2_outlined;
+    case ProjectCategory.advertising:
+      return Icons.campaign_outlined;
+    case ProjectCategory.artwork:
+      return Icons.brush_outlined;
+  }
+}
 
 // ---------------------------------------------------------------------
 // ✏️ Hardcoded "About me" copy — no longer pulled from the about_me
@@ -172,65 +195,194 @@ List<_TimelineEntry> kEducation(bool isArabic) => [
       ),
     ];
 
-/// One portfolio project — plain static data (not admin-editable, same idea
-/// as [kExperience]/[kEducation]/[kStats] above): to add a new project just
-/// add another `_ProjectItem(...)` entry to [kProjects] below and drop its
-/// image into assets/images/.
-class _ProjectItem {
+/// One certificate shown as a flip card under "Who am I" — [title] /
+/// [issuer] / [date] print on the front face; tapping the card flips it
+/// over (see [_CertificateFlipCard]) to reveal [content], the write-up
+/// of what the certificate actually covers or was awarded for.
+class _Certificate {
   final String title;
-  final String category;
-  final String description;
-  // Path under assets/images/, e.g. 'assets/images/project_wedding_invite.png'.
-  // Leave empty and the card shows a plain violet gradient plate instead.
-  final String imageAsset;
-  // Optional external link (behance/instagram/drive/etc.) — leave empty to
-  // make the card non-tappable.
-  final String url;
-  const _ProjectItem({
+  final String issuer;
+  final String date;
+  final String content;
+  // Optional real certificate image (asset path) — when set, the front
+  // of the card shows this image full-bleed instead of the plain
+  // icon/title mock-up. The back (flip side) still shows the write-up
+  // in [content].
+  final String? imageAsset;
+  const _Certificate({
     required this.title,
-    this.category = '',
-    this.description = '',
-    this.imageAsset = '',
-    this.url = '',
+    required this.issuer,
+    required this.date,
+    required this.content,
+    this.imageAsset,
   });
 }
 
 // ---------------------------------------------------------------------
-// ✏️ عدّلي هنا يدويًا: كل مشروع جديد ضيفيه كـ _ProjectItem في الليستة دي.
-// - title / description: بالعربي والانجليزي حسب isArabic زي باقي الصفحة.
-// - category: نوع الشغل (هوية بصرية / تغليف / سوشيال ميديا...) بيظهر كـ
-//   تاج صغير فوق الصورة.
-// - imageAsset: حطي صورة المشروع في assets/images/ واكتبي مسارها هنا
-//   (وسجّليها في pubspec.yaml لو مش متسجلة أصلاً)، أو سيبيها فاضية عشان
-//   يظهر بلاطة بنفسجية بدال الصورة.
-// - url: رابط خارجي اختياري (بيهافيور/انستجرام/درايف...) أو سيبيه فاضي.
+// ✏️ عدّلي هنا يدويًا: كل شهادة جديدة ضيفيها كـ _Certificate في الليستة
+// دي. title/issuer/date بيظهروا في وش الكارت؛ content هو اللي بيظهر
+// لما اليوزر يدوس على الكارت ويعمل فليب — اكتبيه باختصار (2-3 جمل).
 // ---------------------------------------------------------------------
-List<_ProjectItem> kProjects(bool isArabic) => [
-      _ProjectItem(
+List<_Certificate> kCertificates(bool isArabic) => isArabic
+    ? const [
+        _Certificate(
+          title: 'دورة التصميم الجرافيكي الاحترافي',
+          issuer: 'Creative Ideas',
+          date: '01 / 06 / 2024',
+          content: 'أتمت الدورة الاحترافية في التصميم الجرافيكي بنجاح، وأظهرت '
+              'خلالها إبداعًا والتزامًا وإتقانًا في مبادئ التصميم والطباعة '
+              'وبناء العلامة التجارية ونظرية الألوان وتصميم التخطيط '
+              'والتواصل البصري. غطّت الدورة أيضًا استخدام برامج التصميم '
+              'الاحترافية وتطبيق أسس التصميم على مشاريع حقيقية من فكرة '
+              'إلى تنفيذ نهائي جاهز للنشر.',
+          imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
+        ),
+        _Certificate(
+          title: 'اسم الشهادة الأولى',
+          issuer: 'الجهة المانحة',
+          date: '2023',
+          content: 'وصف مختصر لمحتوى الشهادة: إيه اللي اتغطى فيها، وإيه '
+              'المهارات أو الأدوات اللي اتعلمتيها من خلالها.',
+        ),
+        _Certificate(
+          title: 'اسم الشهادة الثانية',
+          issuer: 'الجهة المانحة',
+          date: '2022',
+          content: 'وصف مختصر لمحتوى الشهادة التانية.',
+        ),
+        _Certificate(
+          title: 'اسم الشهادة الثالثة',
+          issuer: 'الجهة المانحة',
+          date: '2021',
+          content: 'وصف مختصر لمحتوى الشهادة التالتة.',
+        ),
+        _Certificate(
+          title: 'اسم الشهادة الرابعة',
+          issuer: 'الجهة المانحة',
+          date: '2020',
+          content: 'وصف مختصر لمحتوى الشهادة الرابعة.',
+        ),
+      ]
+    : const [
+        _Certificate(
+          title: 'Professional Graphic Design Course',
+          issuer: 'Creative Ideas',
+          date: '01 / 06 / 2024',
+          content: 'Successfully completed the Professional Graphic Design '
+              'Course, demonstrating creativity, dedication, and '
+              'proficiency in design principles, typography, branding, '
+              'color theory, layout design, and visual communication. '
+              'The course also covered professional design software and '
+              'applying core design fundamentals to real projects, from '
+              'initial concept through to a publish-ready final piece.',
+          imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
+        ),
+        _Certificate(
+          title: 'First Certificate Name',
+          issuer: 'Issuing Organization',
+          date: '2023',
+          content: 'A short write-up of what the certificate covers — the '
+              'skills or tools it represents.',
+        ),
+        _Certificate(
+          title: 'Second Certificate Name',
+          issuer: 'Issuing Organization',
+          date: '2022',
+          content: 'A short write-up of the second certificate.',
+        ),
+        _Certificate(
+          title: 'Third Certificate Name',
+          issuer: 'Issuing Organization',
+          date: '2021',
+          content: 'A short write-up of the third certificate.',
+        ),
+        _Certificate(
+          title: 'Fourth Certificate Name',
+          issuer: 'Issuing Organization',
+          date: '2020',
+          content: 'A short write-up of the fourth certificate.',
+        ),
+      ];
+
+// ---------------------------------------------------------------------
+// ✏️ عدّلي هنا يدويًا: كل مشروع جديد ضيفيه كـ PortfolioProject في
+// الليستة دي (النوع نفسه معرّف في lib/models/portfolio_project.dart).
+// - title / description / fullDescription: بالعربي والانجليزي حسب
+//   isArabic زي باقي الصفحة. description قصير (مش بيظهر في الجريد حاليًا
+//   بس متاح لأي استخدام تاني)، fullDescription هو النص اللي بيظهر في
+//   صفحة تفاصيل المشروع (زي وصف المشروع في بيهانس).
+// - category: واحدة من 4 أنواع بس (ProjectCategory.logoIdentity /
+//   .packaging / .advertising / .artwork) — بتظهر كـ تاج صغير فوق
+//   الصورة وفي أعلى صفحة التفاصيل.
+// - images: لستة بـ 5 صور بالظبط لكل مشروع، مسارها تحت assets/images/
+//   (المجلد كله مسجّل في pubspec.yaml أصلاً، مفيش داعي تضيفي حاجة —
+//   كفاية تحطي الملفات في المسارات دي). أول صورة هي غلاف الكارت في
+//   الجريد، والـ5 صور بيظهروا في صفحة التفاصيل في جاليري "بينتو"
+//   مميز (صورة كبيرة رئيسية + 4 صور جنبها) بدل ما يتعرضوا تحت بعض
+//   عادي. سيبي أي مسار زي ما هو من غير ما تحطي صورة عشان تظهر بلاطة
+//   بنفسجية بدالها لحد ما تجهزي الصور.
+// - url: رابط بيهانس الحقيقي للمشروع (اختياري) — بيظهر كزرار "View on
+//   Behance" في صفحة التفاصيل، أو سيبيه فاضي عشان الزرار ميظهرش.
+// ---------------------------------------------------------------------
+List<PortfolioProject> kProjects(bool isArabic) => [
+      PortfolioProject(
         title: isArabic ? 'اسم المشروع الأول' : 'First Project Name',
-        category: isArabic ? 'هوية بصرية' : 'Brand Identity',
+        category: ProjectCategory.logoIdentity,
         description: isArabic
             ? 'وصف مختصر للمشروع: إيه اللي اتعمل فيه وليه.'
             : 'A short description of the project: what it is and why.',
-        imageAsset: '',
+        images: const [
+          'assets/images/projects/project_1/1.jpg',
+          'assets/images/projects/project_1/2.jpg',
+          'assets/images/projects/project_1/3.jpg',
+          'assets/images/projects/project_1/4.jpg',
+          'assets/images/projects/project_1/5.jpg',
+        ],
         url: '',
       ),
-      _ProjectItem(
+      PortfolioProject(
         title: isArabic ? 'اسم المشروع الثاني' : 'Second Project Name',
-        category: isArabic ? 'تغليف' : 'Packaging',
+        category: ProjectCategory.packaging,
         description: isArabic
             ? 'وصف مختصر للمشروع التاني.'
             : 'A short description of the second project.',
-        imageAsset: '',
+        images: const [
+          'assets/images/projects/project_2/1.jpg',
+          'assets/images/projects/project_2/2.jpg',
+          'assets/images/projects/project_2/3.jpg',
+          'assets/images/projects/project_2/4.jpg',
+          'assets/images/projects/project_2/5.jpg',
+        ],
         url: '',
       ),
-      _ProjectItem(
+      PortfolioProject(
         title: isArabic ? 'اسم المشروع الثالث' : 'Third Project Name',
-        category: isArabic ? 'مطبوعات' : 'Print',
+        category: ProjectCategory.advertising,
         description: isArabic
             ? 'وصف مختصر للمشروع التالت.'
             : 'A short description of the third project.',
-        imageAsset: '',
+        images: const [
+          'assets/images/projects/project_3/1.jpg',
+          'assets/images/projects/project_3/2.jpg',
+          'assets/images/projects/project_3/3.jpg',
+          'assets/images/projects/project_3/4.jpg',
+          'assets/images/projects/project_3/5.jpg',
+        ],
+        url: '',
+      ),
+      PortfolioProject(
+        title: isArabic ? 'اسم المشروع الرابع' : 'Fourth Project Name',
+        category: ProjectCategory.artwork,
+        description: isArabic
+            ? 'وصف مختصر للمشروع الرابع.'
+            : 'A short description of the fourth project.',
+        images: const [
+          'assets/images/projects/project_4/1.jpg',
+          'assets/images/projects/project_4/2.jpg',
+          'assets/images/projects/project_4/3.jpg',
+          'assets/images/projects/project_4/4.jpg',
+          'assets/images/projects/project_4/5.jpg',
+        ],
         url: '',
       ),
     ];
@@ -417,7 +569,7 @@ class _Profile extends StatelessWidget {
     final isArabic = context.isArabicLanguage;
     final bio = kBioIntro(isArabic);
     final bioSections = kBioSections(isArabic);
-    final skills = profile.skillsFor(isArabic);
+    final certificates = kCertificates(isArabic);
     final experience = kExperience(isArabic);
     final education = kEducation(isArabic);
     final projects = kProjects(isArabic);
@@ -531,7 +683,7 @@ class _Profile extends StatelessWidget {
             width: double.infinity,
             child: Text(
               bio,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: AppFonts.body(
                 color: context.colors.creamDim,
                 size: isMobile ? 19 : 21,
@@ -574,42 +726,15 @@ class _Profile extends StatelessWidget {
             ],
           ],
         ],
-        if (skills.isNotEmpty) ...[
+        if (certificates.isNotEmpty) ...[
           const SizedBox(height: 40),
           _SectionCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _MiniSectionHeader(label: context.strings.skillsLabel),
+                _MiniSectionHeader(label: context.strings.certificatesLabel),
                 const SizedBox(height: 20),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: skills
-                      .map((s) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: context.colors.surface,
-                              borderRadius: BorderRadius.circular(100),
-                              // Was a flat white border — invisible against a
-                              // white surface in light mode. Cream adapts per
-                              // theme.
-                              border: Border.all(color: context.colors.border(0.1)),
-                            ),
-                            child: Text(
-                              _capitalizeWords(s),
-                              style: AppFonts.body(
-                                size: isMobile ? 13.5 : 14.5,
-                                weight: FontWeight.w700,
-                                color: context.colors.cream,
-                                text: s,
-                                boostArabicSize: false,
-                              ),
-                            ),
-                          ))
-                      .toList(),
-                ),
+                _CertificatesCarousel(certificates: certificates, isMobile: isMobile),
               ],
             ),
           ),
@@ -623,7 +748,7 @@ class _Profile extends StatelessWidget {
           // title/category set as plain text underneath the artwork
           // instead of overlaid on it — closer to how a Behance profile's
           // Projects tab reads than the old single-row poster reel.
-          _ProjectsMasonryGrid(projects: projects, isMobile: isMobile, onOpenUrl: onOpenUrl),
+          _ProjectsMasonryGrid(projects: projects, isMobile: isMobile),
         ],
         if (experience.isNotEmpty) ...[
           const SizedBox(height: 32),
@@ -981,8 +1106,9 @@ class _TimelineCard extends StatelessWidget {
 }
 
 /// One project tile in the manual Projects grid — image on top (or a
-/// placeholder icon if [_ProjectItem.imageAsset] is empty), title,
-/// description, and an optional "view" tap-through if a url was given.
+/// placeholder icon if [PortfolioProject.coverImage] is empty), title,
+/// and category, tapping through to [ProjectDetailScreen] for the full
+/// Behance-style case study.
 /// Lays [projects] out the way a Behance profile's "Projects" tab does:
 /// fixed columns (2 on mobile, more as the screen widens), each project a
 /// cover image of its own height with the title/category printed as plain
@@ -996,14 +1122,12 @@ class _TimelineCard extends StatelessWidget {
 /// exactly the uneven-height look a real masonry layout would produce,
 /// without pulling in a new dependency.
 class _ProjectsMasonryGrid extends StatelessWidget {
-  final List<_ProjectItem> projects;
+  final List<PortfolioProject> projects;
   final bool isMobile;
-  final ValueChanged<String> onOpenUrl;
 
   const _ProjectsMasonryGrid({
     required this.projects,
     required this.isMobile,
-    required this.onOpenUrl,
   });
 
   // A small repeating cycle of aspect ratios (width / height) so covers
@@ -1041,7 +1165,7 @@ class _ProjectsMasonryGrid extends StatelessWidget {
                   _ProjectCard(
                     project: projects[i],
                     aspectRatio: _aspectCycle[i % _aspectCycle.length],
-                    onOpenUrl: onOpenUrl,
+                    index: i,
                   ),
                 ],
               ],
@@ -1059,15 +1183,19 @@ class _ProjectsMasonryGrid extends StatelessWidget {
 /// veil plus a centered "view" glyph fades in only on hover/press. The
 /// title and category live as plain text *underneath* the frame, the way
 /// a Behance grid item's title sits below its cover rather than stamped
-/// across it.
+/// across it. Tapping anywhere on the tile opens [ProjectDetailScreen]
+/// with this project's full gallery and write-up.
 class _ProjectCard extends StatefulWidget {
-  final _ProjectItem project;
+  final PortfolioProject project;
   final double aspectRatio;
-  final ValueChanged<String> onOpenUrl;
+  // Position in the grid — drives the placeholder's "01" index badge and
+  // a small stagger on the entrance animation, so the whole grid doesn't
+  // pop in as one flat block.
+  final int index;
   const _ProjectCard({
     required this.project,
     required this.aspectRatio,
-    required this.onOpenUrl,
+    required this.index,
   });
 
   @override
@@ -1080,48 +1208,68 @@ class _ProjectCardState extends State<_ProjectCard> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isArabic = context.isArabicLanguage;
     final project = widget.project;
-    final hasUrl = project.url.trim().isNotEmpty;
-    final hasImage = project.imageAsset.trim().isNotEmpty;
+    final categoryLabel = project.category.labelFor(isArabic);
+    final hasImage = project.coverImage.trim().isNotEmpty;
+    final indexLabel = (widget.index + 1).toString().padLeft(2, '0');
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      cursor: hasUrl ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        onTap: hasUrl ? () => widget.onOpenUrl(project.url) : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: AspectRatio(
+    return RevealOnScroll(
+      delay: Duration(milliseconds: 60 * (widget.index % 6)),
+      offsetY: 26,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
                 aspectRatio: widget.aspectRatio,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Base layer: the artwork itself, or a violet gradient
-                    // plate standing in for it — never a plain grey/white
-                    // placeholder, since this section should look
-                    // finished even before real images are dropped in.
-                    if (hasImage)
-                      AnimatedScale(
-                        scale: _hovering ? 1.05 : 1.0,
-                        duration: const Duration(milliseconds: 260),
-                        curve: Curves.easeOut,
-                        child: Image.asset(
-                          project.imageAsset,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
+                // Tilts gently toward the pointer and lifts with a violet
+                // glow on hover — the same premium, "designed" hover
+                // language as the project detail gallery, so the grid and
+                // the case-study page read as one consistent product.
+                child: Tilt3DCard(
+                  maxTiltDegrees: 5,
+                  liftOnHover: 5,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Base layer: the artwork itself, or a deliberately
+                      // designed violet placeholder plate — a soft light
+                      // sweep plus a large faint category glyph — never a
+                      // flat, empty-looking rectangle, so the section
+                      // reads as finished even before real photos land.
+                      if (hasImage)
+                        AnimatedScale(
+                          scale: _hovering ? 1.06 : 1.0,
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeOut,
+                          child: Image.asset(
+                            project.coverImage,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _ProjectPlaceholderArt(
+                              category: project.category,
+                              hovering: _hovering,
+                              colors: colors,
+                            ),
+                          ),
+                        )
+                      else
+                        _ProjectPlaceholderArt(
+                          category: project.category,
+                          hovering: _hovering,
+                          colors: colors,
                         ),
-                      )
-                    else
-                      Container(decoration: BoxDecoration(gradient: colors.violetGradientWide)),
 
-                    // Category tag, top-start — real content (what kind
-                    // of work this is), not decoration.
-                    if (project.category.isNotEmpty)
+                      // Category tag, top-start — real content (what kind
+                      // of work this is), not decoration.
                       Positioned(
                         top: 10,
                         left: 10,
@@ -1132,18 +1280,35 @@ class _ProjectCardState extends State<_ProjectCard> {
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(color: Colors.white.withOpacity(0.18)),
                           ),
-                          child: Text(project.category,
-                            style: AppFonts.label(text: project.category, size: 11, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
+                          child: Text(categoryLabel,
+                            style: AppFonts.label(text: categoryLabel, size: 11, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
                           ),
                         ),
                       ),
 
-                    // Hover veil + "view" glyph — mirrors the darken +
-                    // centered eye/arrow treatment a Behance cover shows
-                    // on hover, right before it opens the project. Only
-                    // meaningful (and only fades in) when the tile is
-                    // actually tappable.
-                    if (hasUrl)
+                      // "01" index badge, top-end — a small catalogue-style
+                      // touch that makes the grid read as a numbered
+                      // portfolio rather than a loose set of tiles.
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.32),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: Colors.white.withOpacity(0.18)),
+                          ),
+                          child: Text(indexLabel,
+                            style: AppFonts.label(text: indexLabel, size: 11, weight: FontWeight.w700, color: Colors.white.withOpacity(0.85), letterSpacing: 0.5),
+                          ),
+                        ),
+                      ),
+
+                      // Hover veil + "view" glyph — mirrors the darken +
+                      // centered eye/arrow treatment a Behance cover shows
+                      // on hover, right before it opens the project's case
+                      // study page.
                       AnimatedOpacity(
                         opacity: _hovering ? 1 : 0,
                         duration: const Duration(milliseconds: 200),
@@ -1154,27 +1319,543 @@ class _ProjectCardState extends State<_ProjectCard> {
                           ),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Small accent dash above the title — the same eyebrow
+              // language used at the top of the page — so the caption
+              // reads as a deliberate label, not just leftover text.
+              Container(width: 18, height: 2, color: _hovering ? colors.orchid : colors.orchid.withOpacity(0.5)),
+              const SizedBox(height: 8),
+              Text(project.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppFonts.body(size: 15.5, weight: FontWeight.w700, color: colors.cream, text: project.title),
+              ),
+              const SizedBox(height: 2),
+              Text(categoryLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppFonts.body(size: 13, weight: FontWeight.w500, color: colors.creamDim, text: categoryLabel),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The "no photo yet" cover: a violet gradient plate with a soft light
+/// sweep in one corner and a large, faint glyph for the project's
+/// category — designed to look intentional rather than empty, and to
+/// brighten slightly on hover along with the rest of the tile.
+class _ProjectPlaceholderArt extends StatelessWidget {
+  final ProjectCategory category;
+  final bool hovering;
+  final AppColors colors;
+  const _ProjectPlaceholderArt({required this.category, required this.hovering, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final glyphSize = constraints.maxWidth * 0.56;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 260),
+          decoration: BoxDecoration(gradient: colors.violetGradientWide),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Soft light sweep, top-start — adds depth so the plate
+              // doesn't read as one flat color.
+              Positioned(
+                top: -constraints.maxWidth * 0.35,
+                left: -constraints.maxWidth * 0.25,
+                child: Container(
+                  width: constraints.maxWidth * 0.9,
+                  height: constraints.maxWidth * 0.9,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [Colors.white.withOpacity(hovering ? 0.16 : 0.10), Colors.transparent],
+                    ),
+                  ),
+                ),
+              ),
+              // Large faint category glyph, bottom-end — hints at what
+              // kind of work this is even with no photo in place yet.
+              Positioned(
+                right: -glyphSize * 0.16,
+                bottom: -glyphSize * 0.16,
+                child: Transform.rotate(
+                  angle: -0.2,
+                  child: Icon(
+                    _iconForCategory(category),
+                    size: glyphSize,
+                    color: Colors.white.withOpacity(hovering ? 0.18 : 0.13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+/// Lets a mouse/trackpad drag the certificates carousel on desktop web,
+/// same fix as the home banner slideshow — by default Flutter's web
+/// scroll behaviour only accepts touch/stylus drags.
+class _CertDragScrollBehavior extends MaterialScrollBehavior {
+  const _CertDragScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
+/// A lighter, snappier drag feel for the certificates carousel — now
+/// that each card is much bigger (A4-landscape sized), the default
+/// [PageScrollPhysics] needs an almost full-width drag before it'll
+/// commit to the next page. This scales the user's drag so a smaller,
+/// quicker swipe is enough, and lowers the fling-velocity tolerance so
+/// a fast flick counts sooner too.
+class _FastCertPageScrollPhysics extends PageScrollPhysics {
+  const _FastCertPageScrollPhysics({super.parent});
+
+  @override
+  _FastCertPageScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _FastCertPageScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  Tolerance get tolerance => const Tolerance(velocity: 300, distance: 0.01);
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return super.applyPhysicsToUserOffset(position, offset * 1.6);
+  }
+}
+
+/// Certificates shown one at a time in a swipeable, snapping carousel —
+/// a single centered card fills the page; swiping left/right moves to
+/// the next or previous certificate. Each card is still the same flip
+/// tile (see [_CertificateFlipCard]) — swiping moves between
+/// certificates, tapping the card flips it in place to reveal its
+/// write-up.
+class _CertificatesCarousel extends StatefulWidget {
+  final List<_Certificate> certificates;
+  final bool isMobile;
+  const _CertificatesCarousel({required this.certificates, required this.isMobile});
+
+  @override
+  State<_CertificatesCarousel> createState() => _CertificatesCarouselState();
+}
+
+class _CertificatesCarouselState extends State<_CertificatesCarousel> {
+  late final PageController _controller;
+  int _page = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // One certificate on screen at a time — swipe moves to the next.
+    _controller = PageController(viewportFraction: 1.0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final certs = widget.certificates;
+    if (certs.isEmpty) return const SizedBox.shrink();
+
+    // A4 landscape proportions (297mm × 210mm) — width : height ≈
+    // 1.4142 : 1 (√2). Each certificate card is sized to that ratio:
+    // as wide as the available space allows (capped so it doesn't
+    // sprawl edge-to-edge on wide desktop screens), with the height
+    // following from the ratio.
+    const a4LandscapeRatio = 297 / 210;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxCardWidth = widget.isMobile ? constraints.maxWidth : 760.0;
+        final cardWidth = constraints.maxWidth < maxCardWidth ? constraints.maxWidth : maxCardWidth;
+        final cardHeight = cardWidth / a4LandscapeRatio;
+
+        return Column(
+          children: [
+            SizedBox(
+              height: cardHeight + 16,
+              child: ScrollConfiguration(
+                behavior: const _CertDragScrollBehavior(),
+                child: PageView.builder(
+                  controller: _controller,
+                  physics: const _FastCertPageScrollPhysics(),
+                  itemCount: certs.length,
+                  onPageChanged: (i) => setState(() => _page = i),
+                  itemBuilder: (context, i) {
+                    return Center(
+                      child: SizedBox(
+                        width: cardWidth,
+                        height: cardHeight,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: RevealOnScroll(
+                            delay: Duration(milliseconds: 60 * (i % 6)),
+                            offsetY: 22,
+                            child: _CertificateFlipCard(certificate: certs[i]),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            // Title + category, printed plainly below the frame — the
-            // caption lives in the page's own text flow now, not as an
-            // overlay competing with the artwork.
-            Text(project.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppFonts.body(size: 15.5, weight: FontWeight.w700, color: colors.cream, text: project.title),
-            ),
-            if (project.category.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text(project.category,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppFonts.body(size: 13, weight: FontWeight.w500, color: colors.creamDim, text: project.category),
+            if (certs.length > 1) ...[
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(certs.length, (i) {
+                  final active = i == _page;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 20 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: active ? context.colors.orchid : context.colors.orchid.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  );
+                }),
               ),
             ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// A single certificate tile that flips over on tap: the front shows
+/// the certificate icon, title, issuer and date; tapping it plays a 3D
+/// Y-axis flip to reveal the write-up on the back, and tapping again
+/// flips it back — like turning a physical certificate card over.
+class _CertificateFlipCard extends StatefulWidget {
+  final _Certificate certificate;
+  const _CertificateFlipCard({required this.certificate});
+
+  @override
+  State<_CertificateFlipCard> createState() => _CertificateFlipCardState();
+}
+
+class _CertificateFlipCardState extends State<_CertificateFlipCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  bool _flipped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 480));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _flipped = !_flipped);
+    if (_flipped) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cert = widget.certificate;
+    return Semantics(
+      button: true,
+      label: cert.title,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: _toggle,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final angle = _controller.value * 3.14159265359;
+              final showBack = angle > 3.14159265359 / 2;
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.0016)
+                  ..rotateY(angle),
+                child: showBack
+                    ? _CertificateBack(certificate: cert)
+                    : _CertificateFront(certificate: cert),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CertificateFront extends StatelessWidget {
+  final _Certificate certificate;
+  const _CertificateFront({required this.certificate});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: colors.cardGradient,
+        border: Border.all(color: colors.orchid.withOpacity(0.28)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 22, offset: const Offset(0, 10)),
+          BoxShadow(color: colors.orchid.withOpacity(0.12), blurRadius: 30, spreadRadius: -6),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Faint oversized watermark of the medal icon in the corner —
+          // a decorative touch that echoes an actual paper certificate's
+          // seal without competing with the real content.
+          Positioned(
+            top: -18,
+            right: -18,
+            child: Icon(
+              Icons.workspace_premium_outlined,
+              size: 110,
+              color: colors.orchid.withOpacity(0.06),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(17),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: colors.violetGradient,
+                      boxShadow: [
+                        BoxShadow(color: colors.orchid.withOpacity(0.45), blurRadius: 22, spreadRadius: 1),
+                      ],
+                    ),
+                    child: const Icon(Icons.workspace_premium_outlined, color: Colors.white, size: 30),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    certificate.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppFonts.body(text: certificate.title, size: 21, weight: FontWeight.w800, color: colors.cream, height: 1.3),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 34,
+                    height: 2.5,
+                    decoration: BoxDecoration(
+                      gradient: colors.violetGradient,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _CertMetaChip(icon: Icons.apartment_rounded, label: certificate.issuer, colors: colors),
+                      _CertMetaChip(icon: Icons.event_rounded, label: certificate.date, colors: colors),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    certificate.content,
+                    textAlign: TextAlign.center,
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppFonts.body(text: certificate.content, size: 15, weight: FontWeight.w500, color: colors.creamDim, height: 1.6),
+                  ),
+                  const SizedBox(height: 18),
+                  _TapToFlipHint(colors: colors, label: context.strings.tapToFlipHint),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A light "tap to flip" hint printed under the description — plain
+/// text with a small icon, not a heavy button, just enough to tell the
+/// user the card can be flipped to see the real certificate.
+class _TapToFlipHint extends StatelessWidget {
+  final AppColors colors;
+  final String label;
+  const _TapToFlipHint({required this.colors, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.touch_app_outlined, size: 14, color: colors.orchid.withOpacity(0.85)),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: AppFonts.label(text: label, size: 12.5, weight: FontWeight.w700, color: colors.orchid.withOpacity(0.85)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small rounded pill used on the certificate front for the issuer and
+/// date — a tidier alternative to plain stacked text lines.
+class _CertMetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final AppColors colors;
+  const _CertMetaChip({required this.icon, required this.label, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised.withOpacity(colors.isDark ? 0.6 : 1),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: colors.orchid.withOpacity(0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: colors.orchid),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppFonts.body(text: label, size: 12.5, weight: FontWeight.w600, color: colors.creamDim),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CertificateBack extends StatelessWidget {
+  final _Certificate certificate;
+  const _CertificateBack({required this.certificate});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // Mirrored back-face — flipped again here so its own content reads
+    // normally once the outer Transform has rotated the whole tile 180°.
+    return Transform(
+      alignment: Alignment.center,
+      transform: Matrix4.identity()..rotateY(3.14159265359),
+      child: _CertificateBackContent(certificate: certificate),
+    );
+  }
+}
+
+/// The back face's actual content — split out so the real-certificate
+/// image path and the plain text write-up fallback stay easy to tell
+/// apart at a glance.
+class _CertificateBackContent extends StatelessWidget {
+  final _Certificate certificate;
+  const _CertificateBackContent({required this.certificate});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // Real certificate image on file — show it full-bleed on the back
+    // of the card.
+    if (certificate.imageAsset != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colors.orchid.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
+                ],
+              ),
+            ),
+            Image.asset(certificate.imageAsset!, fit: BoxFit.cover),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: colors.violetGradientWide,
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
+        ],
+      ),
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              certificate.title,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppFonts.body(text: certificate.title, size: 16.5, weight: FontWeight.w800, color: Colors.white, height: 1.3),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              certificate.content,
+              style: AppFonts.body(text: certificate.content, size: 13.5, weight: FontWeight.w500, color: Colors.white.withOpacity(0.9), height: 1.55),
+            ),
           ],
         ),
       ),
