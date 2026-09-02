@@ -17,7 +17,7 @@ class CartScreen extends StatelessWidget {
     final cart = context.watch<CartProvider>();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(isMobile ? 20 : 60, isMobile ? 120 : 150, isMobile ? 20 : 60, 60),
+      padding: EdgeInsets.fromLTRB(isMobile ? 20 : 60, isMobile ? 90 : 110, isMobile ? 20 : 60, 60),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

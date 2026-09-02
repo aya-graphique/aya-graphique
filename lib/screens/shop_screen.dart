@@ -107,7 +107,7 @@ class _ShopScreenState extends State<ShopScreen> {
           // Same top offset as every other standalone tab (home, search,
           // services, cart) so switching tabs doesn't jump the content
           // under the fixed nav bar.
-          SizedBox(height: widget.isMobile ? 120 : 150),
+          SizedBox(height: widget.isMobile ? 90 : 110),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 16 : 40),
             child: RevealOnScroll(
@@ -127,7 +127,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           eyebrow: context.strings.collectionEyebrow,
                           title: context.strings.collectionTitle,
                           subtitle: context.strings.collectionSubtitle,
-                          titleSize: widget.isMobile ? 28 : 34,
+                          titleSize: widget.isMobile ? 22 : 26,
                         ),
                       ),
                     ),
@@ -213,15 +213,15 @@ class _ProductSection extends StatelessWidget {
                   ? SectionHeading(
                       eyebrow: eyebrow!,
                       title: title,
-                      titleSize: isMobile ? 24 : 30,
+                      titleSize: isMobile ? 20 : 24,
                     )
                   : Text(
                       title,
                       style: AppFonts.display(
                         color: context.colors.cream,
                         size: AppFonts.isArabic(title)
-                            ? (isMobile ? 21.6 : 27.0)
-                            : (isMobile ? 38.9 : 48.6),
+                            ? (isMobile ? 18 : 22)
+                            : (isMobile ? 30 : 38),
                         weight: FontWeight.w700,
                         text: title,
                         boostArabicSize: false,

@@ -26,6 +26,25 @@ class ProjectDetailScreen extends StatelessWidget {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
+  // Opens the tapped photo full-screen, pinch/scroll-zoomable, and lets
+  // the user swipe between the rest of this project's real photos
+  // (the padded placeholder slots in the bento grid are never tappable,
+  // so [images] here is always the project's actual, un-padded list).
+  void _openLightbox(BuildContext context, List<String> images, int initialIndex) {
+    if (images.isEmpty) return;
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black.withOpacity(0.95),
+        transitionDuration: const Duration(milliseconds: 220),
+        pageBuilder: (context, animation, __) => FadeTransition(
+          opacity: animation,
+          child: _ImageLightbox(images: images, initialIndex: initialIndex),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -124,7 +143,11 @@ class ProjectDetailScreen extends StatelessWidget {
                   const SizedBox(height: 36),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
-                    child: _BentoGallery(images: gallery, isMobile: isMobile),
+                    child: _BentoGallery(
+                      images: gallery,
+                      isMobile: isMobile,
+                      onTapImage: (i) => _openLightbox(context, project.images, i),
+                    ),
                   ),
                   const SizedBox(height: 44),
                 ],
@@ -145,7 +168,8 @@ class ProjectDetailScreen extends StatelessWidget {
 class _BentoGallery extends StatelessWidget {
   final List<String> images; // always length 5 (some may be '')
   final bool isMobile;
-  const _BentoGallery({required this.images, required this.isMobile});
+  final ValueChanged<int> onTapImage;
+  const _BentoGallery({required this.images, required this.isMobile, required this.onTapImage});
 
   @override
   Widget build(BuildContext context) {
@@ -156,21 +180,21 @@ class _BentoGallery extends StatelessWidget {
       // still a mosaic, just single-column-friendly for narrow screens.
       return Column(
         children: [
-          _GalleryTile(path: images[0], height: 260, index: 0),
+          _GalleryTile(path: images[0], height: 260, index: 0, onTap: () => onTapImage(0)),
           SizedBox(height: gap),
           Row(
             children: [
-              Expanded(child: _GalleryTile(path: images[1], height: 170, index: 1)),
+              Expanded(child: _GalleryTile(path: images[1], height: 170, index: 1, onTap: () => onTapImage(1))),
               SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[2], height: 170, index: 2)),
+              Expanded(child: _GalleryTile(path: images[2], height: 170, index: 2, onTap: () => onTapImage(2))),
             ],
           ),
           SizedBox(height: gap),
           Row(
             children: [
-              Expanded(child: _GalleryTile(path: images[3], height: 170, index: 3)),
+              Expanded(child: _GalleryTile(path: images[3], height: 170, index: 3, onTap: () => onTapImage(3))),
               SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[4], height: 170, index: 4)),
+              Expanded(child: _GalleryTile(path: images[4], height: 170, index: 4, onTap: () => onTapImage(4))),
             ],
           ),
         ],
@@ -186,9 +210,9 @@ class _BentoGallery extends StatelessWidget {
           height: 380,
           child: Row(
             children: [
-              Expanded(flex: 3, child: _GalleryTile(path: images[0], height: 380, index: 0)),
+              Expanded(flex: 3, child: _GalleryTile(path: images[0], height: 380, index: 0, onTap: () => onTapImage(0))),
               SizedBox(width: gap),
-              Expanded(flex: 2, child: _GalleryTile(path: images[1], height: 380, index: 1)),
+              Expanded(flex: 2, child: _GalleryTile(path: images[1], height: 380, index: 1, onTap: () => onTapImage(1))),
             ],
           ),
         ),
@@ -197,11 +221,11 @@ class _BentoGallery extends StatelessWidget {
           height: 230,
           child: Row(
             children: [
-              Expanded(child: _GalleryTile(path: images[2], height: 230, index: 2)),
+              Expanded(child: _GalleryTile(path: images[2], height: 230, index: 2, onTap: () => onTapImage(2))),
               SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[3], height: 230, index: 3)),
+              Expanded(child: _GalleryTile(path: images[3], height: 230, index: 3, onTap: () => onTapImage(3))),
               SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[4], height: 230, index: 4)),
+              Expanded(child: _GalleryTile(path: images[4], height: 230, index: 4, onTap: () => onTapImage(4))),
             ],
           ),
         ),
@@ -214,7 +238,8 @@ class _GalleryTile extends StatelessWidget {
   final String path;
   final double height;
   final int index;
-  const _GalleryTile({required this.path, required this.height, required this.index});
+  final VoidCallback onTap;
+  const _GalleryTile({required this.path, required this.height, required this.index, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -229,13 +254,19 @@ class _GalleryTile extends StatelessWidget {
           liftOnHover: 6,
           borderRadius: BorderRadius.circular(18),
           child: hasImage
-              ? Image.asset(
-                  path,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorBuilder: (_, __, ___) =>
-                      Container(decoration: BoxDecoration(gradient: context.colors.violetGradientWide)),
+              ? Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                    child: Image.asset(
+                      path,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (_, __, ___) =>
+                          Container(decoration: BoxDecoration(gradient: context.colors.violetGradientWide)),
+                    ),
+                  ),
                 )
               : Container(decoration: BoxDecoration(gradient: context.colors.violetGradientWide)),
         ),
@@ -293,6 +324,154 @@ class _RoundIconButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Icon(icon, size: 20, color: context.colors.cream),
+        ),
+      ),
+    );
+  }
+}
+
+/// Full-screen photo viewer opened by tapping any gallery image. Each
+/// photo is pinch/scroll-zoomable and pannable (see [InteractiveViewer]),
+/// and swiping left/right moves between the rest of the project's real
+/// photos without leaving this view. A tap outside the zoomed image, the
+/// close button, or the back gesture all dismiss it.
+class _ImageLightbox extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+  const _ImageLightbox({required this.images, required this.initialIndex});
+
+  @override
+  State<_ImageLightbox> createState() => _ImageLightboxState();
+}
+
+class _ImageLightboxState extends State<_ImageLightbox> {
+  late final PageController _controller;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex;
+    _controller = PageController(initialPage: _index);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _controller,
+              itemCount: widget.images.length,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (context, i) {
+                return _ZoomableImage(path: widget.images[i]);
+              },
+            ),
+            Positioned(
+              top: 12,
+              right: 16,
+              child: _RoundIconButton(
+                icon: Icons.close_rounded,
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ),
+            if (widget.images.length > 1)
+              Positioned(
+                bottom: 22,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(widget.images.length, (i) {
+                    final active = i == _index;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: active ? 20 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: active ? Colors.white : Colors.white.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A single lightbox photo: pinch-to-zoom and pannable via
+/// [InteractiveViewer], but crucially panning stays OFF while the image
+/// is at its normal, un-zoomed scale. InteractiveViewer otherwise
+/// swallows every horizontal drag for its own panning before the
+/// [PageView] above it ever sees it, which is exactly why swiping
+/// between photos previously did nothing. Panning turns back on only
+/// once the user has actually pinched (or double-tapped) to zoom in, at
+/// which point dragging pans the zoomed image instead of changing pages
+/// — the same trade-off most photo viewers make.
+class _ZoomableImage extends StatefulWidget {
+  final String path;
+  const _ZoomableImage({required this.path});
+
+  @override
+  State<_ZoomableImage> createState() => _ZoomableImageState();
+}
+
+class _ZoomableImageState extends State<_ZoomableImage> {
+  final TransformationController _transformController = TransformationController();
+  bool _zoomed = false;
+
+  @override
+  void dispose() {
+    _transformController.dispose();
+    super.dispose();
+  }
+
+  void _onInteractionEnd(ScaleEndDetails details) {
+    final scale = _transformController.value.getMaxScaleOnAxis();
+    final zoomed = scale > 1.01;
+    if (zoomed != _zoomed) setState(() => _zoomed = zoomed);
+  }
+
+  void _onDoubleTap() {
+    if (_zoomed) {
+      _transformController.value = Matrix4.identity();
+      setState(() => _zoomed = false);
+    } else {
+      _transformController.value = Matrix4.identity()..scale(2.5);
+      setState(() => _zoomed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onDoubleTap: _onDoubleTap,
+      child: InteractiveViewer(
+        transformationController: _transformController,
+        minScale: 1,
+        maxScale: 4,
+        panEnabled: _zoomed,
+        onInteractionEnd: _onInteractionEnd,
+        child: Center(
+          child: Image.asset(
+            widget.path,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
         ),
       ),
     );

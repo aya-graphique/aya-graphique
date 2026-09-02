@@ -13,6 +13,7 @@ import 'cart_screen.dart';
 import 'favorites_screen.dart';
 import 'graphical_services_screen.dart';
 import 'home_screen.dart';
+import 'my_works_screen.dart';
 import 'search_screen.dart';
 import 'shop_screen.dart';
 import 'who_am_i_screen.dart';
@@ -249,7 +250,7 @@ class _MainShellState extends State<MainShell> {
                           onServiceCategoryTap: _openServiceCategory,
                           onShopTap: () => _goTo(ShopPage.shop),
                           onCategoryTap: _openShopCategory,
-                          onViewProfileTap: () => _goTo(ShopPage.about),
+                          onViewProfileTap: () => _goTo(ShopPage.myWorks),
                         ),
                         ShopScreen(
                           products: products,
@@ -263,12 +264,18 @@ class _MainShellState extends State<MainShell> {
                           focusController: _servicesFocusController,
                         ),
                         // Standalone "Who am I" tab — Home no longer
-                        // embeds this inline; the owner-intro card's
-                        // "View full profile" button jumps here instead
-                        // (see HomeScreen.onViewProfileTap).
+                        // embeds this inline. The Hero's "View my work"
+                        // button now jumps to the My Works tab instead
+                        // (see HomeScreen.onViewProfileTap), not here.
                         WhoAmIScreen(isMobile: isMobile),
+                        // ShopPage.myWorks — the Projects section that
+                        // used to live inline inside "Who am I" now has
+                        // its own top-level tab (see MyWorksScreen). Must
+                        // sit at this exact position (index 5) to line up
+                        // with the enum order in shop_nav_bar.dart.
+                        MyWorksScreen(isMobile: isMobile),
                         // ShopPage.favorites — must sit at this exact
-                        // position (index 5) to line up with the enum
+                        // position (index 6) to line up with the enum
                         // order in shop_nav_bar.dart. This was previously
                         // missing entirely, which made IndexedStack throw
                         // an out-of-range assertion (and freeze the whole

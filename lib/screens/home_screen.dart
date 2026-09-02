@@ -57,9 +57,8 @@ class HomeScreen extends StatefulWidget {
   // with that category already selected — see
   // MainShell._openShopCategory.
   final ValueChanged<String> onCategoryTap;
-  // "Who am I" no longer lives embedded on Home — it's the standalone
-  // Portfolio tab now (see MainShell). The owner-intro card's "View full
-  // profile" button calls this to switch straight to that tab.
+  // Hero's "View my work" button calls this to jump straight to the
+  // standalone My Works tab (see MainShell._goTo(ShopPage.myWorks)).
   final VoidCallback onViewProfileTap;
 
   const HomeScreen({
@@ -159,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: widget.scrollController,
       child: Column(
         children: [
-          SizedBox(height: widget.isMobile ? 120 : 150),
+          SizedBox(height: widget.isMobile ? 90 : 110),
           _WelcomeHero(
             isMobile: widget.isMobile,
             onPrimaryTap: widget.onViewProfileTap,
@@ -1172,8 +1171,8 @@ class _ShopPreviewSection extends StatelessWidget {
               child: SectionHeading(
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
-                titleSize: isMobile ? 24 : 30,
-                eyebrowSize: isMobile ? 15 : 17,
+                titleSize: isMobile ? 20 : 24,
+                eyebrowSize: isMobile ? 13 : 15,
                 eyebrowIcon: Icons.local_fire_department_rounded,
                 align: TextAlign.center,
               ),
@@ -1394,12 +1393,12 @@ class _EyebrowCirclesSection extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(icon, size: isMobile ? 14 : 17, color: colors.orchid),
+                        Icon(icon, size: isMobile ? 13 : 15, color: colors.orchid),
                         SizedBox(width: isMobile ? 7 : 10),
                         Text(eyebrow,
                             style: AppFonts.label(text: eyebrow, 
                               color: colors.orchid,
-                              size: isMobile ? 15 : 19,
+                              size: isMobile ? 13 : 16,
                               letterSpacing: isMobile ? 1.2 : 3.0,
                             )),
                       ],

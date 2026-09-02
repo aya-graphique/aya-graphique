@@ -32,7 +32,10 @@ extension ProjectCategoryLabel on ProjectCategory {
 /// currently show it, but it's kept for a future compact caption/tooltip
 /// use). Supply exactly 5 entries in [images] for the gallery to lay out
 /// as intended (1 featured + 4 supporting shots) — fewer still work but
-/// leave empty violet slots.
+/// leave empty violet slots. [coverOverride] is optional: set it when a
+/// 6th "packshot" photo should stand alone as the grid cover, kept out
+/// of the 5-photo gallery entirely (otherwise the grid cover just falls
+/// back to images.first, same as before).
 class PortfolioProject {
   final String title;
   final ProjectCategory category;
@@ -41,12 +44,17 @@ class PortfolioProject {
   // page. Falls back to [description] when left blank, so a project
   // with only a short blurb still shows something on its detail page.
   final String fullDescription;
-  // Every photo for this project, in display order. images.first is
-  // used as the grid cover; the detail page shows all of them, one
-  // full-width image after another, like scrolling a Behance case
-  // study. Leave empty and both the grid card and the detail page show
-  // a plain violet gradient plate instead.
+  // Every photo for this project, in display order. Feeds the 5-photo
+  // bento gallery on the detail page — and, when [coverOverride] is
+  // empty, also doubles as the grid cover (images.first). Leave empty
+  // and both the grid card and the detail page show a plain violet
+  // gradient plate instead.
   final List<String> images;
+  // Optional standalone cover photo for the grid card, kept separate
+  // from [images] so it never takes up one of the 5 gallery slots (e.g.
+  // a packaging shot used as the "face" of the project). Leave blank to
+  // fall back to images.first, same as before.
+  final String coverOverride;
   // Optional external link (e.g. the real Behance project page) —
   // shown as a "View on Behance" button on the detail page. Leave empty
   // to hide that button.
@@ -58,9 +66,11 @@ class PortfolioProject {
     this.description = '',
     this.fullDescription = '',
     this.images = const [],
+    this.coverOverride = '',
     this.url = '',
   });
 
-  String get coverImage => images.isNotEmpty ? images.first : '';
+  String get coverImage =>
+      coverOverride.trim().isNotEmpty ? coverOverride : (images.isNotEmpty ? images.first : '');
   String descriptionFor() => fullDescription.trim().isNotEmpty ? fullDescription : description;
 }

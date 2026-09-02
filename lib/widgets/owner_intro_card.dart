@@ -121,10 +121,10 @@ class OwnerIntroCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome_rounded, size: 17, color: colors.orchid),
+              Icon(Icons.auto_awesome_rounded, size: 15, color: colors.orchid),
               const SizedBox(width: 10),
               Text(context.strings.availableForEyebrow,
-                style: AppFonts.label(text: context.strings.availableForEyebrow, color: colors.orchid, size: 16, weight: FontWeight.w800),
+                style: AppFonts.label(text: context.strings.availableForEyebrow, color: colors.orchid, size: 14, weight: FontWeight.w800),
               ),
             ],
           ),

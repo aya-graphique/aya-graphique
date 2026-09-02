@@ -23,6 +23,7 @@ class AppText {
   String get navFavorites => _t('Saved', 'المحفوظات');
   String get navAbout => _t('Who am I', 'من أنا');
   String get navServices => _t('Services', 'الخدمات');
+  String get navMyWorks => _t('My Works', 'اعمالي');
 
   // Home — hero
   String get heroEyebrow => _t('NOTEBOOKS & CALENDARS', 'دفاتر وتقويمات');
@@ -302,6 +303,14 @@ class AppText {
   String get aspiringDesignersLabel => _t('Aspiring designers', 'المصممون الطموحون');
   String get contentCreatorsLabel => _t('Content creators', 'صناع المحتوى');
   String get projectsLabel => _t('PROJECTS', 'المشاريع');
+  String get myWorksEyebrow => _t('MY WORKS', 'اعمالي');
+  String get myWorksTitle => _t('A closer look\nat my work.', 'نظرة أقرب\nعلى أعمالي.');
+  String get myWorksSubtitle => _t(
+        'A selection of brand identity, packaging, advertising and '
+        'illustration projects — tap any cover for the full case study.',
+        'مجموعة مختارة من مشاريع الهوية التجارية والتغليف والإعلانات '
+        'والرسوم التوضيحية — دوسي على أي غلاف عشان تشوفي التفاصيل كاملة.',
+      );
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get skillsLabel => _t('SKILLS', 'المهارات');

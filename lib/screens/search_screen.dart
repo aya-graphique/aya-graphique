@@ -42,7 +42,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         widget.isMobile ? 20 : 60,
-        widget.isMobile ? 120 : 150,
+        widget.isMobile ? 90 : 110,
         widget.isMobile ? 20 : 60,
         60,
       ),

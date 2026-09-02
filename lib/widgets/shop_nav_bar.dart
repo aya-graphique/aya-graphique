@@ -7,7 +7,7 @@ import '../providers/favorites_provider.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 
-enum ShopPage { home, shop, search, services, about, favorites, cart }
+enum ShopPage { home, shop, search, services, about, myWorks, favorites, cart }
 
 /// Small circular portrait shown next to the "Aya's" wordmark — a rounded
 /// avatar framed by a thin gradient ring so it reads as a deliberate brand
@@ -153,6 +153,15 @@ class ShopNavBar extends StatelessWidget {
                   onTap: () => onTap(ShopPage.about),
                 ),
                 _NavIconLabel(
+                  icon: active == ShopPage.myWorks
+                      ? Icons.work_rounded
+                      : Icons.work_outline_rounded,
+                  label: strings.navMyWorks,
+                  active: active == ShopPage.myWorks,
+                  isMobile: isMobile,
+                  onTap: () => onTap(ShopPage.myWorks),
+                ),
+                _NavIconLabel(
                   icon: active == ShopPage.favorites
                       ? Icons.favorite_rounded
                       : Icons.favorite_border_rounded,
@@ -163,7 +172,7 @@ class ShopNavBar extends StatelessWidget {
                   onTap: () => onTap(ShopPage.favorites),
                 ),
               ],
-              _NavIconLabel(
+            _NavIconLabel(
                 icon: active == ShopPage.cart
                     ? Icons.shopping_bag_rounded
                     : Icons.shopping_bag_outlined,
@@ -214,6 +223,16 @@ class ShopNavBar extends StatelessWidget {
                   active: active == ShopPage.about,
                   isMobile: isMobile,
                   onTap: () => onTap(ShopPage.about),
+                ),
+                _NavIconLabel(
+                  icon: active == ShopPage.myWorks
+                      ? Icons.work_rounded
+                      : Icons.work_outline_rounded,
+                  label: strings.navMyWorks,
+                  stacked: true,
+                  active: active == ShopPage.myWorks,
+                  isMobile: isMobile,
+                  onTap: () => onTap(ShopPage.myWorks),
                 ),
                 _NavIconLabel(
                   icon: active == ShopPage.favorites
@@ -447,6 +466,14 @@ class ShopNavDrawer extends StatelessWidget {
                     label: strings.navAbout,
                     active: active == ShopPage.about,
                     onTap: () => go(ShopPage.about),
+                  ),
+                  _DrawerItem(
+                    icon: active == ShopPage.myWorks
+                        ? Icons.work_rounded
+                        : Icons.work_outline_rounded,
+                    label: strings.navMyWorks,
+                    active: active == ShopPage.myWorks,
+                    onTap: () => go(ShopPage.myWorks),
                   ),
                   _DrawerItem(
                     icon: active == ShopPage.favorites

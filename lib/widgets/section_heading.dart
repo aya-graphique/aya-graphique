@@ -19,7 +19,7 @@ class SectionHeading extends StatelessWidget {
     this.subtitle,
     this.align = TextAlign.start,
     this.boostArabicSize = true,
-    this.titleSize = 40,
+    this.titleSize = 30,
     this.eyebrowSize,
     this.eyebrowIcon,
   });
@@ -36,7 +36,7 @@ class SectionHeading extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             eyebrowIcon != null
-                ? Icon(eyebrowIcon, size: (eyebrowSize ?? 13) + 4, color: context.colors.orchid)
+                ? Icon(eyebrowIcon, size: (eyebrowSize ?? 12) + 3, color: context.colors.orchid)
                 : Container(
                     width: 28,
                     height: 2,
@@ -47,7 +47,7 @@ class SectionHeading extends StatelessWidget {
                 style: AppFonts.label(text: eyebrow, 
                   color: context.colors.orchid,
                   boostArabicSize: boostArabicSize,
-                  size: eyebrowSize ?? 13,
+                  size: eyebrowSize ?? 12,
                 )),
           ],
         ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.1, end: 0),
