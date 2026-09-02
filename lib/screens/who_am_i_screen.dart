@@ -211,12 +211,8 @@ List<_Certificate> kCertificates(bool isArabic) => isArabic
           title: 'دورة التصميم الجرافيكي الاحترافي',
           issuer: 'Creative Ideas',
           date: '01 / 06 / 2024',
-          content: 'أتمت الدورة الاحترافية في التصميم الجرافيكي بنجاح، وأظهرت '
-              'خلالها إبداعًا والتزامًا وإتقانًا في مبادئ التصميم والطباعة '
-              'وبناء العلامة التجارية ونظرية الألوان وتصميم التخطيط '
-              'والتواصل البصري. غطّت الدورة أيضًا استخدام برامج التصميم '
-              'الاحترافية وتطبيق أسس التصميم على مشاريع حقيقية من فكرة '
-              'إلى تنفيذ نهائي جاهز للنشر.',
+          content: 'أتمت الدورة الاحترافية في التصميم الجرافيكي بنجاح، بمهارات '
+              'قوية في مبادئ التصميم، بناء العلامة التجارية، ونظرية الألوان.',
           imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
         ),
         _Certificate(
@@ -251,12 +247,8 @@ List<_Certificate> kCertificates(bool isArabic) => isArabic
           issuer: 'Creative Ideas',
           date: '01 / 06 / 2024',
           content: 'Successfully completed the Professional Graphic Design '
-              'Course, demonstrating creativity, dedication, and '
-              'proficiency in design principles, typography, branding, '
-              'color theory, layout design, and visual communication. '
-              'The course also covered professional design software and '
-              'applying core design fundamentals to real projects, from '
-              'initial concept through to a publish-ready final piece.',
+              'Course, with strong skills in design principles, branding, '
+              'and color theory.',
           imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
         ),
         _Certificate(
@@ -1077,11 +1069,17 @@ class _CertificatesCarouselState extends State<_CertificatesCarousel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Sized down to 80% of the available width (instead of full-
-        // bleed) so the certificate cards read a bit smaller/cozier
-        // inside the section, then centered in the remaining space.
-        final cardWidth = constraints.maxWidth * 0.8;
-        final cardHeight = (cardWidth / bannerAspectRatio).clamp(200.0, 760.0);
+        // Sized down to 80% of the available width on desktop for a
+        // cozier card — but on mobile that shrink (combined with the
+        // already-narrow screen) was pushing the card height below
+        // what the front face's content (icon, title, chips, blurb)
+        // needs. Mobile keeps the full width, and its height floor is
+        // raised past the ~240–270px the 1492×1054 ratio alone would
+        // give — just enough for the (now shorter) description, so the
+        // back face's real certificate photo isn't left with big empty
+        // gutters above/below either.
+        final cardWidth = widget.isMobile ? constraints.maxWidth : constraints.maxWidth * 0.8;
+        final cardHeight = (cardWidth / bannerAspectRatio).clamp(widget.isMobile ? 360.0 : 200.0, 760.0);
 
         return Column(
           children: [
@@ -1157,6 +1155,12 @@ class _CertProgressBar extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           '${page + 1} / $count',
+          // Forced LTR: inside an Arabic (RTL) paragraph, a bare
+          // "1 / 5" string has no strong-direction anchor, so the
+          // bidi algorithm was free to reorder it into "5 / 1". This
+          // keeps the fraction reading left-to-right regardless of
+          // the surrounding language.
+          textDirection: TextDirection.ltr,
           style: AppFonts.label(
             text: '${page + 1} / $count',
             size: 12,
@@ -1444,8 +1448,14 @@ class _CertificateBackContent extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Backdrop fill behind the image — needed now that the
+            // image uses BoxFit.contain (shows the whole certificate,
+            // uncropped) instead of cover, which can leave letterbox
+            // gutters on the sides or top/bottom depending on how the
+            // card's box ratio compares to the real certificate's.
             Container(
               decoration: BoxDecoration(
+                gradient: colors.cardGradient,
                 border: Border.all(color: colors.orchid.withOpacity(0.3)),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
@@ -1453,7 +1463,10 @@ class _CertificateBackContent extends StatelessWidget {
                 ],
               ),
             ),
-            Image.asset(certificate.imageAsset!, fit: BoxFit.cover),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Image.asset(certificate.imageAsset!, fit: BoxFit.contain),
+            ),
           ],
         ),
       );
