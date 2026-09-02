@@ -1257,11 +1257,11 @@ class _CertificateFront extends StatelessWidget {
     final colors = context.colors;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(24),
           gradient: colors.cardGradient,
           border: Border.all(color: colors.orchid.withOpacity(0.28)),
           boxShadow: [
@@ -1468,7 +1468,7 @@ class _CertificateBackContent extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: certificateAspectRatio,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(24),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -1476,7 +1476,7 @@ class _CertificateBackContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: colors.cardGradient,
                     border: Border.all(color: colors.orchid.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
                     ],
@@ -1496,7 +1496,7 @@ class _CertificateBackContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
         gradient: colors.violetGradientWide,
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),

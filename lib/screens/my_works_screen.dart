@@ -154,16 +154,9 @@ class MyWorksScreen extends StatelessWidget {
 /// Behance-style case study.
 /// Lays [projects] out the way a Behance profile's "Projects" tab does:
 /// fixed columns (2 on mobile, more as the screen widens), each project a
-/// cover image of its own height with the title/category printed as plain
-/// text underneath — rather than one uniform row of poster cards with the
-/// caption overlaid on the artwork.
-///
-/// There's no masonry-grid package in this project, so the staggering is
-/// done by hand: items are dealt round-robin into N side-by-side Columns,
-/// and each cover's aspect ratio is picked deterministically from its
-/// index so the columns naturally drift out of sync with each other —
-/// exactly the uneven-height look a real masonry layout would produce,
-/// without pulling in a new dependency.
+/// cover image of the same fixed ratio with the title/category printed
+/// as plain text underneath — a clean, even grid rather than a staggered
+/// masonry look.
 class _ProjectsMasonryGrid extends StatelessWidget {
   final List<PortfolioProject> projects;
   final bool isMobile;
@@ -173,14 +166,12 @@ class _ProjectsMasonryGrid extends StatelessWidget {
     required this.isMobile,
   });
 
-  // A small repeating cycle of aspect ratios (width / height) so covers
-  // read as photographed/designed pieces of varying shape — tall poster,
-  // square, and wide landscape — the same mix you'd see scrolling a real
-  // Behance grid, instead of every tile being identically cropped. Used
-  // on desktop/tablet only — on mobile the two columns use one fixed
-  // ratio instead so every tile reads the same size (see [_mobileAspectRatio]).
-  static const List<double> _aspectCycle = [0.78, 1.0, 0.62, 0.9];
-  static const double _mobileAspectRatio = 0.82;
+  // Every cover now uses the same ratio on both mobile and desktop — a
+  // varied masonry cycle here (portrait/square/landscape mixed per
+  // column) previously made desktop columns drift out of sync with
+  // each other, which read as inconsistent rather than intentional.
+  // One fixed ratio keeps every card in the grid the same size.
+  static const double _coverAspectRatio = 0.82;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +201,7 @@ class _ProjectsMasonryGrid extends StatelessWidget {
                   if (i >= columns) const SizedBox(height: gap),
                   _ProjectCard(
                     project: projects[i],
-                    aspectRatio: isMobile ? _mobileAspectRatio : _aspectCycle[i % _aspectCycle.length],
+                    aspectRatio: _coverAspectRatio,
                     index: i,
                   ),
                 ],
