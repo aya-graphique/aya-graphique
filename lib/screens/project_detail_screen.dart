@@ -403,6 +403,46 @@ class _ImageLightboxState extends State<_ImageLightbox> {
                 onTap: () => Navigator.of(context).pop(),
               ),
             ),
+            // Left/right arrow buttons — mainly for desktop web, where
+            // there's no obvious touch-swipe affordance. Hidden at the
+            // first/last image instead of disabled, so it's clear when
+            // there's nowhere further to go. Wrapping to previous/next
+            // uses direct page numbers rather than +1/-1 so RTL page
+            // order doesn't flip the intended direction.
+            if (widget.images.length > 1) ...[
+              if (_index > 0)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: 12,
+                  child: Center(
+                    child: _RoundIconButton(
+                      icon: Icons.chevron_left_rounded,
+                      onTap: () => _controller.animateToPage(
+                        _index - 1,
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOut,
+                      ),
+                    ),
+                  ),
+                ),
+              if (_index < widget.images.length - 1)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: 12,
+                  child: Center(
+                    child: _RoundIconButton(
+                      icon: Icons.chevron_right_rounded,
+                      onTap: () => _controller.animateToPage(
+                        _index + 1,
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOut,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
             if (widget.images.length > 1)
               Positioned(
                 bottom: 22,

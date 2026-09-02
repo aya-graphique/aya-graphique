@@ -304,7 +304,7 @@ class AppText {
   String get contentCreatorsLabel => _t('Content creators', 'صناع المحتوى');
   String get projectsLabel => _t('PROJECTS', 'المشاريع');
   String get myWorksEyebrow => _t('MY WORKS', 'اعمالي');
-  String get myWorksTitle => _t('A closer look\nat my work.', 'نظرة أقرب\nعلى أعمالي.');
+  String get myWorksTitle => _t('A closer look at my work.', 'نظرة أقرب على أعمالي.');
   String get myWorksSubtitle => _t(
         'A selection of brand identity, packaging, advertising and '
         'illustration projects — tap any cover for the full case study.',

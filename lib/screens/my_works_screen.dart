@@ -4,6 +4,7 @@ import '../localization/app_strings.dart';
 import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
+import '../widgets/animated_backdrop.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
 import '../widgets/tilt_3d_card.dart';
@@ -139,7 +140,7 @@ class MyWorksScreen extends StatelessWidget {
           ),
           const SizedBox(height: 44),
           if (projects.isNotEmpty)
-            _ProjectsMasonryGrid(projects: projects, isMobile: isMobile)
+            _CategoriesGrid(projects: projects, isMobile: isMobile)
           else
             const SizedBox.shrink(),
         ],
@@ -210,6 +211,254 @@ class _ProjectsMasonryGrid extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// The top-level "My Works" grid: instead of listing every project
+/// directly, it shows exactly one card per [ProjectCategory] — just the
+/// category name on the outside — and tapping a card opens
+/// [_CategoryProjectsScreen] with that category's projects inside
+/// (reusing the same [_ProjectsMasonryGrid] used before, just filtered).
+class _CategoriesGrid extends StatelessWidget {
+  final List<PortfolioProject> projects;
+  final bool isMobile;
+  const _CategoriesGrid({required this.projects, required this.isMobile});
+
+  static const double _coverAspectRatio = 0.82;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final columns = isMobile
+        ? 2
+        : AppBreakpoints.isTablet(width)
+            ? 3
+            : 4;
+    const gap = 16.0;
+
+    final categories = ProjectCategory.values;
+    final columnItems = List.generate(columns, (_) => <int>[]);
+    for (var i = 0; i < categories.length; i++) {
+      columnItems[i % columns].add(i);
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var c = 0; c < columns; c++) ...[
+          if (c != 0) const SizedBox(width: gap),
+          Expanded(
+            child: Column(
+              children: [
+                for (final i in columnItems[c]) ...[
+                  if (i >= columns) const SizedBox(height: gap),
+                  _CategoryCard(
+                    category: categories[i],
+                    projects: projects.where((p) => p.category == categories[i]).toList(),
+                    aspectRatio: _coverAspectRatio,
+                    index: i,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// One category tile: the cover art is the first matching project's
+/// image (or the same violet placeholder plate used elsewhere when
+/// there isn't one yet), with only the category name printed over it —
+/// no project title, no index badge. Tapping it opens
+/// [_CategoryProjectsScreen] with every project in that category.
+class _CategoryCard extends StatefulWidget {
+  final ProjectCategory category;
+  final List<PortfolioProject> projects;
+  final double aspectRatio;
+  final int index;
+  const _CategoryCard({
+    required this.category,
+    required this.projects,
+    required this.aspectRatio,
+    required this.index,
+  });
+
+  @override
+  State<_CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<_CategoryCard> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final isArabic = context.isArabicLanguage;
+    final categoryLabel = widget.category.labelFor(isArabic);
+
+    return RevealOnScroll(
+      delay: Duration(milliseconds: 60 * (widget.index % 6)),
+      offsetY: 26,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => _CategoryProjectsScreen(
+                category: widget.category,
+                projects: widget.projects,
+              ),
+            ),
+          ),
+          child: AspectRatio(
+            aspectRatio: widget.aspectRatio,
+            child: Tilt3DCard(
+              maxTiltDegrees: 5,
+              liftOnHover: 5,
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Only the designed placeholder plate — never a real
+                  // project photo — so every category card shows the
+                  // same clean, icon-led look regardless of what photos
+                  // exist inside it.
+                  _ProjectPlaceholderArt(
+                    category: widget.category,
+                    hovering: _hovering,
+                    colors: colors,
+                  ),
+                  // Category name, front and center — the one thing the
+                  // card is meant to communicate — set apart with its
+                  // own pill background rather than plain text over the
+                  // artwork.
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: colors.bgDeep.withOpacity(_hovering ? 0.62 : 0.48),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withOpacity(0.22)),
+                        ),
+                        child: Text(
+                          categoryLabel,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppFonts.display(
+                            text: categoryLabel,
+                            size: 19,
+                            weight: FontWeight.w800,
+                            color: Colors.white,
+                            height: 1.25,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  AnimatedOpacity(
+                    opacity: _hovering ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.2)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opened by tapping a category card: same Behance-style masonry grid
+/// as before (see [_ProjectsMasonryGrid]), just filtered down to the
+/// projects that belong to [category].
+class _CategoryProjectsScreen extends StatelessWidget {
+  final ProjectCategory category;
+  final List<PortfolioProject> projects;
+  const _CategoryProjectsScreen({required this.category, required this.projects});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = AppBreakpoints.isMobile(width);
+    final isArabic = context.isArabicLanguage;
+    AppFonts.forceArabic = context.isArabicFontMode;
+    final categoryLabel = category.labelFor(isArabic);
+
+    return Directionality(
+      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        backgroundColor: context.colors.bgDeep,
+        body: AnimatedBackdrop(
+          intensity: 0.5,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(isMobile ? 20 : 60, 20, isMobile ? 20 : 60, 60),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _RoundIconButtonForCategoryBack(onTap: () => Navigator.of(context).pop()),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    categoryLabel,
+                    style: AppFonts.display(
+                      text: categoryLabel,
+                      size: isMobile ? 28 : 38,
+                      weight: FontWeight.w800,
+                      color: context.colors.cream,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  if (projects.isNotEmpty)
+                    _ProjectsMasonryGrid(projects: projects, isMobile: isMobile)
+                  else
+                    const SizedBox.shrink(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small round back button for [_CategoryProjectsScreen] — same visual
+/// language as the arrow/close buttons used on the project detail and
+/// lightbox screens, kept local here to avoid reaching into that file's
+/// private widgets.
+class _RoundIconButtonForCategoryBack extends StatelessWidget {
+  final VoidCallback onTap;
+  const _RoundIconButtonForCategoryBack({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.colors.surface.withOpacity(0.7),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(Icons.arrow_back_rounded, size: 20, color: context.colors.cream),
+        ),
+      ),
     );
   }
 }
