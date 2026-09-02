@@ -40,7 +40,7 @@ class AppText {
   String get heroWelcomeTitleMain => _t('Simply', 'ببساطة!');
   String get heroWelcomeTitleAccent => _t('A design for an ART', 'تصميم للفن؛');
   String get heroWelcomeSubtitle =>
-      _t("Aya Attia Abed; an Egyptian Arab advertising and visual identity designer and illustrator with a Bachelor of Applied Arts degree in Advertising.", 'آية عطية عابد؛ مصممة إعلانات وهويات بصرية ورسامة مصرية عربية حاصلة على بكالريوس الفنون التطبيقية لقسم الإعلان.');
+      _t("Aya Attia Abed is an Egyptian Arab advertising and visual identity designer and illustrator with a Bachelor of Applied Arts in the Advertising Department and founder of the personal brand Aya's Graphique for commercial design services and the sale of hand-drawn products.","آية عطية عابد؛ مصممة إعلانات وهويات بصرية ورسامة مصرية عربية حاصلة على بكالريوس الفنون التطبيقية لقسم الإعلان ومؤسسة للعلامةز التجارية الشخصية Aya's Graphique لخدمات التصميم التجاري ولبيع المنتجات المرسومة يدوياً.");
   String get heroWelcomePrimaryButton => _t('View my work', 'عرض أعمالي');
   String get heroWelcomeSecondaryButton => _t('Explore the shop', 'استكشف المتجر');
   // Home — marquee
