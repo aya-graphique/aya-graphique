@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -1061,25 +1062,28 @@ class _CertificatesCarouselState extends State<_CertificatesCarousel> {
     final certs = widget.certificates;
     if (certs.isEmpty) return const SizedBox.shrink();
 
-    // Matches the certificate image's own proportions (1492×1054), with
-    // the resulting height clamped to the same 200–760 range as the
-    // Home page's promo banners — so the card frames the certificate
-    // without cropping it, instead of forcing a generic 16:9 ratio.
-    const bannerAspectRatio = 1492 / 1054;
+    // Previously matched the certificate image's own proportions
+    // (1492×1054, ~1.42:1). At typical card widths that produced a very
+    // tall box, but the front face's content (icon, title, chips) only
+    // ever filled its upper portion — leaving a big, empty-looking gap
+    // underneath. A shorter, friendlier ratio keeps the card feeling
+    // full; the back face's real photo still fits fine via
+    // BoxFit.contain, just with a touch more letterboxing on very wide
+    // screens.
+    const cardAspectRatio = 1.55;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         // Sized down to 80% of the available width on desktop for a
         // cozier card — but on mobile that shrink (combined with the
         // already-narrow screen) was pushing the card height below
-        // what the front face's content (icon, title, chips) needs.
-        // Mobile keeps the full width, and its height floor is raised
-        // just enough for that content — now that the description
-        // text is gone, this can sit much closer to the certificate
-        // image's own 1492×1054 ratio, keeping the back face's real
-        // photo close to full-bleed instead of heavily letterboxed.
+        // what the front face's content (icon, title, chips, and the
+        // teaser line) needs. Mobile keeps the full width, and its
+        // height floor (340) is raised enough to fit that content
+        // comfortably without the inner scroll view kicking in on a
+        // typical two-line title.
         final cardWidth = widget.isMobile ? constraints.maxWidth : constraints.maxWidth * 0.8;
-        final cardHeight = (cardWidth / bannerAspectRatio).clamp(widget.isMobile ? 300.0 : 200.0, 760.0);
+        final cardHeight = (cardWidth / cardAspectRatio).clamp(widget.isMobile ? 340.0 : 260.0, 460.0);
 
         return Column(
           children: [
@@ -1251,96 +1255,126 @@ class _CertificateFront extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: colors.cardGradient,
-        border: Border.all(color: colors.orchid.withOpacity(0.28)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 22, offset: const Offset(0, 10)),
-          BoxShadow(color: colors.orchid.withOpacity(0.12), blurRadius: 30, spreadRadius: -6),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Faint oversized watermark of the medal icon in the corner —
-          // a decorative touch that echoes an actual paper certificate's
-          // seal without competing with the real content.
-          Positioned(
-            top: -18,
-            right: -18,
-            child: Icon(
-              Icons.workspace_premium_outlined,
-              size: 110,
-              color: colors.orchid.withOpacity(0.06),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Main content stays centered and scrolls if it overflows,
-              // while the "view certificate" hint is pinned to the very
-              // bottom of the card via the Expanded + bottom-aligned hint
-              // below — a clear, deliberate drop to the card's edge.
-              Expanded(
-                child: Align(
-                  alignment: const Alignment(0, -0.35),
-                  child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(17),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: colors.violetGradient,
-                            boxShadow: [
-                              BoxShadow(color: colors.orchid.withOpacity(0.45), blurRadius: 22, spreadRadius: 1),
-                            ],
-                          ),
-                          child: const Icon(Icons.workspace_premium_outlined, color: Colors.white, size: 30),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          certificate.title,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppFonts.body(text: certificate.title, size: 21, weight: FontWeight.w800, color: colors.cream, height: 1.3),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          width: 34,
-                          height: 2.5,
-                          decoration: BoxDecoration(
-                            gradient: colors.violetGradient,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _CertMetaChip(icon: Icons.apartment_rounded, label: certificate.issuer, colors: colors),
-                            _CertMetaChip(icon: Icons.event_rounded, label: certificate.date, colors: colors),
-                          ],
-                        ),
-                      ],
-                    ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: colors.cardGradient,
+          border: Border.all(color: colors.orchid.withOpacity(0.28)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 22, offset: const Offset(0, 10)),
+            BoxShadow(color: colors.orchid.withOpacity(0.12), blurRadius: 30, spreadRadius: -6),
+          ],
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Faint full-bleed backdrop of the real certificate photo
+            // (when there is one) blurred and heavily dimmed — it fills
+            // the card with texture instead of flat empty gradient,
+            // without ever competing with the title/chips on top.
+            if (certificate.imageAsset != null)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: colors.isDark ? 0.16 : 0.10,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: Image.asset(certificate.imageAsset!, fit: BoxFit.cover),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              _TapToFlipHint(colors: colors, label: context.strings.tapToFlipHint),
-            ],
-          ),
-        ],
+            // Faint oversized watermark of the medal icon in the corner —
+            // a decorative touch that echoes an actual paper certificate's
+            // seal without competing with the real content.
+            Positioned(
+              top: -18,
+              right: -18,
+              child: Icon(
+                Icons.workspace_premium_outlined,
+                size: 110,
+                color: colors.orchid.withOpacity(0.06),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Main content is centered and scrolls if it overflows,
+                // while the "view certificate" hint is pinned to the very
+                // bottom of the card via the Expanded + bottom-aligned hint
+                // below.
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(17),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: colors.violetGradient,
+                              boxShadow: [
+                                BoxShadow(color: colors.orchid.withOpacity(0.45), blurRadius: 22, spreadRadius: 1),
+                              ],
+                            ),
+                            child: const Icon(Icons.workspace_premium_outlined, color: Colors.white, size: 30),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            certificate.title,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppFonts.body(text: certificate.title, size: 21, weight: FontWeight.w800, color: colors.cream, height: 1.3),
+                          ),
+                          const SizedBox(height: 9),
+                          Container(
+                            width: 34,
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              gradient: colors.violetGradient,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                          ),
+                          const SizedBox(height: 13),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _CertMetaChip(icon: Icons.apartment_rounded, label: certificate.issuer, colors: colors),
+                              _CertMetaChip(icon: Icons.event_rounded, label: certificate.date, colors: colors),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          // A short teaser of the write-up — the full
+                          // text still only shows on the flip side, but
+                          // a couple of lines here keep the front from
+                          // reading as empty on taller cards.
+                          Text(
+                            certificate.content,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppFonts.body(text: certificate.content, size: 13.5, weight: FontWeight.w500, color: colors.creamDim, height: 1.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _TapToFlipHint(colors: colors, label: context.strings.tapToFlipHint),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
