@@ -40,7 +40,7 @@ class AppText {
   String get heroWelcomeTitleMain => _t('Simply', 'ببساطة!');
   String get heroWelcomeTitleAccent => _t('A design for an ART', 'تصميم للفن؛');
   String get heroWelcomeSubtitle =>
-      _t("Aya Attia Abed; an Egyptian Arab designer and illustrator with a Bachelor of Applied Arts degree in Advertising.", 'آية عطية عابد؛ مصممة ورسامة مصرية عربية حاصلة على بكالريوس الفنون التطبيقية لقسم الإعلان.');
+      _t("Aya Attia Abed; an Egyptian Arab advertising and visual identity designer and illustrator with a Bachelor of Applied Arts degree in Advertising.", 'آية عطية عابد؛ مصممة إعلانات وهويات بصرية ورسامة مصرية عربية حاصلة على بكالريوس الفنون التطبيقية لقسم الإعلان.');
   String get heroWelcomePrimaryButton => _t('View my work', 'عرض أعمالي');
   String get heroWelcomeSecondaryButton => _t('Explore the shop', 'استكشف المتجر');
   // Home — marquee
@@ -101,7 +101,7 @@ class AppText {
 
   // Home — footer
   String get footerTagline =>
-      _t('Notebooks & calendars, simplicity makes it art.', 'دفاتر وتقويمات، البساطة تصنع الفن.');
+      _t('Simplicity makes it art', 'Simplicity makes it art');
   String get storeAdmin => _t('Store admin →', 'إدارة المتجر ←');
 
   // Graphical Services
@@ -300,7 +300,7 @@ class AppText {
   String get creativityLabel => _t('Creativity', 'الإبداع');
   String get privateWorkshopIndividualsLabel =>
       _t('Individuals — private workshops', 'الأفراد — ورش فردية');
-  String get aspiringDesignersLabel => _t('Aspiring designers', 'المصممون الطموحون');
+  String get aspiringDesignersLabel => _t('Aspiring designers', 'المصممين الطموحين');
   String get contentCreatorsLabel => _t('Content creators', 'صناع المحتوى');
   String get projectsLabel => _t('PROJECTS', 'المشاريع');
   String get myWorksEyebrow => _t('MY WORKS', 'اعمالي');
@@ -309,7 +309,7 @@ class AppText {
         'A selection of brand identity, packaging, advertising and '
         'illustration projects — tap any cover for the full case study.',
         'مجموعة مختارة من مشاريع الهوية التجارية والتغليف والإعلانات '
-        'والرسوم التوضيحية — دوسي على أي غلاف عشان تشوفي التفاصيل كاملة.',
+        'والرسوم التوضيحية',
       );
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
