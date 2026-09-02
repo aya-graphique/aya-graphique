@@ -49669,7 +49669,7 @@ A.Y9.prototype={
 A(a){var s=null,r=A.qp(new A.bj(1/0,1/0,A.r1("assets/images/aya_hero_flag_photo.png",B.fe,s,B.Fo,s,s),s),B.y,s)
 return r}}
 A.Yb.prototype={
-A(a){var s,r,q,p=null,o="A design for an ART",n="\u062a\u0635\u0645\u064a\u0645 \u0644\u0644\u0641\u0646\u061b",m="Aya Attia Abed; an Egyptian Arab designer and illustrator with a Bachelor of Applied Arts degree in Advertising.",l="\u0622\u064a\u0629 \u0639\u0637\u064a\u0629 \u0639\u0627\u0628\u062f\u061b \u0645\u0635\u0645\u0645\u0629 \u0648\u0631\u0633\u0627\u0645\u0629 \u0645\u0635\u0631\u064a\u0629 \u0639\u0631\u0628\u064a\u0629 \u062d\u0627\u0635\u0644\u0629 \u0639\u0644\u0649 \u0628\u0643\u0627\u0644\u0631\u064a\u0648\u0633 \u0627\u0644\u0641\u0646\u0648\u0646 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u064a\u0629 \u0644\u0642\u0633\u0645 \u0627\u0644\u0625\u0639\u0644\u0627\u0646.",k=A.c(a,!0,t.f).a===B.l,j=this.c,i=j?B.u:B.E,h=j?B.ai:B.ab,g=j?B.D:B.aS,f=k?n:o,e=j?32:45
+A(a){var s,r,q,p=null,o="A design for an ART",n="\u062a\u0635\u0645\u064a\u0645 \u0644\u0644\u0641\u0646\u061b",m="Aya Attia Abed; an Egyptian Arab advertising and visual identity designer and illustrator with a Bachelor of Applied Arts degree in Advertising.",l="\u0622\u064a\u0629 \u0639\u0637\u064a\u0629 \u0639\u0627\u0628\u062f\u061b \u0645\u0635\u0645\u0645\u0629 \u0625\u0639\u0644\u0627\u0646\u0627\u062a \u0648\u0647\u0648\u064a\u0627\u062a \u0628\u0635\u0631\u064a\u0629 \u0648\u0631\u0633\u0627\u0645\u0629 \u0645\u0635\u0631\u064a\u0629 \u0639\u0631\u0628\u064a\u0629 \u062d\u0627\u0635\u0644\u0629 \u0639\u0644\u0649 \u0628\u0643\u0627\u0644\u0631\u064a\u0648\u0633 \u0627\u0644\u0641\u0646\u0648\u0646 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u064a\u0629 \u0644\u0642\u0633\u0645 \u0627\u0644\u0625\u0639\u0644\u0627\u0646.",k=A.c(a,!0,t.f).a===B.l,j=this.c,i=j?B.u:B.E,h=j?B.ai:B.ab,g=j?B.D:B.aS,f=k?n:o,e=j?32:45
 f=A.cP(p,A.bU(!0,B.n,p,p,e,k?n:o,B.ap),f)
 e=A.cP(p,A.bU(!0,B.n,p,p,j?32:45,p,B.ap)," ")
 s=k?"\u0628\u0628\u0633\u0627\u0637\u0629!":"Simply"
@@ -49931,20 +49931,20 @@ return A.l(A.bf(a,!1).d5(A.e2(new A.aAS(),null,t.z)),$async$AJ)
 case 2:q.d.$0()
 return A.q(null,r)}})
 return A.r($async$AJ,r)},
-A(a){var s,r,q,p,o,n,m=null,l="Aya's Graphique",k="Notebooks & calendars, simplicity makes it art.",j="\u062f\u0641\u0627\u062a\u0631 \u0648\u062a\u0642\u0648\u064a\u0645\u0627\u062a\u060c \u0627\u0644\u0628\u0633\u0627\u0637\u0629 \u062a\u0635\u0646\u0639 \u0627\u0644\u0641\u0646.",i=" Aya's Graphique ",h="Store admin \u2192",g="\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u062a\u062c\u0631 \u2190",f=t.p,e=A.c(a,!0,f).a===B.e?B.f:B.h,d=this.c?24:60,c=e.d
-c=A.a_(B.d.ag(255*(e.Q.lQ()>0.5?0.5:0.6)),c.m()>>>16&255,c.m()>>>8&255,c.m()&255)
-s=e.b9(0.08)
-r=A.v(l,m,m,m,A.bU(!0,(A.c(a,!0,f).a===B.e?B.f:B.h).Q,m,m,22,l,B.ap),m,m)
+A(a){var s,r,q,p,o,n,m=null,l="Aya's Graphique",k="Simplicity makes it art",j=" Aya's Graphique ",i="Store admin \u2192",h="\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u062a\u062c\u0631 \u2190",g=t.p,f=A.c(a,!0,g).a===B.e?B.f:B.h,e=this.c?24:60,d=f.d
+d=A.a_(B.d.ag(255*(f.Q.lQ()>0.5?0.5:0.6)),d.m()>>>16&255,d.m()>>>8&255,d.m()&255)
+s=f.b9(0.08)
+r=A.v(l,m,m,m,A.bU(!0,(A.c(a,!0,g).a===B.e?B.f:B.h).Q,m,m,22,l,B.ap),m,m)
 q=t.f
-p=A.c(a,!0,q).a===B.l?j:k
-o=A.c(a,!0,q).a===B.l?j:k
-p=A.v(p,m,m,m,A.X(!0,(A.c(a,!0,f).a===B.e?B.f:B.h).as,m,13,o,B.k),B.ai,m)
+A.c(a,!0,q).toString
+A.c(a,!0,q).toString
+p=A.v(k,m,m,m,A.X(!0,(A.c(a,!0,g).a===B.e?B.f:B.h).as,m,13,k,B.k),B.ai,m)
 o=Date.now()
 n=Date.now()
-o=A.v("\xa9 "+A.rV(new A.dl(o,0,!1))+i,m,m,m,A.X(!0,(A.c(a,!0,f).a===B.e?B.f:B.h).as,m,12,"\xa9 "+A.rV(new A.dl(n,0,!1))+i,B.k),m,m)
-n=A.c(a,!0,q).a===B.l?g:h
-q=A.c(a,!0,q).a===B.l?g:h
-return A.a4(m,A.ao(A.a([r,B.aQ,p,B.jO,o,B.b8,A.be(m,A.v(n,m,m,m,A.aW(!0,(A.c(a,!0,f).a===B.e?B.f:B.h).as,1.2,11,q,B.B),m,m),B.z,!1,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,new A.aAT(this,a),m,m,m,m,m,m,!1,B.K)],t.D),B.u,B.j,B.p),B.i,m,m,new A.a3(c,m,new A.dO(new A.by(s,1,B.T,-1),B.L,B.L,B.L),m,m,m,B.v),m,m,m,m,new A.R(d,32,d,32),m,m,1/0)}}
+o=A.v("\xa9 "+A.rV(new A.dl(o,0,!1))+j,m,m,m,A.X(!0,(A.c(a,!0,g).a===B.e?B.f:B.h).as,m,12,"\xa9 "+A.rV(new A.dl(n,0,!1))+j,B.k),m,m)
+n=A.c(a,!0,q).a===B.l?h:i
+q=A.c(a,!0,q).a===B.l?h:i
+return A.a4(m,A.ao(A.a([r,B.aQ,p,B.jO,o,B.b8,A.be(m,A.v(n,m,m,m,A.aW(!0,(A.c(a,!0,g).a===B.e?B.f:B.h).as,1.2,11,q,B.B),m,m),B.z,!1,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,new A.aAT(this,a),m,m,m,m,m,m,!1,B.K)],t.D),B.u,B.j,B.p),B.i,m,m,new A.a3(d,m,new A.dO(new A.by(s,1,B.T,-1),B.L,B.L,B.L),m,m,m,B.v),m,m,m,m,new A.R(e,32,e,32),m,m,1/0)}}
 A.aAS.prototype={
 $1(a){return B.nU},
 $S:215}
@@ -50153,7 +50153,7 @@ n=p?90:110
 m=p?20:60
 l=A.c(a,!0,r).a===B.l?"\u0627\u0639\u0645\u0627\u0644\u064a":"MY WORKS"
 k=A.c(a,!0,r).a===B.l?"\u0646\u0638\u0631\u0629 \u0623\u0642\u0631\u0628 \u0639\u0644\u0649 \u0623\u0639\u0645\u0627\u0644\u064a.":"A closer look at my work."
-l=A.a([A.wV(B.ab,!1,l,s,s,A.c(a,!0,r).a===B.l?"\u0645\u062c\u0645\u0648\u0639\u0629 \u0645\u062e\u062a\u0627\u0631\u0629 \u0645\u0646 \u0645\u0634\u0627\u0631\u064a\u0639 \u0627\u0644\u0647\u0648\u064a\u0629 \u0627\u0644\u062a\u062c\u0627\u0631\u064a\u0629 \u0648\u0627\u0644\u062a\u063a\u0644\u064a\u0641 \u0648\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a \u0648\u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u062a\u0648\u0636\u064a\u062d\u064a\u0629 \u2014 \u062f\u0648\u0633\u064a \u0639\u0644\u0649 \u0623\u064a \u063a\u0644\u0627\u0641 \u0639\u0634\u0627\u0646 \u062a\u0634\u0648\u0641\u064a \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644 \u0643\u0627\u0645\u0644\u0629.":"A selection of brand identity, packaging, advertising and illustration projects \u2014 tap any cover for the full case study.",k,30),B.n2],t.D)
+l=A.a([A.wV(B.ab,!1,l,s,s,A.c(a,!0,r).a===B.l?"\u0645\u062c\u0645\u0648\u0639\u0629 \u0645\u062e\u062a\u0627\u0631\u0629 \u0645\u0646 \u0645\u0634\u0627\u0631\u064a\u0639 \u0627\u0644\u0647\u0648\u064a\u0629 \u0627\u0644\u062a\u062c\u0627\u0631\u064a\u0629 \u0648\u0627\u0644\u062a\u063a\u0644\u064a\u0641 \u0648\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a \u0648\u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u062a\u0648\u0636\u064a\u062d\u064a\u0629":"A selection of brand identity, packaging, advertising and illustration projects \u2014 tap any cover for the full case study.",k,30),B.n2],t.D)
 l.push(new A.W_(h,p,s))
 return A.fj(A.ao(l,B.E,B.j,B.p),s,new A.R(o,n,m,60),s,B.a1)}}
 A.a_s.prototype={
@@ -52088,7 +52088,7 @@ be(){this.c9()
 this.c0()
 this.e6()}}
 A.QP.prototype={
-A(a4){var s,r,q,p,o,n,m=this,l=null,k="AVAILABLE FOR",j="\u0645\u062a\u0627\u062d\u0629 \u0644\u0644\u0639\u0645\u0644 \u0645\u0639",i=A.c(a4,!0,t.p).a===B.e?B.f:B.h,h=t.f,g=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0645\u0637\u0627\u0639\u0645":"Restaurant owners",f=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0641\u0646\u0627\u062f\u0642":"Hotel owners",e=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0627\u062a":"Company owners",d=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0647\u0648\u064a\u0629 \u0627\u0644\u062a\u062c\u0627\u0631\u064a\u0629":"Branding",c=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u062a\u0648\u0636\u064a\u062d\u064a\u0629":"Illustration",b=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0625\u0628\u062f\u0627\u0639":"Creativity",a=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0623\u0641\u0631\u0627\u062f \u2014 \u0648\u0631\u0634 \u0641\u0631\u062f\u064a\u0629":"Individuals \u2014 private workshops",a0=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0645\u0635\u0645\u0645\u0648\u0646 \u0627\u0644\u0637\u0645\u0648\u062d\u0648\u0646":"Aspiring designers",a1=A.c(a4,!0,h).a===B.l?"\u0635\u0646\u0627\u0639 \u0627\u0644\u0645\u062d\u062a\u0648\u0649":"Content creators",a2=A.a([new A.ha(B.L6,g,new A.ajt(m)),new A.ha(B.KV,f,new A.aju(m)),new A.ha(B.KP,e,new A.ajv(m)),new A.ha(B.KN,d,new A.ajw(m)),new A.ha(B.L2,c,new A.ajx(m)),new A.ha(B.KY,b,new A.ajy(m)),new A.ha(B.qv,a,new A.ajz(m)),new A.ha(B.qx,a0,new A.ajA(m)),new A.ha(B.Ld,a1,new A.ajB(m))],t.Jw),a3=B.o.k7(3)
+A(a4){var s,r,q,p,o,n,m=this,l=null,k="AVAILABLE FOR",j="\u0645\u062a\u0627\u062d\u0629 \u0644\u0644\u0639\u0645\u0644 \u0645\u0639",i=A.c(a4,!0,t.p).a===B.e?B.f:B.h,h=t.f,g=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0645\u0637\u0627\u0639\u0645":"Restaurant owners",f=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0641\u0646\u0627\u062f\u0642":"Hotel owners",e=A.c(a4,!0,h).a===B.l?"\u0623\u0635\u062d\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0627\u062a":"Company owners",d=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0647\u0648\u064a\u0629 \u0627\u0644\u062a\u062c\u0627\u0631\u064a\u0629":"Branding",c=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u062a\u0648\u0636\u064a\u062d\u064a\u0629":"Illustration",b=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0625\u0628\u062f\u0627\u0639":"Creativity",a=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0623\u0641\u0631\u0627\u062f \u2014 \u0648\u0631\u0634 \u0641\u0631\u062f\u064a\u0629":"Individuals \u2014 private workshops",a0=A.c(a4,!0,h).a===B.l?"\u0627\u0644\u0645\u0635\u0645\u0645\u064a\u0646 \u0627\u0644\u0637\u0645\u0648\u062d\u064a\u0646":"Aspiring designers",a1=A.c(a4,!0,h).a===B.l?"\u0635\u0646\u0627\u0639 \u0627\u0644\u0645\u062d\u062a\u0648\u0649":"Content creators",a2=A.a([new A.ha(B.L6,g,new A.ajt(m)),new A.ha(B.KV,f,new A.aju(m)),new A.ha(B.KP,e,new A.ajv(m)),new A.ha(B.KN,d,new A.ajw(m)),new A.ha(B.L2,c,new A.ajx(m)),new A.ha(B.KY,b,new A.ajy(m)),new A.ha(B.qv,a,new A.ajz(m)),new A.ha(B.qx,a0,new A.ajA(m)),new A.ha(B.Ld,a1,new A.ajB(m))],t.Jw),a3=B.o.k7(3)
 a1=A.a([],t.We)
 for(s=0;s<3;s=r){r=s+1
 a1.push(B.b.cF(a2,s*a3,B.o.cM(r*a3,0,9)))}q=new A.ajC()
