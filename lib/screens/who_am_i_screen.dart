@@ -1072,14 +1072,14 @@ class _CertificatesCarouselState extends State<_CertificatesCarousel> {
         // Sized down to 80% of the available width on desktop for a
         // cozier card — but on mobile that shrink (combined with the
         // already-narrow screen) was pushing the card height below
-        // what the front face's content (icon, title, chips, blurb)
-        // needs. Mobile keeps the full width, and its height floor is
-        // raised past the ~240–270px the 1492×1054 ratio alone would
-        // give — just enough for the (now shorter) description, so the
-        // back face's real certificate photo isn't left with big empty
-        // gutters above/below either.
+        // what the front face's content (icon, title, chips) needs.
+        // Mobile keeps the full width, and its height floor is raised
+        // just enough for that content — now that the description
+        // text is gone, this can sit much closer to the certificate
+        // image's own 1492×1054 ratio, keeping the back face's real
+        // photo close to full-bleed instead of heavily letterboxed.
         final cardWidth = widget.isMobile ? constraints.maxWidth : constraints.maxWidth * 0.8;
-        final cardHeight = (cardWidth / bannerAspectRatio).clamp(widget.isMobile ? 360.0 : 200.0, 760.0);
+        final cardHeight = (cardWidth / bannerAspectRatio).clamp(widget.isMobile ? 300.0 : 200.0, 760.0);
 
         return Column(
           children: [
@@ -1331,14 +1331,6 @@ class _CertificateFront extends StatelessWidget {
                             _CertMetaChip(icon: Icons.event_rounded, label: certificate.date, colors: colors),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          certificate.content,
-                          textAlign: TextAlign.center,
-                          maxLines: 6,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppFonts.body(text: certificate.content, size: 15, weight: FontWeight.w500, color: colors.creamDim, height: 1.6),
-                        ),
                       ],
                     ),
                   ),
@@ -1481,24 +1473,13 @@ class _CertificateBackContent extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
         ],
       ),
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              certificate.title,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: AppFonts.body(text: certificate.title, size: 16.5, weight: FontWeight.w800, color: Colors.white, height: 1.3),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              certificate.content,
-              style: AppFonts.body(text: certificate.content, size: 13.5, weight: FontWeight.w500, color: Colors.white.withOpacity(0.9), height: 1.55),
-            ),
-          ],
+      child: Center(
+        child: Text(
+          certificate.title,
+          textAlign: TextAlign.center,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: AppFonts.body(text: certificate.title, size: 18, weight: FontWeight.w800, color: Colors.white, height: 1.3),
         ),
       ),
     );

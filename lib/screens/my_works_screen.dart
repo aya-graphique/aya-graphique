@@ -176,8 +176,11 @@ class _ProjectsMasonryGrid extends StatelessWidget {
   // A small repeating cycle of aspect ratios (width / height) so covers
   // read as photographed/designed pieces of varying shape — tall poster,
   // square, and wide landscape — the same mix you'd see scrolling a real
-  // Behance grid, instead of every tile being identically cropped.
+  // Behance grid, instead of every tile being identically cropped. Used
+  // on desktop/tablet only — on mobile the two columns use one fixed
+  // ratio instead so every tile reads the same size (see [_mobileAspectRatio]).
   static const List<double> _aspectCycle = [0.78, 1.0, 0.62, 0.9];
+  static const double _mobileAspectRatio = 0.82;
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +210,7 @@ class _ProjectsMasonryGrid extends StatelessWidget {
                   if (i >= columns) const SizedBox(height: gap),
                   _ProjectCard(
                     project: projects[i],
-                    aspectRatio: _aspectCycle[i % _aspectCycle.length],
+                    aspectRatio: isMobile ? _mobileAspectRatio : _aspectCycle[i % _aspectCycle.length],
                     index: i,
                   ),
                 ],
@@ -220,13 +223,13 @@ class _ProjectsMasonryGrid extends StatelessWidget {
   }
 }
 
-/// One project cover, Behance-card style: the artwork fills a fixed-ratio
-/// frame with a category tag pinned over it top-start, and — like hovering
-/// a Behance cover before it takes you to the case study — a soft dark
-/// veil plus a centered "view" glyph fades in only on hover/press. The
-/// title and category live as plain text *underneath* the frame, the way
-/// a Behance grid item's title sits below its cover rather than stamped
-/// across it. Tapping anywhere on the tile opens [ProjectDetailScreen]
+/// One project cover, Behance-card style: a small category-tag pill sits
+/// above the frame (not stamped over the artwork), the artwork fills a
+/// fixed-ratio frame below it with only the "01" index badge on top of
+/// it, and — like hovering a Behance cover before it takes you to the
+/// case study — a soft dark veil plus a centered "view" glyph fades in
+/// only on hover/press. The title lives as plain text *underneath* the
+/// frame. Tapping anywhere on the tile opens [ProjectDetailScreen]
 /// with this project's full gallery and write-up.
 class _ProjectCard extends StatefulWidget {
   final PortfolioProject project;
@@ -271,6 +274,21 @@ class _ProjectCardState extends State<_ProjectCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Category tag now lives above the cover as a small
+              // eyebrow label, not stamped over the artwork — the
+              // "01" index badge stays on the image itself below.
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.orchid.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: colors.orchid.withOpacity(0.4)),
+                ),
+                child: Text(categoryLabel,
+                  style: AppFonts.label(text: categoryLabel, size: 11, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.3),
+                ),
+              ),
+              const SizedBox(height: 8),
               AspectRatio(
                 aspectRatio: widget.aspectRatio,
                 // Tilts gently toward the pointer and lifts with a violet
@@ -310,24 +328,6 @@ class _ProjectCardState extends State<_ProjectCard> {
                           hovering: _hovering,
                           colors: colors,
                         ),
-
-                      // Category tag, top-start — real content (what kind
-                      // of work this is), not decoration.
-                      Positioned(
-                        top: 10,
-                        left: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.32),
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(color: Colors.white.withOpacity(0.18)),
-                          ),
-                          child: Text(categoryLabel,
-                            style: AppFonts.label(text: categoryLabel, size: 11, weight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
-                          ),
-                        ),
-                      ),
 
                       // "01" index badge, top-end — a small catalogue-style
                       // touch that makes the grid read as a numbered
@@ -376,12 +376,6 @@ class _ProjectCardState extends State<_ProjectCard> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppFonts.body(size: 15.5, weight: FontWeight.w700, color: colors.cream, text: project.title),
-              ),
-              const SizedBox(height: 2),
-              Text(categoryLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppFonts.body(size: 13, weight: FontWeight.w500, color: colors.creamDim, text: categoryLabel),
               ),
             ],
           ),
