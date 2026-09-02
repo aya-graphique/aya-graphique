@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
@@ -381,10 +382,65 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
+  Future<void> _openPhone(String number) async {
+    final digits = number.replaceAll(RegExp(r'[^0-9+]'), '');
+    if (digits.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: digits);
+    var launched = false;
+    try {
+      launched = await launchUrl(uri);
+    } catch (_) {
+      launched = false;
+    }
+    if (!mounted || launched) return;
+    // Same idea as the email fallback: tel: only does something if the
+    // device can actually place calls (a phone) or has a calling app
+    // wired up to it — on a plain desktop browser nothing happens, so
+    // copy the number instead of leaving the tap feeling broken.
+    await Clipboard.setData(ClipboardData(text: number));
+    if (!mounted) return;
+    final isArabic = context.isArabicLanguage;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isArabic ? 'اتنسخ الرقم: $number' : 'Copied the number: $number',
+        ),
+      ),
+    );
+  }
+
   Future<void> _openEmail(String email) async {
-    if (email.trim().isEmpty) return;
-    final uri = Uri(scheme: 'mailto', path: email.trim());
-    await launchUrl(uri);
+    final value = email.trim();
+    if (value.isEmpty) return;
+    // The app runs in a browser, so a Gmail compose link (opens in a new
+    // tab, "to" pre-filled) is far more reliable than a mailto: link —
+    // mailto: only works if the visitor's OS has a desktop mail app set
+    // as default, which most people testing/browsing on the web don't.
+    final gmailUri = Uri.parse(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=${Uri.encodeComponent(value)}',
+    );
+    var launched = false;
+    try {
+      launched = await launchUrl(gmailUri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      launched = false;
+    }
+    if (!mounted) return;
+    if (launched) return;
+    // Fallback for the rare case even that fails (e.g. pop-ups blocked):
+    // copy the address so the person still walks away with something.
+    await Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    final isArabic = context.isArabicLanguage;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isArabic
+              ? 'مقدرناش نفتح جيميل — اتنسخ الإيميل بدل كده: $value'
+              : "Couldn't open Gmail — copied the email instead: $value",
+        ),
+      ),
+    );
   }
 
   @override
@@ -423,6 +479,7 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
                         onOpenUrl: _openUrl,
                         onOpenWhatsapp: _openWhatsapp,
                         onOpenEmail: _openEmail,
+                        onOpenPhone: _openPhone,
                       ),
               ),
               const SizedBox(height: 60),
@@ -446,6 +503,7 @@ class _Profile extends StatelessWidget {
   final ValueChanged<String> onOpenUrl;
   final ValueChanged<String> onOpenWhatsapp;
   final ValueChanged<String> onOpenEmail;
+  final ValueChanged<String> onOpenPhone;
 
   const _Profile({
     required this.profile,
@@ -453,6 +511,7 @@ class _Profile extends StatelessWidget {
     required this.onOpenUrl,
     required this.onOpenWhatsapp,
     required this.onOpenEmail,
+    required this.onOpenPhone,
   });
 
   @override
@@ -694,7 +753,7 @@ class _Profile extends StatelessWidget {
                           _ContactButton(
                             icon: Icons.call_outlined,
                             label: profile.phone,
-                            onTap: () {},
+                            onTap: () => onOpenPhone(profile.phone),
                           ),
                         if (profile.portfolioUrl.isNotEmpty)
                           _ContactButton(

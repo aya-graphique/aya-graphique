@@ -161,10 +161,15 @@ class MyWorksScreen extends StatelessWidget {
 class _ProjectsMasonryGrid extends StatelessWidget {
   final List<PortfolioProject> projects;
   final bool isMobile;
+  // Hides the small category-tag pill on each card — used when the whole
+  // grid is already scoped to one category (its name is the page's own
+  // heading above), so repeating it per-card would just be noise.
+  final bool showCategoryTag;
 
   const _ProjectsMasonryGrid({
     required this.projects,
     required this.isMobile,
+    this.showCategoryTag = true,
   });
 
   // Every cover now uses the same ratio on both mobile and desktop — a
@@ -204,6 +209,7 @@ class _ProjectsMasonryGrid extends StatelessWidget {
                     project: projects[i],
                     aspectRatio: _coverAspectRatio,
                     index: i,
+                    showCategoryTag: showCategoryTag,
                   ),
                 ],
               ],
@@ -225,7 +231,10 @@ class _CategoriesGrid extends StatelessWidget {
   final bool isMobile;
   const _CategoriesGrid({required this.projects, required this.isMobile});
 
-  static const double _coverAspectRatio = 0.82;
+  // A bit shorter than the projects grid's ratio — these plates only
+  // need to hold a category name, not a title/caption underneath, so a
+  // slightly squatter card reads as more proportionate.
+  static const double _coverAspectRatio = 1.05;
 
   @override
   Widget build(BuildContext context) {
@@ -333,33 +342,27 @@ class _CategoryCardState extends State<_CategoryCard> {
                     hovering: _hovering,
                     colors: colors,
                   ),
-                  // Category name, front and center — the one thing the
-                  // card is meant to communicate — set apart with its
-                  // own pill background rather than plain text over the
-                  // artwork.
+                  // Category name, front and center — plain text with a
+                  // soft shadow for legibility over the artwork, no pill
+                  // background boxing it in.
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: colors.bgDeep.withOpacity(_hovering ? 0.62 : 0.48),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.22)),
-                        ),
-                        child: Text(
-                          categoryLabel,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppFonts.display(
-                            text: categoryLabel,
-                            size: 19,
-                            weight: FontWeight.w800,
-                            color: Colors.white,
-                            height: 1.25,
-                          ),
-                        ),
+                      child: Text(
+                        categoryLabel,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppFonts.display(
+                          text: categoryLabel,
+                          size: 19,
+                          weight: FontWeight.w800,
+                          color: Colors.white,
+                          height: 1.25,
+                        ).copyWith(shadows: [
+                          Shadow(color: Colors.black.withOpacity(0.45), blurRadius: 10),
+                          Shadow(color: Colors.black.withOpacity(0.35), blurRadius: 22),
+                        ]),
                       ),
                     ),
                   ),
@@ -425,7 +428,7 @@ class _CategoryProjectsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   if (projects.isNotEmpty)
-                    _ProjectsMasonryGrid(projects: projects, isMobile: isMobile)
+                    _ProjectsMasonryGrid(projects: projects, isMobile: isMobile, showCategoryTag: false)
                   else
                     const SizedBox.shrink(),
                 ],
@@ -478,10 +481,15 @@ class _ProjectCard extends StatefulWidget {
   // a small stagger on the entrance animation, so the whole grid doesn't
   // pop in as one flat block.
   final int index;
+  // Hides the small purple category pill above the cover — off when the
+  // page itself is already scoped to one category (its name shown as
+  // the page heading), so the tag isn't repeated on every card.
+  final bool showCategoryTag;
   const _ProjectCard({
     required this.project,
     required this.aspectRatio,
     required this.index,
+    this.showCategoryTag = true,
   });
 
   @override
@@ -517,18 +525,20 @@ class _ProjectCardState extends State<_ProjectCard> {
               // Category tag now lives above the cover as a small
               // eyebrow label, not stamped over the artwork — the
               // "01" index badge stays on the image itself below.
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                decoration: BoxDecoration(
-                  color: colors.orchid.withOpacity(0.16),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: colors.orchid.withOpacity(0.4)),
+              if (widget.showCategoryTag) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colors.orchid.withOpacity(0.16),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: colors.orchid.withOpacity(0.4)),
+                  ),
+                  child: Text(categoryLabel,
+                    style: AppFonts.label(text: categoryLabel, size: 11, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.3),
+                  ),
                 ),
-                child: Text(categoryLabel,
-                  style: AppFonts.label(text: categoryLabel, size: 11, weight: FontWeight.w700, color: colors.orchid, letterSpacing: 0.3),
-                ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
+              ],
               AspectRatio(
                 aspectRatio: widget.aspectRatio,
                 // Tilts gently toward the pointer and lifts with a violet
