@@ -12,6 +12,16 @@ class SectionHeading extends StatelessWidget {
   final double? eyebrowSize;
   final IconData? eyebrowIcon;
 
+  // Every SectionHeading's title shrinks to this same size on phones,
+  // regardless of the [titleSize] a screen passes in for desktop — so
+  // "المنتجات" on the shop, "اعمالي" on My Works, "السلة" on the cart,
+  // etc. all read the same, consistent size on mobile instead of each
+  // screen drifting to whatever size it happened to be given. Screens
+  // that already asked for something smaller than this on mobile (e.g.
+  // a compact inline heading) keep their smaller size — this only caps
+  // headings down, never enlarges one that was already asked to be tiny.
+  static const double _mobileTitleCap = 18;
+
   const SectionHeading({
     super.key,
     required this.eyebrow,
@@ -29,6 +39,8 @@ class SectionHeading extends StatelessWidget {
     final crossAxis = align == TextAlign.center
         ? CrossAxisAlignment.center
         : CrossAxisAlignment.start;
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final effectiveTitleSize = isMobile ? (titleSize < _mobileTitleCap ? titleSize : _mobileTitleCap) : titleSize;
     return Column(
       crossAxisAlignment: crossAxis,
       children: [
@@ -54,7 +66,7 @@ class SectionHeading extends StatelessWidget {
         const SizedBox(height: 16),
         Text(title,
           textAlign: align,
-          style: AppFonts.display(text: title, color: context.colors.cream, size: titleSize, height: 1.08, boostArabicSize: boostArabicSize),
+          style: AppFonts.display(text: title, color: context.colors.cream, size: effectiveTitleSize, height: 1.08, boostArabicSize: boostArabicSize),
         ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(
               begin: 0.15,
               end: 0,

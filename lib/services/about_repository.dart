@@ -7,19 +7,56 @@ import 'supabase_service.dart';
 /// plus the ordered set of slideshow photos in `about_slides`. Same
 /// singleton-row pattern as `SettingsRepository`/`store_settings`.
 class AboutRepository {
+  // Contact fallback shown until the `about_me` row in Supabase has its
+  // own email/phone/whatsapp filled in (there's no admin form for those
+  // fields yet, just the slideshow) — any of the three left blank here
+  // falls back to whatever the database already has, and any value set
+  // later in Supabase overrides this automatically.
+  static const String _fallbackEmail = 'aya@ayasgraphique.com';
+  static const String _fallbackPhone = '01010660135';
+  // wa.me needs the full international number with no leading zero —
+  // Egypt's country code (20) + the number as given, minus its leading 0.
+  static const String _fallbackWhatsapp = '201010660135';
+
+  static AboutMe _withContactFallback(AboutMe profile) {
+    if (profile.email.isNotEmpty && profile.phone.isNotEmpty && profile.whatsapp.isNotEmpty) {
+      return profile;
+    }
+    return AboutMe(
+      fullName: profile.fullName,
+      fullNameAr: profile.fullNameAr,
+      headline: profile.headline,
+      headlineAr: profile.headlineAr,
+      bio: profile.bio,
+      bioAr: profile.bioAr,
+      skills: profile.skills,
+      skillsAr: profile.skillsAr,
+      email: profile.email.isNotEmpty ? profile.email : _fallbackEmail,
+      phone: profile.phone.isNotEmpty ? profile.phone : _fallbackPhone,
+      whatsapp: profile.whatsapp.isNotEmpty ? profile.whatsapp : _fallbackWhatsapp,
+      location: profile.location,
+      portfolioUrl: profile.portfolioUrl,
+      cvUrl: profile.cvUrl,
+      instagramUrl: profile.instagramUrl,
+      facebookUrl: profile.facebookUrl,
+      tiktokUrl: profile.tiktokUrl,
+      linkedinUrl: profile.linkedinUrl,
+    );
+  }
+
   static Future<AboutMe> fetchProfile() async {
-    if (!SupabaseConfig.isConfigured) return const AboutMe();
+    if (!SupabaseConfig.isConfigured) return _withContactFallback(const AboutMe());
     try {
       final row = await SupabaseService.client
           .from('about_me')
           .select()
           .eq('id', 1)
           .maybeSingle();
-      if (row == null) return const AboutMe();
-      return AboutMe.fromRow(row);
+      if (row == null) return _withContactFallback(const AboutMe());
+      return _withContactFallback(AboutMe.fromRow(row));
     } catch (e) {
       debugPrint("Aya's Graphique: fetching about_me failed. Real error was:\n$e");
-      return const AboutMe();
+      return _withContactFallback(const AboutMe());
     }
   }
 

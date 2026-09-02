@@ -127,7 +127,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           eyebrow: context.strings.collectionEyebrow,
                           title: context.strings.collectionTitle,
                           subtitle: context.strings.collectionSubtitle,
-                          titleSize: widget.isMobile ? 22 : 26,
+                          titleSize: widget.isMobile ? 18 : 26,
                         ),
                       ),
                     ),
