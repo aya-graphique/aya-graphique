@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -1074,15 +1073,15 @@ class _CertificatesCarouselState extends State<_CertificatesCarousel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Sized down to 80% of the available width on desktop for a
-        // cozier card — but on mobile that shrink (combined with the
-        // already-narrow screen) was pushing the card height below
-        // what the front face's content (icon, title, chips, and the
-        // teaser line) needs. Mobile keeps the full width, and its
-        // height floor (340) is raised enough to fit that content
-        // comfortably without the inner scroll view kicking in on a
-        // typical two-line title.
-        final cardWidth = widget.isMobile ? constraints.maxWidth : constraints.maxWidth * 0.8;
+        // Sized down on desktop for a cozier card — narrower than
+        // before (60% instead of 80%) since the front face's content
+        // (icon, title, chips, teaser) is a fairly narrow centered
+        // column, and the extra width was mostly showing up as empty
+        // purple margin on either side of it. Mobile keeps the full
+        // width, and its height floor (340) is raised enough to fit
+        // that content comfortably without the inner scroll view
+        // kicking in on a typical two-line title.
+        final cardWidth = widget.isMobile ? constraints.maxWidth : constraints.maxWidth * 0.6;
         final cardHeight = (cardWidth / cardAspectRatio).clamp(widget.isMobile ? 340.0 : 260.0, 460.0);
 
         return Column(
@@ -1101,7 +1100,7 @@ class _CertificatesCarouselState extends State<_CertificatesCarousel> {
                       return RevealOnScroll(
                         delay: Duration(milliseconds: 60 * (i % 6)),
                         offsetY: 22,
-                        child: _CertificateFlipCard(certificate: certs[i]),
+                        child: _CertificateFlipCard(certificate: certs[i], isMobile: widget.isMobile),
                       );
                     },
                   ),
@@ -1183,7 +1182,8 @@ class _CertProgressBar extends StatelessWidget {
 /// flips it back — like turning a physical certificate card over.
 class _CertificateFlipCard extends StatefulWidget {
   final _Certificate certificate;
-  const _CertificateFlipCard({required this.certificate});
+  final bool isMobile;
+  const _CertificateFlipCard({required this.certificate, required this.isMobile});
 
   @override
   State<_CertificateFlipCard> createState() => _CertificateFlipCardState();
@@ -1237,7 +1237,7 @@ class _CertificateFlipCardState extends State<_CertificateFlipCard>
                   ..rotateY(angle),
                 child: showBack
                     ? _CertificateBack(certificate: cert)
-                    : _CertificateFront(certificate: cert),
+                    : _CertificateFront(certificate: cert, isMobile: widget.isMobile),
               );
             },
           ),
@@ -1249,18 +1249,19 @@ class _CertificateFlipCardState extends State<_CertificateFlipCard>
 
 class _CertificateFront extends StatelessWidget {
   final _Certificate certificate;
-  const _CertificateFront({required this.certificate});
+  final bool isMobile;
+  const _CertificateFront({required this.certificate, required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
           gradient: colors.cardGradient,
           border: Border.all(color: colors.orchid.withOpacity(0.28)),
           boxShadow: [
@@ -1271,20 +1272,6 @@ class _CertificateFront extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Faint full-bleed backdrop of the real certificate photo
-            // (when there is one) blurred and heavily dimmed — it fills
-            // the card with texture instead of flat empty gradient,
-            // without ever competing with the title/chips on top.
-            if (certificate.imageAsset != null)
-              Positioned.fill(
-                child: Opacity(
-                  opacity: colors.isDark ? 0.16 : 0.10,
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Image.asset(certificate.imageAsset!, fit: BoxFit.cover),
-                  ),
-                ),
-              ),
             // Faint oversized watermark of the medal icon in the corner —
             // a decorative touch that echoes an actual paper certificate's
             // seal without competing with the real content.
@@ -1352,18 +1339,20 @@ class _CertificateFront extends StatelessWidget {
                               _CertMetaChip(icon: Icons.event_rounded, label: certificate.date, colors: colors),
                             ],
                           ),
-                          const SizedBox(height: 14),
-                          // A short teaser of the write-up — the full
-                          // text still only shows on the flip side, but
-                          // a couple of lines here keep the front from
-                          // reading as empty on taller cards.
-                          Text(
-                            certificate.content,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppFonts.body(text: certificate.content, size: 13.5, weight: FontWeight.w500, color: colors.creamDim, height: 1.5),
-                          ),
+                          // Teaser line of the write-up — desktop only.
+                          // On mobile the card is already tighter on
+                          // vertical space, so this drops and the full
+                          // write-up stays a tap (flip) away.
+                          if (!isMobile) ...[
+                            const SizedBox(height: 14),
+                            Text(
+                              certificate.content,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppFonts.body(text: certificate.content, size: 16, weight: FontWeight.w500, color: colors.creamDim, height: 1.5),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -1466,34 +1455,40 @@ class _CertificateBackContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    // Real certificate image on file — show it full-bleed on the back
-    // of the card.
+    // Real certificate image on file — the frame itself is now sized to
+    // the certificate's own proportions (1492×1054) instead of
+    // stretching to fill whatever box the front face dictates. It's
+    // centered in the available space, so there's no mismatched
+    // backdrop/border showing in the gutters the way there was when the
+    // frame filled the whole box and the photo sat inside it via
+    // BoxFit.contain.
     if (certificate.imageAsset != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Backdrop fill behind the image — needed now that the
-            // image uses BoxFit.contain (shows the whole certificate,
-            // uncropped) instead of cover, which can leave letterbox
-            // gutters on the sides or top/bottom depending on how the
-            // card's box ratio compares to the real certificate's.
-            Container(
-              decoration: BoxDecoration(
-                gradient: colors.cardGradient,
-                border: Border.all(color: colors.orchid.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
-                ],
-              ),
+      const certificateAspectRatio = 1492 / 1054;
+      return Center(
+        child: AspectRatio(
+          aspectRatio: certificateAspectRatio,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: colors.cardGradient,
+                    border: Border.all(color: colors.orchid.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Image.asset(certificate.imageAsset!, fit: BoxFit.contain),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Image.asset(certificate.imageAsset!, fit: BoxFit.contain),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -1501,7 +1496,7 @@ class _CertificateBackContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         gradient: colors.violetGradientWide,
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 9)),
