@@ -1256,11 +1256,11 @@ class _CertificateFront extends StatelessWidget {
     final colors = context.colors;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           gradient: colors.cardGradient,
           border: Border.all(color: colors.orchid.withOpacity(0.28)),
           boxShadow: [
@@ -1490,7 +1490,7 @@ class _CertificateBackContent extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(18),
               child: Image.asset(certificate.imageAsset!, fit: BoxFit.contain),
             ),
           ],
