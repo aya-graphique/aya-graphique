@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/portfolio_project.dart';
@@ -330,6 +331,21 @@ class _RoundIconButton extends StatelessWidget {
   }
 }
 
+/// Lets a mouse/trackpad drag the lightbox's PageView on desktop web —
+/// by default Flutter only treats touch/stylus drags as page-swipe
+/// gestures, which is why dragging with a mouse did nothing.
+class _LightboxDragScrollBehavior extends MaterialScrollBehavior {
+  const _LightboxDragScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
 /// Full-screen photo viewer opened by tapping any gallery image. Each
 /// photo is pinch/scroll-zoomable and pannable (see [InteractiveViewer]),
 /// and swiping left/right moves between the rest of the project's real
@@ -368,13 +384,16 @@ class _ImageLightboxState extends State<_ImageLightbox> {
       body: SafeArea(
         child: Stack(
           children: [
-            PageView.builder(
-              controller: _controller,
-              itemCount: widget.images.length,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) {
-                return _ZoomableImage(path: widget.images[i]);
-              },
+            ScrollConfiguration(
+              behavior: const _LightboxDragScrollBehavior(),
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: widget.images.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) {
+                  return _ZoomableImage(path: widget.images[i]);
+                },
+              ),
             ),
             Positioned(
               top: 12,

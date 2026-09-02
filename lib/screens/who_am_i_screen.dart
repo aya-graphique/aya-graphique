@@ -209,8 +209,8 @@ List<_Certificate> kCertificates(bool isArabic) => isArabic
     ? const [
         _Certificate(
           title: 'دورة التصميم الجرافيكي الاحترافي',
-          issuer: 'Creative Ideas',
-          date: '01 / 06 / 2024',
+          issuer: 'Creative\u00A0Ideas',
+          date: '2024',
           content: 'أتمت الدورة الاحترافية في التصميم الجرافيكي بنجاح، بمهارات '
               'قوية في مبادئ التصميم، بناء العلامة التجارية، ونظرية الألوان.',
           imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
@@ -244,8 +244,8 @@ List<_Certificate> kCertificates(bool isArabic) => isArabic
     : const [
         _Certificate(
           title: 'Professional Graphic Design Course',
-          issuer: 'Creative Ideas',
-          date: '01 / 06 / 2024',
+          issuer: 'Creative\u00A0Ideas',
+          date: '2024',
           content: 'Successfully completed the Professional Graphic Design '
               'Course, with strong skills in design principles, branding, '
               'and color theory.',
