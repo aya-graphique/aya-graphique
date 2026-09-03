@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
@@ -242,7 +243,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       shape: const CircleBorder(),
                       child: InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: () => Navigator.of(context).pop(),
+                        onTap: () => context.pop(),
                         child: Padding(
                           padding: EdgeInsets.all(10),
                           child: Icon(Icons.arrow_back_rounded, size: 20, color: context.colors.cream),
@@ -767,7 +768,15 @@ class _OrderSuccessDialog extends StatelessWidget {
               width: double.infinity,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  // Close the success dialog, then head to the storefront
+                  // root — equivalent to the old
+                  // `Navigator.popUntil((route) => route.isFirst)`, but
+                  // explicit about the destination instead of relying on
+                  // "whatever is first in the stack" (which is more
+                  // fragile to reason about under go_router's own page
+                  // management).
+                  context.pop();
+                  context.go('/');
                 },
                 child: Container(
                   height: 48,

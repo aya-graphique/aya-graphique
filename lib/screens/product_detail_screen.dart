@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
@@ -47,7 +48,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   children: [
                     _RoundIconButton(
                       icon: Icons.arrow_back_rounded,
-                      onTap: () => Navigator.of(context).pop(),
+                      // A shared link or a page refresh can land here with
+                      // nothing to pop back to (it's the very first page
+                      // in the browser tab), so fall back to the storefront
+                      // root instead of asserting.
+                      onTap: () => context.canPop() ? context.pop() : context.go('/'),
                     ),
                     const Spacer(),
                     _CartHeaderBadge(onTap: () => showMiniCartSheet(context)),

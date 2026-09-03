@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
 import '../services/categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
-import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
-import 'product_detail_screen.dart';
 
 /// Lets other tabs (currently just Home's product category circles) jump
 /// straight to the standalone Shop tab with one particular category
@@ -86,12 +85,7 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   void _openProduct(Product product) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        settings: RouteSettings(name: uniqueRouteName('product-detail')),
-        builder: (_) => ProductDetailScreen(product: product),
-      ),
-    );
+    context.push('/product/${product.id}', extra: product);
   }
 
   @override

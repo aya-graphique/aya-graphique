@@ -1,6 +1,6 @@
 {
-    "name": "ayasgraphique",
-    "short_name": "ayasgraphique",
+    "name": "aya_graphique",
+    "short_name": "aya_graphique",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0D0512",

@@ -37,6 +37,13 @@ extension ProjectCategoryLabel on ProjectCategory {
 /// of the 5-photo gallery entirely (otherwise the grid cover just falls
 /// back to images.first, same as before).
 class PortfolioProject {
+  // Stable identifier used in the URL (e.g. '/my-works/project/:id') so
+  // the project detail/lightbox routes can rebuild themselves straight
+  // from the URL — no `extra` needed. Must stay the same across
+  // rebuilds/hot-reloads for a given project (see kProjects), since it's
+  // what makes browser/phone back-button navigation and page refresh
+  // land on the right project instead of bouncing to '/my-works'.
+  final String id;
   final String title;
   final ProjectCategory category;
   final String description;
@@ -61,6 +68,7 @@ class PortfolioProject {
   final String url;
 
   const PortfolioProject({
+    required this.id,
     required this.title,
     required this.category,
     this.description = '',

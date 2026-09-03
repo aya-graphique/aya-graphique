@@ -38,9 +38,10 @@ class ProductCard extends StatelessWidget {
     // can rebuild it ourselves below, pointed at this exact product instead
     // of wherever they were browsing from.
     final base = Uri.base.toString().split('#').first;
-    // '#/product/<id>' is picked up by MainShell via ProductLinkScreen (see
-    // main.dart's onGenerateRoute), which opens straight to this product's
-    // detail page instead of just landing on the storefront root.
+    // '#/product/<id>' is a go_router route (see main.dart's
+    // GoRoute(path: '/product/:id')), handled by ProductRoutePage, which
+    // opens straight to this product's detail page instead of just
+    // landing on the storefront root.
     final productLink = '$base#/product/${Uri.encodeComponent(product.id)}';
     final text = '${product.name} — $priceText\n$productLink';
     Share.share(text, subject: product.name).catchError((_) {

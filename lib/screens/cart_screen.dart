@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
-import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
-import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   final bool isMobile;
@@ -202,12 +201,7 @@ class _Summary extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  settings: RouteSettings(name: uniqueRouteName('checkout')),
-                  builder: (_) => const CheckoutScreen(),
-                ),
-              ),
+              onTap: () => context.push('/checkout'),
               child: Container(
                 height: 52,
                 decoration: BoxDecoration(

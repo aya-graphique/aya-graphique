@@ -4,6 +4,19 @@ import '../../services/services_repository.dart';
 import '../../theme/app_theme.dart';
 import '../graphical_services_screen.dart';
 
+/// Args bundle passed via go_router's `extra` to the
+/// `/admin/dashboard/services/edit` route.
+class ServiceEditArgs {
+  final String itemKey;
+  final ServiceItem baseItem;
+  final ServiceOverride? existingOverride;
+  const ServiceEditArgs({
+    required this.itemKey,
+    required this.baseItem,
+    required this.existingOverride,
+  });
+}
+
 /// Edit form for one existing "Services" item. Only text and pricing can
 /// change here — every field is optional, and leaving one blank means
 /// "keep the original copy" rather than "show nothing".

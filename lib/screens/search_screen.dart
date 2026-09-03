@@ -1,12 +1,11 @@
 import 'package:aya_graphique/providers/language_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
-import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
-import 'product_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   final List<Product> products;
@@ -81,12 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
           else
             ProductGrid(
               products: results,
-              onProductTap: (p) => Navigator.of(context).push(
-                MaterialPageRoute(
-                  settings: RouteSettings(name: uniqueRouteName('product-detail')),
-                  builder: (_) => ProductDetailScreen(product: p),
-                ),
-              ),
+              onProductTap: (p) => context.push('/product/${p.id}', extra: p),
             ),
         ],
       ),

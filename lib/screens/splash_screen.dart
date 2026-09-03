@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../services/supabase_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shimmer_text.dart';
-import 'main_shell.dart';
 
 /// The very first thing a visitor sees. Flutter's engine boots and this
 /// widget is on screen immediately — nothing here blocks the app from
 /// opening fast. Meanwhile [SupabaseService.init] (the one genuinely slow
 /// step) runs in the background, and this screen simply holds for a fixed
-/// 5 seconds of brand moment before handing off to [MainShell]. If, on a
-/// very slow connection, init happens to take longer than 5 seconds, this
-/// waits the little bit extra rather than dropping the visitor into a
-/// half-ready app — but on any normal connection the two finish together
-/// and the handoff feels instant.
+/// 5 seconds of brand moment before handing off to the storefront root.
+/// If, on a very slow connection, init happens to take longer than 5
+/// seconds, this waits the little bit extra rather than dropping the
+/// visitor into a half-ready app — but on any normal connection the two
+/// finish together and the handoff feels instant.
+///
+/// Currently unused: main.dart opens straight into the storefront
+/// (go_router's `/` route) without this screen in between. Left in place
+/// in case that changes; not wired into any route.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -40,14 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await Future.delayed(remaining);
     }
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, __, ___) => const MainShell(),
-        transitionsBuilder: (_, animation, __, child) =>
-            FadeTransition(opacity: animation, child: child),
-      ),
-    );
+    context.go('/');
   }
 
   @override

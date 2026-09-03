@@ -1,10 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/unique_route.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/tilt_3d_card.dart';
@@ -32,20 +32,26 @@ class ProjectDetailScreen extends StatelessWidget {
   // the user swipe between the rest of this project's real photos
   // (the padded placeholder slots in the bento grid are never tappable,
   // so [images] here is always the project's actual, un-padded list).
+  //
+  // This is a real go_router route (not a bare Navigator.push overlay
+  // like a dialog) specifically so it gets its own browser/back-button
+  // history entry — otherwise, on mobile, the phone's back button (which
+  // acts on browser history, not Flutter's widget-level Navigator) has
+  // nothing of this screen to step back through and skips straight past
+  // it to wherever the last *tracked* location was.
+  //
+  // The project id + tapped index are both encoded straight into the
+  // URL (instead of passed via `extra`) so this route can rebuild
+  // itself — and the two routes underneath it in the stack — purely
+  // from the URL. That's what makes the phone's *physical* back button
+  // step back one screen at a time (lightbox -> project -> category ->
+  // my-works) instead of bouncing all the way to my-works: a real
+  // hardware/browser back press re-parses each URL from scratch with no
+  // `extra` available, and this project's routes used to treat that as
+  // "nothing to show" and redirect straight to '/my-works'.
   void _openLightbox(BuildContext context, List<String> images, int initialIndex) {
     if (images.isEmpty) return;
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        barrierColor: Colors.black.withOpacity(0.95),
-        transitionDuration: const Duration(milliseconds: 220),
-        settings: RouteSettings(name: uniqueRouteName('lightbox')),
-        pageBuilder: (context, animation, __) => FadeTransition(
-          opacity: animation,
-          child: _ImageLightbox(images: images, initialIndex: initialIndex),
-        ),
-      ),
-    );
+    context.push('/my-works/project/${project.id}/lightbox/$initialIndex');
   }
 
   @override
@@ -83,7 +89,7 @@ class ProjectDetailScreen extends StatelessWidget {
                       children: [
                         _RoundIconButton(
                           icon: Icons.arrow_back_rounded,
-                          onTap: () => Navigator.of(context).pop(),
+                          onTap: () => context.pop(),
                         ),
                       ],
                     ),
@@ -353,16 +359,16 @@ class _LightboxDragScrollBehavior extends MaterialScrollBehavior {
 /// and swiping left/right moves between the rest of the project's real
 /// photos without leaving this view. A tap outside the zoomed image, the
 /// close button, or the back gesture all dismiss it.
-class _ImageLightbox extends StatefulWidget {
+class ProjectImageLightbox extends StatefulWidget {
   final List<String> images;
   final int initialIndex;
-  const _ImageLightbox({required this.images, required this.initialIndex});
+  const ProjectImageLightbox({super.key, required this.images, required this.initialIndex});
 
   @override
-  State<_ImageLightbox> createState() => _ImageLightboxState();
+  State<ProjectImageLightbox> createState() => _ProjectImageLightboxState();
 }
 
-class _ImageLightboxState extends State<_ImageLightbox> {
+class _ProjectImageLightboxState extends State<ProjectImageLightbox> {
   late final PageController _controller;
   late int _index;
 
@@ -402,7 +408,7 @@ class _ImageLightboxState extends State<_ImageLightbox> {
               right: 16,
               child: _RoundIconButton(
                 icon: Icons.close_rounded,
-                onTap: () => Navigator.of(context).pop(),
+                onTap: () => context.pop(),
               ),
             ),
             // Left/right arrow buttons — mainly for desktop web, where

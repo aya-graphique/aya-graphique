@@ -78,7 +78,17 @@ class _MobileCircleCarouselState extends State<MobileCircleCarousel> {
         final sizeRef = widget.sizeReferenceCount ?? n;
         final diameter = ((constraints.maxWidth / sizeRef) - 20).clamp(widget.minDiameter, widget.maxDiameter);
         final itemWidth = diameter + 16;
-        final rowHeight = diameter + widget.labelAreaHeight;
+        // Every circle here (see _ClientCircle/_CategoryCircle-style
+        // builders) paints a soft glow BoxShadow around itself that
+        // extends past its own diameter. `rowHeight` used to be just
+        // `diameter + labelAreaHeight`, with zero slack for that glow —
+        // since this Stack clips at its own edges by default, the glow
+        // was getting sliced off in a flat line at the exact top/bottom
+        // of each circle instead of fading out naturally. `glowPadding`
+        // reserves room on both the top and bottom for it to render in
+        // full instead.
+        const glowPadding = 24.0;
+        final rowHeight = diameter + widget.labelAreaHeight + glowPadding * 2;
         final naturalWidth = itemWidth * n;
         final needsScroll = naturalWidth > constraints.maxWidth;
         final rowWidth = needsScroll ? naturalWidth : constraints.maxWidth;
@@ -88,6 +98,12 @@ class _MobileCircleCarouselState extends State<MobileCircleCarousel> {
           height: rowHeight,
           width: rowWidth,
           child: Stack(
+            // Belt-and-suspenders alongside `glowPadding` above: even
+            // with room reserved, the floating up/down animation on
+            // each circle (see e.g. _ClientCircle's .moveY) can still
+            // nudge it right to that reserved edge. Clip.none lets any
+            // remaining sliver of glow bleed rather than get hard-cut.
+            clipBehavior: Clip.none,
             children: [
               for (var i = 0; i < n; i++)
                 AnimatedPositioned(
@@ -95,9 +111,9 @@ class _MobileCircleCarouselState extends State<MobileCircleCarousel> {
                   duration: const Duration(milliseconds: 700),
                   curve: Curves.easeInOutCubic,
                   left: ((i + _rotation) % n) * slotWidth + (slotWidth - itemWidth) / 2,
-                  top: 0,
+                  top: glowPadding,
                   width: itemWidth,
-                  height: rowHeight,
+                  height: rowHeight - glowPadding * 2,
                   child: widget.itemBuilder(context, i, diameter),
                 ),
             ],

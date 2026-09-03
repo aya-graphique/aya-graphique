@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/unique_route.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/circle_carousel.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
 import '../widgets/tilt_3d_card.dart';
-import 'project_detail_screen.dart';
 
 /// Every client logo shown in the "Clients" row below the Projects grid
 /// (see [_ClientsSection]) — bundled assets under assets/images/clients/,
@@ -50,6 +49,7 @@ IconData _iconForCategory(ProjectCategory category) {
 // ---------------------------------------------------------------------
 List<PortfolioProject> kProjects(bool isArabic) => [
       PortfolioProject(
+        id: 'project-1',
         title: isArabic ? 'اسم المشروع الأول' : 'First Project Name',
         category: ProjectCategory.logoIdentity,
         description: isArabic
@@ -65,6 +65,7 @@ List<PortfolioProject> kProjects(bool isArabic) => [
         url: '',
       ),
       PortfolioProject(
+        id: 'project-2',
         title: isArabic ? 'بيتزا بالكسور' : 'Pizza Fractions',
         category: ProjectCategory.packaging,
         description: isArabic
@@ -83,6 +84,7 @@ List<PortfolioProject> kProjects(bool isArabic) => [
         url: '',
       ),
       PortfolioProject(
+        id: 'project-3',
         title: isArabic ? 'اسم المشروع الثالث' : 'Third Project Name',
         category: ProjectCategory.advertising,
         description: isArabic
@@ -98,6 +100,7 @@ List<PortfolioProject> kProjects(bool isArabic) => [
         url: '',
       ),
       PortfolioProject(
+        id: 'project-4',
         title: isArabic ? 'اسم المشروع الرابع' : 'Fourth Project Name',
         category: ProjectCategory.artwork,
         description: isArabic
@@ -389,7 +392,7 @@ class _ProjectsMasonryGrid extends StatelessWidget {
 /// The top-level "My Works" grid: instead of listing every project
 /// directly, it shows exactly one card per [ProjectCategory] — just the
 /// category name on the outside — and tapping a card opens
-/// [_CategoryProjectsScreen] with that category's projects inside
+/// [CategoryProjectsScreen] with that category's projects inside
 /// (reusing the same [_ProjectsMasonryGrid] used before, just filtered).
 class _CategoriesGrid extends StatelessWidget {
   final List<PortfolioProject> projects;
@@ -447,7 +450,7 @@ class _CategoriesGrid extends StatelessWidget {
 /// image (or the same violet placeholder plate used elsewhere when
 /// there isn't one yet), with only the category name printed over it —
 /// no project title, no index badge. Tapping it opens
-/// [_CategoryProjectsScreen] with every project in that category.
+/// [CategoryProjectsScreen] with every project in that category.
 class _CategoryCard extends StatefulWidget {
   final ProjectCategory category;
   final List<PortfolioProject> projects;
@@ -481,15 +484,18 @@ class _CategoryCardState extends State<_CategoryCard> {
         onExit: (_) => setState(() => _hovering = false),
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              settings: RouteSettings(name: uniqueRouteName('category-projects')),
-              builder: (_) => _CategoryProjectsScreen(
-                category: widget.category,
-                projects: widget.projects,
-              ),
-            ),
-          ),
+          // Routed by the category's own stable enum name (e.g.
+          // '/my-works/category/packaging') instead of passing the
+          // projects list via `extra`. `extra` only exists in memory, so
+          // it's gone the instant this route gets rebuilt from a URL
+          // instead of a live push — which is exactly what happens on a
+          // page refresh *and* on a real browser/phone back-button step
+          // (as opposed to the in-app back arrow, which just pops the
+          // in-memory stack). Encoding the category in the URL means the
+          // route can look the projects back up itself every time, so
+          // back/refresh always lands here correctly instead of bouncing
+          // all the way to '/my-works'.
+          onTap: () => context.push('/my-works/category/${widget.category.name}'),
           child: AspectRatio(
             aspectRatio: widget.aspectRatio,
             child: Tilt3DCard(
@@ -551,11 +557,15 @@ class _CategoryCardState extends State<_CategoryCard> {
 
 /// Opened by tapping a category card: same Behance-style masonry grid
 /// as before (see [_ProjectsMasonryGrid]), just filtered down to the
-/// projects that belong to [category].
-class _CategoryProjectsScreen extends StatelessWidget {
+/// projects that belong to [category]. Takes only the [category] enum —
+/// the actual project list is looked up here from [kProjects] every
+/// build, instead of being passed in via go_router's `extra`, so this
+/// screen rebuilds correctly from its URL alone (needed for the phone's
+/// physical back button and for page refresh — see the routing comment
+/// in main.dart).
+class CategoryProjectsScreen extends StatelessWidget {
   final ProjectCategory category;
-  final List<PortfolioProject> projects;
-  const _CategoryProjectsScreen({required this.category, required this.projects});
+  const CategoryProjectsScreen({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -563,6 +573,7 @@ class _CategoryProjectsScreen extends StatelessWidget {
     final isMobile = AppBreakpoints.isMobile(width);
     final isArabic = context.isArabicLanguage;
     AppFonts.forceArabic = context.isArabicFontMode;
+    final projects = kProjects(isArabic).where((p) => p.category == category).toList();
     final categoryLabel = category.labelFor(isArabic);
 
     return Directionality(
@@ -579,7 +590,7 @@ class _CategoryProjectsScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _RoundIconButtonForCategoryBack(onTap: () => Navigator.of(context).pop()),
+                      _RoundIconButtonForCategoryBack(onTap: () => context.pop()),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -607,7 +618,7 @@ class _CategoryProjectsScreen extends StatelessWidget {
   }
 }
 
-/// Small round back button for [_CategoryProjectsScreen] — same visual
+/// Small round back button for [CategoryProjectsScreen] — same visual
 /// language as the arrow/close buttons used on the project detail and
 /// lightbox screens, kept local here to avoid reaching into that file's
 /// private widgets.
@@ -682,12 +693,12 @@ class _ProjectCardState extends State<_ProjectCard> {
         onExit: (_) => setState(() => _hovering = false),
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              settings: RouteSettings(name: uniqueRouteName('project-detail')),
-              builder: (_) => ProjectDetailScreen(project: project),
-            ),
-          ),
+          // Same reasoning as the category card above: route by the
+          // project's stable id (e.g. '/my-works/project/project-2')
+          // instead of passing the whole [PortfolioProject] via `extra`,
+          // so this route can rebuild itself from the URL alone on a
+          // phone back-button step or a refresh.
+          onTap: () => context.push('/my-works/project/${project.id}'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

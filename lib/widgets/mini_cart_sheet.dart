@@ -1,14 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
-import '../screens/checkout_screen.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
-import '../utils/unique_route.dart';
 
 /// Opens a small "mini cart" panel right after the shopper taps + / Add to
 /// cart, showing everything currently in the cart plus a button straight
@@ -148,12 +147,7 @@ class _MiniCartSheet extends StatelessWidget {
                                     child: GestureDetector(
                                       onTap: () {
                                         Navigator.of(context).pop();
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            settings: RouteSettings(name: uniqueRouteName('checkout')),
-                                            builder: (_) => const CheckoutScreen(),
-                                          ),
-                                        );
+                                        context.push('/checkout');
                                       },
                                       child: Container(
                                         height: 58,

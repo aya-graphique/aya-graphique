@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../config/supabase_config.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
-import 'admin_dashboard_screen.dart';
 
 /// Entry point to the admin area. Reachable from the "Store admin" link in
 /// the storefront footer. Anyone can open this screen, but they need the
@@ -39,9 +39,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   void _goToDashboard() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
-    );
+    // Replaces this login page's spot in the stack with the dashboard —
+    // if a shopper reached this screen from the storefront footer link,
+    // the storefront stays underneath so the browser/back-button return
+    // trip still works; if this was opened directly via the `/admin` URL,
+    // there's nothing underneath either way. `context.go('/admin/dashboard')`
+    // would instead discard the whole stack, which would break that
+    // return-to-storefront path.
+    context.pushReplacement('/admin/dashboard');
   }
 
   Future<void> _submit() async {
@@ -80,15 +85,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (Navigator.canPop(context))
+                  if (context.canPop())
                     IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => context.pop(),
                       icon: Icon(Icons.arrow_back_rounded, color: context.colors.creamDim),
                       alignment: Alignment.centerLeft,
                     )
                   else
                     TextButton.icon(
-                      onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
+                      onPressed: () => context.go('/'),
                       icon: Icon(Icons.storefront_rounded, size: 18, color: context.colors.creamDim),
                       label: Text('Back to store', style: AppFonts.body(size: 13, color: context.colors.creamDim)),
                       style: TextButton.styleFrom(alignment: Alignment.centerLeft, padding: EdgeInsets.zero),

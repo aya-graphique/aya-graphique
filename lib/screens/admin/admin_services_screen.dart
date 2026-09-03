@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../config/supabase_config.dart';
 import '../../models/service_override.dart';
 import '../../services/services_repository.dart';
@@ -42,13 +43,12 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
   Future<void> _editItem(int categoryIndex, int itemIndex) async {
     final key = serviceItemKey(categoryIndex, itemIndex);
     final baseItem = kServiceCategories[categoryIndex].items[itemIndex];
-    final changed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => AdminServiceItemEditScreen(
-          itemKey: key,
-          baseItem: baseItem,
-          existingOverride: _overrides[key],
-        ),
+    final changed = await context.push<bool>(
+      '/admin/dashboard/services/edit',
+      extra: ServiceEditArgs(
+        itemKey: key,
+        baseItem: baseItem,
+        existingOverride: _overrides[key],
       ),
     );
     if (changed == true) _load();

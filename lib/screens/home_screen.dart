@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
@@ -23,10 +24,7 @@ import '../widgets/owner_intro_card.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
-import '../utils/unique_route.dart';
-import 'admin/admin_login_screen.dart';
 import 'graphical_services_screen.dart';
-import 'product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Product> products;
@@ -214,12 +212,8 @@ class _HomeScreenState extends State<HomeScreen> {
             _ShopPreviewSection(
               products: widget.products,
               isMobile: widget.isMobile,
-              onProductTap: (product) => Navigator.of(context).push(
-                MaterialPageRoute(
-                  settings: RouteSettings(name: uniqueRouteName('product-detail')),
-                  builder: (_) => ProductDetailScreen(product: product),
-                ),
-              ),
+              onProductTap: (product) =>
+                  context.push('/product/${product.id}', extra: product),
               onShopTap: widget.onShopTap,
             ),
           ],
@@ -1780,12 +1774,7 @@ class _Footer extends StatelessWidget {
   const _Footer({required this.isMobile, this.onAdminReturn});
 
   Future<void> _openAdmin(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        settings: RouteSettings(name: uniqueRouteName('admin-login')),
-        builder: (_) => const AdminLoginScreen(),
-      ),
-    );
+    await context.push('/admin');
     onAdminReturn?.call();
   }
 

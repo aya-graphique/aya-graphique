@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../models/home_banner.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../providers/home_data_controller.dart';
 import '../providers/language_controller.dart';
-import '../services/home_banners_repository.dart';
-import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/shop_nav_bar.dart';
@@ -18,100 +17,68 @@ import 'search_screen.dart';
 import 'shop_screen.dart';
 import 'who_am_i_screen.dart';
 
-// A Navigator route that exists purely so a physical/browser back press
-// has a real, genuine route entry of ours to pop for each tab switch —
-// it never shows anything and never blocks a single tap.
-//
-// This rides the exact same Navigator-push mechanism that already
-// reliably handles browser back for ProductDetailScreen and
-// CheckoutScreen, including multiple levels deep, on both mobile and
-// desktop — that's deliberate. A PopScope-only approach (blocking the
-// pop and asking the engine to "cancel" the browser's own back
-// navigation) was tried instead of this and only worked for a single
-// back press: once the engine compensates for one blocked pop by
-// re-pushing history state, that compensating entry doesn't give the
-// *next* physical back press anything distinguishable to pop, so a
-// second, third, etc. press in a row stopped retracing further tabs.
-// Real, uniquely-named route pushes don't have that ceiling — each one
-// is a genuine, separate history entry, so the phone's own back
-// button/gesture can walk back through as many of them, one at a time,
-// as the person actually has.
-//
-// Two other approaches were tried and both failed for reasons specific
-// to how this app is set up (plain MaterialApp with `routes`, not
-// MaterialApp.router):
-//   1. A raw dart:html.window.onPopState listener, run in parallel with
-//      Flutter's own internal popstate handling — one physical back
-//      press fired both, double-counting and overshooting straight to
-//      Home instead of stepping back one tab.
-//   2. BackButtonListener, which needs a Router ancestor — this app
-//      doesn't have one (it uses plain Navigator 1.0 via `routes`), so
-//      it threw "Router operation requested with a context that does
-//      not include a Router" at runtime.
-// Letting the *same* Navigator that already owns ProductDetailScreen/
-// CheckoutScreen's back handling also own this avoids all three
-// problems.
-//
-// Note this is NOT the same as just passing barrierColor: null to a
-// plain PageRouteBuilder: every ModalRoute (which PageRouteBuilder is)
-// installs an invisible full-screen "modal barrier" whose entire job is
-// to swallow taps aimed at whatever's behind it — that's how a dialog
-// stops you from tapping the screen behind it. barrierColor only
-// controls whether that barrier is painted; it still intercepts every
-// tap even when null. Left as the default, that barrier is what made
-// the site "freeze" after switching tabs once — the very next tap on
-// any icon was being silently absorbed by this marker route's barrier
-// instead of reaching the real nav bar underneath. Overriding
-// buildModalBarrier() to render nothing means there's genuinely nothing
-// left on top of the real UI, so taps pass straight through.
-//
-// Each instance also gets its own unique RouteSettings.name (see the
-// counter below). Two anonymous/identically-named routes pushed back to
-// back can look like the same entry to Flutter's web layer, so only the
-// first tab switch would register a distinct entry. Giving every push a
-// distinct name makes each one a genuinely new entry, so back works for
-// as many hops as the person has actually taken.
-int _tabMarkerSeq = 0;
+/// Cross-tab remote controls + shared data, handed down to every branch
+/// page inside [MainShell] via [Provider].
+///
+/// Before the go_router migration, MainShell built every tab's screen
+/// itself (inside one big IndexedStack) and simply passed all of this as
+/// constructor params. Now that go_router's `StatefulShellRoute` owns
+/// that IndexedStack — each tab is its own route/Navigator, built by its
+/// own tiny page widget below — the tab pages are no longer direct
+/// children of `_MainShellState` in the widget tree, so they reach back
+/// up for this instead.
+class ShellControls {
+  final List<Product> products;
+  final ServicesFocusController servicesFocusController;
+  final ShopFocusController shopFocusController;
+  final ScrollController homeScrollController;
+  final ScrollController shopScrollController;
+  final void Function(ShopPage page) goTo;
+  final VoidCallback refreshProducts;
 
-class _TabMarkerRoute extends PageRouteBuilder<void> {
-  _TabMarkerRoute()
-      : super(
-          opaque: false,
-          maintainState: false,
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-          settings: RouteSettings(name: '/__tab-marker-${_tabMarkerSeq++}'),
-          pageBuilder: (_, __, ___) => const SizedBox.shrink(),
-        );
+  ShellControls({
+    required this.products,
+    required this.servicesFocusController,
+    required this.shopFocusController,
+    required this.homeScrollController,
+    required this.shopScrollController,
+    required this.goTo,
+    required this.refreshProducts,
+  });
 
-  @override
-  Widget buildModalBarrier() => const SizedBox.shrink();
+  // Called from Home's service circles: switch to the Services tab and
+  // have it scroll straight to (and expand) the tapped category.
+  void openServiceCategory(int index) {
+    goTo(ShopPage.services);
+    servicesFocusController.focusCategory(index);
+  }
+
+  // Called from Home's product category circles: switch to the Shop tab
+  // with that category already selected.
+  void openShopCategory(String category) {
+    goTo(ShopPage.shop);
+    shopFocusController.focusCategory(category);
+  }
 }
 
+/// The storefront's persistent chrome — the frosted nav bar/drawer and
+/// backdrop — wrapped around whichever tab [navigationShell] currently
+/// has active. This is the `builder` widget for a
+/// `StatefulShellRoute.indexedStack` (see main.dart): go_router itself
+/// now owns the IndexedStack of tabs (one real Navigator + browser
+/// history entry per tab), so this widget's only job is the chrome plus
+/// the handful of pieces of state/controllers the tabs need to talk to
+/// each other (see [ShellControls]) — it no longer builds any tab's
+/// screen directly.
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final StatefulNavigationShell navigationShell;
+  const MainShell({super.key, required this.navigationShell});
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
-  // Home is the site's landing page — sliders, category/service teasers,
-  // and the owner intro, all in one scroll. The shop grid itself now
-  // lives on its own standalone Shop tab (see ShopScreen).
-  ShopPage _page = ShopPage.home;
-  // Tracks the tabs visited before the current one, most recent last, so
-  // the physical/browser back button can retrace the user's actual path
-  // (Shop -> Cart -> back goes to Shop) instead of always jumping to
-  // Home or leaving the site. Each entry here has a matching invisible
-  // route pushed onto the Navigator (see _goTo) — that's what actually
-  // gives a browser back press / phone back gesture something of ours to
-  // pop, one at a time, no matter how many presses in a row. Popped one
-  // at a time in the push's .then callback in _goTo; empty means Home is
-  // the only stop so far, so with no marker route left to pop, the next
-  // back press correctly falls through to normal browser behaviour
-  // (leave the page).
-  final List<ShopPage> _navHistory = [];
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
   // nav instead of a drawer.
@@ -119,42 +86,24 @@ class _MainShellState extends State<MainShell> {
   final ScrollController _homeScrollController = ScrollController();
   final ScrollController _shopScrollController = ScrollController();
   // Lets Home's "service circles" row jump straight to a specific
-  // category on the standalone Services tab (see _openServiceCategory
-  // below and ServicesFocusController in graphical_services_screen.dart).
+  // category on the standalone Services tab.
   final ServicesFocusController _servicesFocusController = ServicesFocusController();
   // Lets Home's product category circles jump straight to a specific
-  // category on the standalone Shop tab (see _openShopCategory below and
-  // ShopFocusController in shop_screen.dart).
+  // category on the standalone Shop tab.
   final ShopFocusController _shopFocusController = ShopFocusController();
-  late Future<List<Product>> _productsFuture;
-  // Kicked off here, at the same time as _productsFuture, instead of
-  // inside HomeScreen's own initState — previously the banner fetch only
-  // *started* once HomeScreen mounted, which was itself gated behind
-  // _productsFuture resolving, so it was two network round-trips back to
-  // back (products, then banners) instead of one. Starting both together
-  // here is what actually fixes the banner slideshow feeling slow to
-  // appear; HomeScreen now just awaits whatever's passed in.
-  late Future<List<HomeBanner>> _bannersFuture;
-  // Same idea as _bannersFuture, but for the second banner strip further
-  // down Home, right above "MOST ORDERED" — its own owner-managed set of
-  // photos (see HomeBannerPlacement.mostOrdered), fetched alongside the
-  // others so it's ready by the time that part of Home scrolls into view.
-  late Future<List<HomeBanner>> _mostOrderedBannersFuture;
 
   @override
   void initState() {
     super.initState();
-    _productsFuture = ProductsRepository.fetchAll();
     // Reload whatever was in the cart last time this shopper was here,
     // once we actually have the catalog to match those saved lines
-    // against (see CartProvider.restore).
-    _productsFuture.then((products) {
+    // against (see CartProvider.restore). HomeDataController starts this
+    // fetch the moment it's created (see AyaGraphiqueApp), so this just
+    // waits on it.
+    context.read<HomeDataController>().productsFuture.then((products) {
       if (!mounted) return;
       context.read<CartProvider>().restore(products);
     });
-    _bannersFuture = HomeBannersRepository.fetchSlides();
-    _mostOrderedBannersFuture =
-        HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
   }
 
   @override
@@ -167,48 +116,16 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _goTo(ShopPage page) {
-    if (page == _page) return;
-    final previous = _page;
-    setState(() {
-      _navHistory.add(previous);
-      _page = page;
-    });
-    // Push a zero-size, fully transparent route so a physical/browser
-    // back press has a real Navigator entry of ours to pop before it
-    // reaches anything else. Nothing ever pops this programmatically; it
-    // only comes off the stack when the user actually goes back, which
-    // is exactly when we want to retrace one tab. Because this is a
-    // genuine route push (not a state-only change), the phone's native
-    // back button/gesture can walk back through several of these in a
-    // row, one at a time — it's the browser's own history stack doing
-    // the work, not a hand-rolled counter we're trying to keep in sync.
-    Navigator.of(context).push(_TabMarkerRoute()).then((_) {
-      if (!mounted || _navHistory.isEmpty) return;
-      setState(() => _page = _navHistory.removeLast());
-    });
-  }
-
-  // Called from Home's service circles: switch to the Services tab and
-  // have it scroll straight to (and expand) the tapped category.
-  void _openServiceCategory(int index) {
-    _goTo(ShopPage.services);
-    _servicesFocusController.focusCategory(index);
-  }
-
-  // Called from Home's product category circles: switch to the Shop tab
-  // with that category already selected.
-  void _openShopCategory(String category) {
-    _goTo(ShopPage.shop);
-    _shopFocusController.focusCategory(category);
-  }
-
-  void _refreshProducts() {
-    setState(() {
-      _productsFuture = ProductsRepository.fetchAll();
-      _bannersFuture = HomeBannersRepository.fetchSlides();
-      _mostOrderedBannersFuture =
-          HomeBannersRepository.fetchSlides(placement: HomeBannerPlacement.mostOrdered);
-    });
+    // Each tab is a real go_router branch/location now — switching tabs
+    // is genuine navigation (StatefulNavigationShell.goBranch), and
+    // go_router reports every one of these to the browser as its own
+    // history entry on its own. That's exactly what the old
+    // _TabMarkerRoute/_navHistory hand-rolled machinery existed to fake
+    // for a plain Navigator 1.0 app, so none of that is needed anymore.
+    widget.navigationShell.goBranch(
+      page.index,
+      initialLocation: page.index == widget.navigationShell.currentIndex,
+    );
   }
 
   @override
@@ -228,15 +145,9 @@ class _MainShellState extends State<MainShell> {
     // storefront stuck showing the Latin font after a shopper picked
     // Arabic.
     AppFonts.forceArabic = context.watch<FontController>().arabicMode;
+    final page = ShopPage.values[widget.navigationShell.currentIndex];
+    final data = context.watch<HomeDataController>();
 
-    // No PopScope needed here: every tab switch pushes a real (invisible)
-    // Navigator route in _goTo, so the browser back button / phone back
-    // gesture already has a genuine route of ours to pop — handled by
-    // Flutter's own Navigator, the same well-tested path that already
-    // makes back work correctly for ProductDetailScreen and
-    // CheckoutScreen, including several levels deep. When _navHistory is
-    // empty there's no marker route left, so a back press correctly
-    // falls through to leaving the page.
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
@@ -245,13 +156,22 @@ class _MainShellState extends State<MainShell> {
         // The drawer only exists on mobile — desktop keeps the full pill
         // nav bar floating over the content instead, so there's nothing
         // for a drawer to open there.
-        drawer: isMobile ? ShopNavDrawer(active: _page, onTap: _goTo) : null,
+        drawer: isMobile ? ShopNavDrawer(active: page, onTap: _goTo) : null,
         body: AnimatedBackdrop(
           child: FutureBuilder<List<Product>>(
-            future: _productsFuture,
+            future: data.productsFuture,
             builder: (context, snapshot) {
               final products = snapshot.data ?? const [];
               final loading = snapshot.connectionState == ConnectionState.waiting;
+              final controls = ShellControls(
+                products: products,
+                servicesFocusController: _servicesFocusController,
+                shopFocusController: _shopFocusController,
+                homeScrollController: _homeScrollController,
+                shopScrollController: _shopScrollController,
+                goTo: _goTo,
+                refreshProducts: data.refresh,
+              );
 
               return Stack(
                 children: [
@@ -260,58 +180,9 @@ class _MainShellState extends State<MainShell> {
                       child: CircularProgressIndicator(color: context.colors.orchid),
                     )
                   else
-                    IndexedStack(
-                      index: _page.index,
-                      children: [
-                        HomeScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          scrollController: _homeScrollController,
-                          onAdminReturn: _refreshProducts,
-                          bannersFuture: _bannersFuture,
-                          mostOrderedBannersFuture: _mostOrderedBannersFuture,
-                          onServiceCategoryTap: _openServiceCategory,
-                          onShopTap: () => _goTo(ShopPage.shop),
-                          onCategoryTap: _openShopCategory,
-                          onViewProfileTap: () => _goTo(ShopPage.myWorks),
-                        ),
-                        ShopScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          scrollController: _shopScrollController,
-                          focusController: _shopFocusController,
-                        ),
-                        SearchScreen(products: products, isMobile: isMobile),
-                        GraphicalServicesScreen(
-                          isMobile: isMobile,
-                          focusController: _servicesFocusController,
-                        ),
-                        // Standalone "Who am I" tab — Home no longer
-                        // embeds this inline. The Hero's "View my work"
-                        // button now jumps to the My Works tab instead
-                        // (see HomeScreen.onViewProfileTap), not here.
-                        WhoAmIScreen(isMobile: isMobile),
-                        // ShopPage.myWorks — the Projects section that
-                        // used to live inline inside "Who am I" now has
-                        // its own top-level tab (see MyWorksScreen). Must
-                        // sit at this exact position (index 5) to line up
-                        // with the enum order in shop_nav_bar.dart.
-                        MyWorksScreen(isMobile: isMobile),
-                        // ShopPage.favorites — must sit at this exact
-                        // position (index 6) to line up with the enum
-                        // order in shop_nav_bar.dart. This was previously
-                        // missing entirely, which made IndexedStack throw
-                        // an out-of-range assertion (and freeze the whole
-                        // app) the moment anyone tapped the Favorites icon
-                        // or landed on Cart, since every page after it
-                        // was silently shifted one index short.
-                        FavoritesScreen(
-                          products: products,
-                          isMobile: isMobile,
-                          onBrowse: () => _goTo(ShopPage.shop),
-                        ),
-                        CartScreen(isMobile: isMobile, onBrowse: () => _goTo(ShopPage.shop)),
-                      ],
+                    Provider<ShellControls>.value(
+                      value: controls,
+                      child: widget.navigationShell,
                     ),
                   Positioned(
                     top: 20,
@@ -323,13 +194,13 @@ class _MainShellState extends State<MainShell> {
                       // ShopNavDrawer; desktop is unchanged.
                       child: isMobile
                           ? ShopMobileTopBar(
-                              active: _page,
+                              active: page,
                               onTap: _goTo,
                               onMenuTap: () =>
                                   _scaffoldKey.currentState?.openDrawer(),
                             )
                           : ShopNavBar(
-                              active: _page,
+                              active: page,
                               onTap: _goTo,
                               isMobile: isMobile,
                             ),
@@ -341,6 +212,124 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Below: one tiny page widget per tab/branch (see main.dart's
+/// `StatefulShellRoute.indexedStack`). Each just resolves [ShellControls]
+/// (and, for Home, [HomeDataController] directly for its banner futures)
+/// and builds the real screen — the screens' own widget APIs are
+/// unchanged from before this migration.
+class HomeTabPage extends StatelessWidget {
+  const HomeTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    final data = context.watch<HomeDataController>();
+    return HomeScreen(
+      products: controls.products,
+      isMobile: isMobile,
+      scrollController: controls.homeScrollController,
+      onAdminReturn: controls.refreshProducts,
+      bannersFuture: data.bannersFuture,
+      mostOrderedBannersFuture: data.mostOrderedBannersFuture,
+      onServiceCategoryTap: controls.openServiceCategory,
+      onShopTap: () => controls.goTo(ShopPage.shop),
+      onCategoryTap: controls.openShopCategory,
+      onViewProfileTap: () => controls.goTo(ShopPage.myWorks),
+    );
+  }
+}
+
+class ShopTabPage extends StatelessWidget {
+  const ShopTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    return ShopScreen(
+      products: controls.products,
+      isMobile: isMobile,
+      scrollController: controls.shopScrollController,
+      focusController: controls.shopFocusController,
+    );
+  }
+}
+
+class SearchTabPage extends StatelessWidget {
+  const SearchTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    return SearchScreen(products: controls.products, isMobile: isMobile);
+  }
+}
+
+class ServicesTabPage extends StatelessWidget {
+  const ServicesTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    return GraphicalServicesScreen(
+      isMobile: isMobile,
+      focusController: controls.servicesFocusController,
+    );
+  }
+}
+
+class AboutTabPage extends StatelessWidget {
+  const AboutTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    return WhoAmIScreen(isMobile: isMobile);
+  }
+}
+
+class MyWorksTabPage extends StatelessWidget {
+  const MyWorksTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    return MyWorksScreen(isMobile: isMobile);
+  }
+}
+
+class FavoritesTabPage extends StatelessWidget {
+  const FavoritesTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    return FavoritesScreen(
+      products: controls.products,
+      isMobile: isMobile,
+      onBrowse: () => controls.goTo(ShopPage.shop),
+    );
+  }
+}
+
+class CartTabPage extends StatelessWidget {
+  const CartTabPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(MediaQuery.of(context).size.width);
+    final controls = context.watch<ShellControls>();
+    return CartScreen(
+      isMobile: isMobile,
+      onBrowse: () => controls.goTo(ShopPage.shop),
     );
   }
 }
