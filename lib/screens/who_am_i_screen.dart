@@ -192,90 +192,99 @@ class _Certificate {
   // icon/title mock-up. The back (flip side) still shows the write-up
   // in [content].
   final String? imageAsset;
+  // Real certificate photos come in whatever aspect ratio they were
+  // scanned/photographed at (portrait A4, landscape, etc.) — this lets
+  // each certificate report its own image's width/height ratio so the
+  // back-face frame fits it properly instead of assuming every photo is
+  // shaped like the old default (1492×1054, landscape). Falls back to
+  // that same default when a certificate doesn't set it.
+  final double? imageAspectRatio;
   const _Certificate({
     required this.title,
     required this.issuer,
     required this.date,
     required this.content,
     this.imageAsset,
+    this.imageAspectRatio,
   });
 }
 
 // ---------------------------------------------------------------------
-// ✏️ عدّلي هنا يدويًا: كل شهادة جديدة ضيفيها كـ _Certificate في الليستة
-// دي. title/issuer/date بيظهروا في وش الكارت؛ content هو اللي بيظهر
-// لما اليوزر يدوس على الكارت ويعمل فليب — اكتبيه باختصار (2-3 جمل).
+// ✏️ الشهادات الحقيقية — كل الشهادات الوهمية/التجريبية القديمة اتشالت
+// وبقت الليستة دي فيها الشهادات الفعلية بتاعتك بصورها الحقيقية بس.
+// لإضافة شهادة جديدة يدويًا: ضيفيها كـ _Certificate هنا (وفي نسخة
+// الـ isArabic التانية بالإنجليزي)، وحطي صورتها في
+// assets/images/certificates/ وسجليها في pubspec.yaml لو مش متسجلة.
 // ---------------------------------------------------------------------
 List<_Certificate> kCertificates(bool isArabic) => isArabic
     ? const [
         _Certificate(
-          title: 'دورة التصميم الجرافيكي الاحترافي',
-          issuer: 'Creative\u00A0Ideas',
-          date: '2024',
-          content: 'أتمت الدورة الاحترافية في التصميم الجرافيكي بنجاح، بمهارات '
-              'قوية في مبادئ التصميم، بناء العلامة التجارية، ونظرية الألوان.',
-          imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
-        ),
-        _Certificate(
-          title: 'اسم الشهادة الأولى',
-          issuer: 'الجهة المانحة',
+          title: 'شهادة تخرج – بكالوريوس الفنون التطبيقية',
+          issuer: 'جامعة 6 أكتوبر – كلية الفنون التطبيقية',
           date: '2023',
-          content: 'وصف مختصر لمحتوى الشهادة: إيه اللي اتغطى فيها، وإيه '
-              'المهارات أو الأدوات اللي اتعلمتيها من خلالها.',
+          content: 'شهادة تخرج تفيد بمنح درجة بكالوريوس الفنون التطبيقية '
+              '(قسم الإعلان) من جامعة 6 أكتوبر، بمعدل تراكمي 3.13 من 4 '
+              'يعادل تقدير جيد جدًا — سبتمبر 2023.',
+          imageAsset: 'assets/images/certificates/certificate_graduation_2023.jpg',
+          imageAspectRatio: 1131 / 1600,
         ),
         _Certificate(
-          title: 'اسم الشهادة الثانية',
-          issuer: 'الجهة المانحة',
-          date: '2022',
-          content: 'وصف مختصر لمحتوى الشهادة التانية.',
+          title: 'ندوة: دور الذكاء الاصطناعي في تصميم الإعلان',
+          issuer: 'جامعة 6 أكتوبر – قسم الإعلان',
+          date: '2024',
+          content: 'شهادة شكر وتقدير من أسرة قسم الإعلان بكلية الفنون '
+              'التطبيقية، تقديرًا للمشاركة بإلقاء ندوة بعنوان (دور الذكاء '
+              'الاصطناعي في تصميم الإعلان) لطلاب القسم خلال العام الجامعي '
+              '2023/2024.',
+          imageAsset: 'assets/images/certificates/certificate_ai_seminar_2024.jpg',
+          imageAspectRatio: 1131 / 1600,
         ),
         _Certificate(
-          title: 'اسم الشهادة الثالثة',
-          issuer: 'الجهة المانحة',
-          date: '2021',
-          content: 'وصف مختصر لمحتوى الشهادة التالتة.',
-        ),
-        _Certificate(
-          title: 'اسم الشهادة الرابعة',
-          issuer: 'الجهة المانحة',
-          date: '2020',
-          content: 'وصف مختصر لمحتوى الشهادة الرابعة.',
+          title: 'ندوة: الفن والتصميم',
+          issuer: 'جامعة 6 أكتوبر – قسم الإعلان',
+          date: '2025',
+          content: 'شهادة شكر وتقدير من كلية الفنون التطبيقية، تقديرًا '
+              'لتقديم ندوة بعنوان (الفن والتصميم) لطلاب الفرقة الرابعة '
+              'بقسم الإعلان في مقرر تصميم المكتبات والتقويمات — نوفمبر '
+              '2025.',
+          imageAsset: 'assets/images/certificates/certificate_art_design_seminar_2025.jpg',
+          imageAspectRatio: 1600 / 1131,
         ),
       ]
     : const [
         _Certificate(
-          title: 'Professional Graphic Design Course',
-          issuer: 'Creative\u00A0Ideas',
-          date: '2024',
-          content: 'Successfully completed the Professional Graphic Design '
-              'Course, with strong skills in design principles, branding, '
-              'and color theory.',
-          imageAsset: 'assets/images/certificates/certificate_graphic_design.png',
-        ),
-        _Certificate(
-          title: 'First Certificate Name',
-          issuer: 'Issuing Organization',
+          title: "Bachelor's Degree Certificate – Applied Arts",
+          issuer: 'October 6 University — Faculty of Applied Arts',
           date: '2023',
-          content: 'A short write-up of what the certificate covers — the '
-              'skills or tools it represents.',
+          content: 'Graduation certificate confirming the award of a '
+              "Bachelor's degree in Applied Arts (Advertising) from "
+              'October 6 University, with a cumulative GPA of 3.13/4 '
+              '(Very Good) — September 2023.',
+          imageAsset: 'assets/images/certificates/certificate_graduation_2023.jpg',
+          imageAspectRatio: 1131 / 1600,
         ),
         _Certificate(
-          title: 'Second Certificate Name',
-          issuer: 'Issuing Organization',
-          date: '2022',
-          content: 'A short write-up of the second certificate.',
+          title: 'Seminar: The Role of AI in Advertising Design',
+          issuer: 'October 6 University — Advertising Department',
+          date: '2024',
+          content: 'Certificate of appreciation from the Advertising '
+              'Department, Faculty of Applied Arts, for delivering a '
+              'seminar on "The Role of Artificial Intelligence in '
+              'Advertising Design" to advertising students during the '
+              '2023/2024 academic year.',
+          imageAsset: 'assets/images/certificates/certificate_ai_seminar_2024.jpg',
+          imageAspectRatio: 1131 / 1600,
         ),
         _Certificate(
-          title: 'Third Certificate Name',
-          issuer: 'Issuing Organization',
-          date: '2021',
-          content: 'A short write-up of the third certificate.',
-        ),
-        _Certificate(
-          title: 'Fourth Certificate Name',
-          issuer: 'Issuing Organization',
-          date: '2020',
-          content: 'A short write-up of the fourth certificate.',
+          title: 'Seminar: Art and Design',
+          issuer: 'October 6 University — Advertising Department',
+          date: '2025',
+          content: 'Certificate of appreciation from the Faculty of '
+              'Applied Arts for delivering a seminar titled "Art and '
+              'Design" to fourth-year Advertising students in the '
+              'Typography and Calendar Design course — November 2025.',
+          imageAsset: 'assets/images/certificates/certificate_art_design_seminar_2025.jpg',
+          imageAspectRatio: 1600 / 1131,
         ),
       ];
 
@@ -1514,15 +1523,16 @@ class _CertificateBackContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    // Real certificate image on file — the frame itself is now sized to
-    // the certificate's own proportions (1492×1054) instead of
-    // stretching to fill whatever box the front face dictates. It's
-    // centered in the available space, so there's no mismatched
-    // backdrop/border showing in the gutters the way there was when the
-    // frame filled the whole box and the photo sat inside it via
-    // BoxFit.contain.
+    // Real certificate image on file — the frame itself is sized to
+    // that certificate's own photo proportions (imageAspectRatio, set
+    // per-certificate above — portrait for a scanned A4 page, landscape
+    // for a wide award, etc.) instead of stretching to fill whatever box
+    // the front face dictates. It's centered in the available space, so
+    // there's no mismatched backdrop/border showing in the gutters the
+    // way there was when the frame filled the whole box and the photo
+    // sat inside it via BoxFit.contain.
     if (certificate.imageAsset != null) {
-      const certificateAspectRatio = 1492 / 1054;
+      final certificateAspectRatio = certificate.imageAspectRatio ?? (1492 / 1054);
       return Center(
         child: AspectRatio(
           aspectRatio: certificateAspectRatio,
