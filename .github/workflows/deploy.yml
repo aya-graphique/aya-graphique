@@ -1,0 +1,50 @@
+name: Build and Deploy to GitHub Pages
+
+# يشتغل أوتوماتيك كل مرة يتعمل فيها push على الفرع main
+# (غيّري اسم الفرع تحت لو مختلف عندك)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # base-href '/' لأن الموقع ده نوعه username.github.io (صفحة جذر)
+      # لو مستقبلاً نقلتي الموقع لريبو باسم مختلف (repo pages مش user pages)
+      # هتحتاجي تغيّري ده لـ /اسم-الريبو/
+      - name: Build web
+        run: flutter build web --release --base-href /
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

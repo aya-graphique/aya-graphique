@@ -5,5 +5,3 @@
 // hard-fail on a missing dart:html.
 
 void pushTabHistoryEntry() {}
-
-void Function() listenForBack(void Function() onBack) => () {};

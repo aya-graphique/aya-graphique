@@ -22,6 +22,36 @@ import 'who_am_i_screen.dart';
 // has a real, genuine route entry of ours to pop for each tab switch —
 // it never shows anything and never blocks a single tap.
 //
+// This rides the exact same Navigator-push mechanism that already
+// reliably handles browser back for ProductDetailScreen and
+// CheckoutScreen, including multiple levels deep, on both mobile and
+// desktop — that's deliberate. A PopScope-only approach (blocking the
+// pop and asking the engine to "cancel" the browser's own back
+// navigation) was tried instead of this and only worked for a single
+// back press: once the engine compensates for one blocked pop by
+// re-pushing history state, that compensating entry doesn't give the
+// *next* physical back press anything distinguishable to pop, so a
+// second, third, etc. press in a row stopped retracing further tabs.
+// Real, uniquely-named route pushes don't have that ceiling — each one
+// is a genuine, separate history entry, so the phone's own back
+// button/gesture can walk back through as many of them, one at a time,
+// as the person actually has.
+//
+// Two other approaches were tried and both failed for reasons specific
+// to how this app is set up (plain MaterialApp with `routes`, not
+// MaterialApp.router):
+//   1. A raw dart:html.window.onPopState listener, run in parallel with
+//      Flutter's own internal popstate handling — one physical back
+//      press fired both, double-counting and overshooting straight to
+//      Home instead of stepping back one tab.
+//   2. BackButtonListener, which needs a Router ancestor — this app
+//      doesn't have one (it uses plain Navigator 1.0 via `routes`), so
+//      it threw "Router operation requested with a context that does
+//      not include a Router" at runtime.
+// Letting the *same* Navigator that already owns ProductDetailScreen/
+// CheckoutScreen's back handling also own this avoids all three
+// problems.
+//
 // Note this is NOT the same as just passing barrierColor: null to a
 // plain PageRouteBuilder: every ModalRoute (which PageRouteBuilder is)
 // installs an invisible full-screen "modal barrier" whose entire job is
@@ -36,15 +66,11 @@ import 'who_am_i_screen.dart';
 // left on top of the real UI, so taps pass straight through.
 //
 // Each instance also gets its own unique RouteSettings.name (see the
-// counter below). Flutter Web's router only pushes a *new* browser
-// history entry when a route's identity actually looks different from
-// the previous one — every earlier version of this marker was an
-// anonymous, nameless route, so the second, third, etc. tab switch in a
-// row all looked identical to the router and only the very first one
-// ever registered with the browser. That's what made back only work a
-// single time on both mobile and desktop. Giving every push a distinct
-// name makes each one a genuinely new entry, so back works for as many
-// hops as the person has actually taken.
+// counter below). Two anonymous/identically-named routes pushed back to
+// back can look like the same entry to Flutter's web layer, so only the
+// first tab switch would register a distinct entry. Giving every push a
+// distinct name makes each one a genuinely new entry, so back works for
+// as many hops as the person has actually taken.
 int _tabMarkerSeq = 0;
 
 class _TabMarkerRoute extends PageRouteBuilder<void> {
@@ -80,15 +106,11 @@ class _MainShellState extends State<MainShell> {
   // Home or leaving the site. Each entry here has a matching invisible
   // route pushed onto the Navigator (see _goTo) — that's what actually
   // gives a browser back press / phone back gesture something of ours to
-  // pop, riding the exact same Navigator-push mechanism that already
-  // reliably handles back for ProductDetailScreen and CheckoutScreen on
-  // both mobile and desktop, instead of the hand-rolled dart:html
-  // history.pushState/popstate listener this used to use (which behaved
-  // inconsistently between mobile and desktop browsers). Popped one at a
-  // time in the push's .then callback below; empty means Home is the
-  // only stop so far, so with no marker route left to pop, the next back
-  // press correctly falls through to normal browser behaviour (leave the
-  // page).
+  // pop, one at a time, no matter how many presses in a row. Popped one
+  // at a time in the push's .then callback in _goTo; empty means Home is
+  // the only stop so far, so with no marker route left to pop, the next
+  // back press correctly falls through to normal browser behaviour
+  // (leave the page).
   final List<ShopPage> _navHistory = [];
   // Only used on mobile, to open ShopNavDrawer from the compact top bar's
   // menu button — desktop never touches this since it keeps the full pill
@@ -153,13 +175,13 @@ class _MainShellState extends State<MainShell> {
     });
     // Push a zero-size, fully transparent route so a physical/browser
     // back press has a real Navigator entry of ours to pop before it
-    // reaches anything else. This is the same push mechanism already
-    // used for ProductDetailScreen/CheckoutScreen — letting Flutter's own
-    // Navigator/Router own the browser history entry is what makes back
-    // behave consistently across both mobile and desktop browsers.
-    // Nothing ever pops this programmatically; it only comes off the
-    // stack when the user actually goes back, which is exactly when we
-    // want to retrace one tab.
+    // reaches anything else. Nothing ever pops this programmatically; it
+    // only comes off the stack when the user actually goes back, which
+    // is exactly when we want to retrace one tab. Because this is a
+    // genuine route push (not a state-only change), the phone's native
+    // back button/gesture can walk back through several of these in a
+    // row, one at a time — it's the browser's own history stack doing
+    // the work, not a hand-rolled counter we're trying to keep in sync.
     Navigator.of(context).push(_TabMarkerRoute()).then((_) {
       if (!mounted || _navHistory.isEmpty) return;
       setState(() => _page = _navHistory.removeLast());
@@ -207,13 +229,14 @@ class _MainShellState extends State<MainShell> {
     // Arabic.
     AppFonts.forceArabic = context.watch<FontController>().arabicMode;
 
-    // No PopScope needed here anymore: every tab switch now pushes a real
-    // (invisible) Navigator route in _goTo, so the browser back button /
-    // phone back gesture already has a genuine route of ours to pop —
-    // handled by Flutter's own Navigator, the same well-tested path that
-    // already makes back work correctly for ProductDetailScreen and
-    // CheckoutScreen. When _navHistory is empty there's no marker route
-    // left, so a back press correctly falls through to leaving the page.
+    // No PopScope needed here: every tab switch pushes a real (invisible)
+    // Navigator route in _goTo, so the browser back button / phone back
+    // gesture already has a genuine route of ours to pop — handled by
+    // Flutter's own Navigator, the same well-tested path that already
+    // makes back work correctly for ProductDetailScreen and
+    // CheckoutScreen, including several levels deep. When _navHistory is
+    // empty there's no marker route left, so a back press correctly
+    // falls through to leaving the page.
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
