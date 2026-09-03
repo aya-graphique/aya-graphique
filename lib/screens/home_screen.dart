@@ -909,13 +909,13 @@ class _StarHeading extends StatelessWidget {
   }
 }
 
-/// The owner-managed "Skills & Arts" row: a centered star-and-title
-/// heading with a short subtitle underneath, then a grid of horizontal
-/// image-left/text-right cards — one per owner-added item (fully
-/// open-ended, added/edited/deleted/reordered from the admin dashboard,
-/// see AdminIllustrationArtScreen). Two cards per row on wide screens,
-/// stacked full-width on mobile. Hidden entirely until the owner has
-/// added at least one item — see the empty-check at the call site.
+/// The "Skills & Arts" row: a centered star-and-title heading with a
+/// short subtitle underneath, then a grid of horizontal image-left/
+/// text-right cards. The items themselves are now hardcoded in
+/// IllustrationArtRepository (no more admin dashboard screen for this —
+/// see that file to change what's shown). Two cards per row on wide
+/// screens, stacked full-width on mobile. Hidden entirely if the list is
+/// ever empty — see the empty-check at the call site.
 class _IllustrationArtSection extends StatelessWidget {
   final List<IllustrationArtItem> items;
   final bool isMobile;
@@ -1047,15 +1047,31 @@ class _SkillArtCardState extends State<_SkillArtCard> {
                         ),
                       ),
                       child: widget.item.imageUrl.isNotEmpty
-                          ? Image.network(
-                              widget.item.imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.palette_outlined,
-                                color: colors.violetPop,
-                                size: 34,
-                              ),
-                            )
+                          // Hardcoded items (see IllustrationArtRepository)
+                          // point at a bundled assets/images/... path
+                          // instead of a Supabase URL, so they need
+                          // Image.asset instead of Image.network — network
+                          // is kept as a fallback in case a real URL ever
+                          // ends up here again.
+                          ? (widget.item.imageUrl.startsWith('assets/')
+                              ? Image.asset(
+                                  widget.item.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    Icons.palette_outlined,
+                                    color: colors.violetPop,
+                                    size: 34,
+                                  ),
+                                )
+                              : Image.network(
+                                  widget.item.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    Icons.palette_outlined,
+                                    color: colors.violetPop,
+                                    size: 34,
+                                  ),
+                                ))
                           : Center(
                               child: Icon(Icons.palette_outlined, color: colors.violetPop, size: 34),
                             ),
@@ -1561,20 +1577,43 @@ class _CategoryCircleState extends State<_CategoryCircle> {
                         ),
                       ),
                       child: widget.imageUrl != null
-                          ? Image.network(
-                              widget.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Padding(
-                                padding: EdgeInsets.all(diameter * 0.14),
-                                child: Center(
-                                  child: Icon(
-                                    widget.icon ?? Icons.auto_awesome_rounded,
-                                    color: colors.violetPop,
-                                    size: diameter * 0.5,
+                          // Hardcoded service-category images (see
+                          // ServiceCategoriesRepository) point at a
+                          // bundled assets/images/... path instead of a
+                          // Supabase URL, so they need Image.asset instead
+                          // of Image.network — network is kept as a
+                          // fallback for any other caller of this shared
+                          // circle widget that still passes a real URL
+                          // (e.g. shop category circles).
+                          ? (widget.imageUrl!.startsWith('assets/')
+                              ? Image.asset(
+                                  widget.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Padding(
+                                    padding: EdgeInsets.all(diameter * 0.14),
+                                    child: Center(
+                                      child: Icon(
+                                        widget.icon ?? Icons.auto_awesome_rounded,
+                                        color: colors.violetPop,
+                                        size: diameter * 0.5,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )
+                                )
+                              : Image.network(
+                                  widget.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Padding(
+                                    padding: EdgeInsets.all(diameter * 0.14),
+                                    child: Center(
+                                      child: Icon(
+                                        widget.icon ?? Icons.auto_awesome_rounded,
+                                        color: colors.violetPop,
+                                        size: diameter * 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ))
                           : Padding(
                               padding: EdgeInsets.all(diameter * 0.14),
                               child: Center(

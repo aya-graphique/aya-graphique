@@ -14,7 +14,6 @@ import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
 import 'admin_home_banners_screen.dart';
-import 'admin_illustration_art_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_services_screen.dart';
@@ -464,16 +463,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               },
             ),
             _DrawerTile(
-              icon: Icons.brush_outlined,
-              label: 'Illustration & Art',
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AdminIllustrationArtScreen()),
-                );
-              },
-            ),
-            _DrawerTile(
               icon: Icons.receipt_long_rounded,
               label: 'Orders',
               badgeCount: _pendingOrdersCount,
@@ -534,13 +523,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             icon: Icon(Icons.design_services_outlined, color: context.colors.creamDim),
             tooltip: 'Services',
-          ),
-          IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminIllustrationArtScreen()),
-            ),
-            icon: Icon(Icons.brush_outlined, color: context.colors.creamDim),
-            tooltip: 'Illustration & Art',
           ),
           IconButton(
             onPressed: _openOrders,

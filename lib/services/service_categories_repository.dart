@@ -1,58 +1,23 @@
-import '../config/supabase_config.dart';
-import 'supabase_service.dart';
-
-/// Owner-set thumbnail images for the three fixed service categories
-/// (Mentoring / Designing / Private Workshop) shown on the storefront's
-/// Home page category-circles row, keyed by each category's fixed index
-/// in `kServiceCategories` (see graphical_services_screen.dart). Mirrors
-/// [CategoriesRepository]'s image handling for the shop's own category
-/// circles, just for a fixed set of 3 rows instead of an open-ended list.
+/// Thumbnail images for the three fixed service categories (Mentoring /
+/// Designing / Private Workshop) shown on the storefront's Home page
+/// category-circles row, keyed by each category's fixed index in
+/// `kServiceCategories` (see graphical_services_screen.dart).
+///
+/// This used to be owner-managed from the admin dashboard (upload/replace/
+/// remove per category, stored in Supabase). It's now hardcoded instead
+/// (bundled into the app itself) to save bandwidth, since these three
+/// photos rarely change. The admin dashboard no longer has a screen for
+/// this — to change a photo, replace its file under assets/images/ (or
+/// point [_hardcodedImages] at a new one below), then run
+/// `flutter build web --release` and redeploy.
 class ServiceCategoriesRepository {
-  /// All saved thumbnails, keyed by category index. A category with no
-  /// entry here (or a blank image_url) just falls back to its icon — see
-  /// HomeScreen's `_CategoryCircles`.
-  static Future<Map<int, String>> fetchImages() async {
-    if (!SupabaseConfig.isConfigured) return {};
-    try {
-      final data = await SupabaseService.client.from('service_category_images').select();
-      final rows = (data as List).cast<Map<String, dynamic>>();
-      return {
-        for (final row in rows)
-          if (((row['image_url'] as String?) ?? '').isNotEmpty)
-            row['category_index'] as int: row['image_url'] as String,
-      };
-    } catch (_) {
-      return {};
-    }
-  }
+  static const Map<int, String> _hardcodedImages = {
+    0: 'assets/images/service_mentoring.jpg', // Mentoring
+    1: 'assets/images/service_designing.jpg', // Designing
+    2: 'assets/images/service_workshop.jpg', // Private Workshop
+  };
 
-  /// Sets (or replaces) a service category's thumbnail image.
-  static Future<void> setImage(int categoryIndex, String imageUrl) async {
-    if (!SupabaseConfig.isConfigured) return;
-    await SupabaseService.client
-        .from('service_category_images')
-        .upsert({'category_index': categoryIndex, 'image_url': imageUrl});
-  }
-
-  /// Clears a service category's thumbnail, falling back to its default
-  /// icon on the storefront. Deletes the row outright rather than upserting
-  /// a blank image_url, so [fetchImages] (which already skips blank URLs)
-  /// doesn't need to special-case it either way.
-  ///
-  /// Chains `.select()` onto the delete and checks the returned rows:
-  /// Supabase's delete call succeeds (no exception) even when a row-level
-  /// security policy silently blocks it and zero rows are actually
-  /// removed, so without this check the UI would optimistically show the
-  /// photo as gone while it's still sitting in the database.
-  static Future<void> clearImage(int categoryIndex) async {
-    if (!SupabaseConfig.isConfigured) return;
-    final deleted = await SupabaseService.client
-        .from('service_category_images')
-        .delete()
-        .eq('category_index', categoryIndex)
-        .select();
-    if ((deleted as List).isEmpty) {
-      throw Exception('Photo wasn\'t removed — check delete permissions on service_category_images.');
-    }
-  }
+  /// All thumbnails, keyed by category index. A category with no entry
+  /// here just falls back to its icon — see HomeScreen's `_CategoryCircle`.
+  static Future<Map<int, String>> fetchImages() async => _hardcodedImages;
 }

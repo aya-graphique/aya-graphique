@@ -1,28 +1,55 @@
-import 'package:flutter/foundation.dart';
-import '../config/supabase_config.dart';
 import '../models/illustration_art_item.dart';
 import 'supabase_service.dart';
 
-/// Backs the "Illustration & Art" circles row on the Home page — fully
-/// owner-managed from the admin dashboard (add/edit/delete/reorder), same
-/// singleton-table-of-photos pattern as [HomeBannersRepository], just with
-/// a title alongside each photo instead of just the photo.
+/// Backs the "Illustration & Art" circles row on the Home page.
+///
+/// This used to be fully owner-managed from the admin dashboard
+/// (add/edit/delete/reorder), fetched live from Supabase on every visit —
+/// same singleton-table-of-photos pattern as [HomeBannersRepository]. It's
+/// now hardcoded instead (bundled into the app itself) to save bandwidth,
+/// since this content doesn't change often. [fetchAll] below no longer
+/// touches the network at all.
+///
+/// NOTE: the admin dashboard's "Illustration & Art" screen can still add,
+/// edit, or reorder rows in the `illustration_art_items` table, but none
+/// of that will show up on the live site anymore — this list is what's
+/// actually displayed. To change what shoppers see, edit [_hardcodedItems]
+/// below (and add any new photo under assets/images/, then run
+/// `flutter build web --release` and redeploy).
 class IllustrationArtRepository {
-  /// Items in display order (lowest `sort_order` first).
+  static const List<IllustrationArtItem> _hardcodedItems = [
+    IllustrationArtItem(
+      id: 'illustration',
+      titleEn: 'Illustration',
+      titleAr: 'رسـم',
+      descriptionEn:
+          'Digital and traditional paintings that express magical worlds '
+          'and tales woven by the brush of imagination',
+      descriptionAr:
+          'لوحات رقمية وتقليدية تعبر عن عوالم سحرية وحكايات تنسجها ريشة '
+          'الخيال',
+      imageUrl: 'assets/images/illustration_rasm.jpg',
+      sortOrder: 0,
+    ),
+    IllustrationArtItem(
+      id: 'freeform_arabic',
+      titleEn: 'Freeform Arabic',
+      titleAr: 'خط عربي حُر',
+      descriptionEn:
+          'Reviving the ancient Arabic script with contemporary touches in '
+          'artworks that blend authenticity with abstraction',
+      descriptionAr:
+          'احياء الحروف العربية العريقة ولمسات معاصرة في اعمال فنية تدمج '
+          'الأصالة بالتجريد',
+      imageUrl: 'assets/images/illustration_khat.jpg',
+      sortOrder: 1,
+    ),
+  ];
+
+  /// Items in display order. Now a plain hardcoded list — see the class
+  /// doc above for why, and how to change it.
   static Future<List<IllustrationArtItem>> fetchAll() async {
-    if (!SupabaseConfig.isConfigured) return [];
-    try {
-      final data = await SupabaseService.client
-          .from('illustration_art_items')
-          .select()
-          .order('sort_order', ascending: true);
-      return (data as List)
-          .map((row) => IllustrationArtItem.fromRow(row as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      debugPrint("Aya's Graphique: fetching illustration_art_items failed. Real error was:\n$e");
-      return [];
-    }
+    return _hardcodedItems;
   }
 
   /// Adds a circle after whatever's already there (appends to the end).

@@ -1,10 +1,7 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../config/supabase_config.dart';
 import '../../models/service_override.dart';
-import '../../services/service_categories_repository.dart';
 import '../../services/services_repository.dart';
-import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../graphical_services_screen.dart';
 import 'admin_service_item_edit_screen.dart';
@@ -12,8 +9,9 @@ import 'admin_service_item_edit_screen.dart';
 /// Lets the owner tweak the text and prices already on the public
 /// "Services" page. The categories and items themselves are fixed in
 /// code — nothing here can add or remove one, only change what an
-/// existing item says and costs (plus each category's thumbnail image,
-/// shown on the Home page's category-circles row).
+/// existing item says and costs. Each category's thumbnail photo (shown
+/// on the Home page's category-circles row) used to be editable here too,
+/// but is now hardcoded — see ServiceCategoriesRepository.
 class AdminServicesScreen extends StatefulWidget {
   const AdminServicesScreen({super.key});
 
@@ -23,11 +21,6 @@ class AdminServicesScreen extends StatefulWidget {
 
 class _AdminServicesScreenState extends State<AdminServicesScreen> {
   Map<String, ServiceOverride> _overrides = {};
-  Map<int, String> _categoryImages = {};
-  // Which category index is currently mid-upload, so only that one row
-  // shows a spinner instead of the whole page.
-  final Set<int> _uploadingCategoryImage = {};
-  String? _categoryImageError;
   bool _loading = true;
 
   @override
@@ -39,85 +32,11 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     final overrides = await ServicesRepository.fetchOverrides();
-    final categoryImages = await ServiceCategoriesRepository.fetchImages();
     if (!mounted) return;
     setState(() {
       _overrides = overrides;
-      _categoryImages = categoryImages;
       _loading = false;
     });
-  }
-
-  Future<void> _pickCategoryImage(int categoryIndex) async {
-    if (!SupabaseConfig.isConfigured) {
-      setState(() => _categoryImageError = 'Connect Supabase first (see lib/config/supabase_config.dart).');
-      return;
-    }
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      withData: true, // loads bytes directly, works on web + mobile + desktop
-    );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    final bytes = file.bytes;
-    if (bytes == null) {
-      setState(() => _categoryImageError = 'Couldn\'t read that file. Try a different photo.');
-      return;
-    }
-
-    setState(() {
-      _uploadingCategoryImage.add(categoryIndex);
-      _categoryImageError = null;
-    });
-    try {
-      final url = await StorageService.uploadServiceCategoryImage(bytes, file.name);
-      await ServiceCategoriesRepository.setImage(categoryIndex, url);
-      if (!mounted) return;
-      setState(() => _categoryImages = {..._categoryImages, categoryIndex: url});
-    } catch (e) {
-      setState(() => _categoryImageError = 'Couldn\'t upload photo: $e');
-    } finally {
-      if (mounted) setState(() => _uploadingCategoryImage.remove(categoryIndex));
-    }
-  }
-
-  Future<void> _removeCategoryImage(int categoryIndex) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.colors.surfaceRaised,
-        title: Text('Remove photo?', style: AppFonts.display(color: context.colors.cream, size: 16, weight: FontWeight.w700)),
-        content: Text(
-          'This category will show its default icon instead.',
-          style: AppFonts.body(size: 13.5, color: context.colors.creamDim),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: AppFonts.body(color: context.colors.creamDim)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove', style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    setState(() {
-      _uploadingCategoryImage.add(categoryIndex);
-      _categoryImageError = null;
-    });
-    try {
-      await ServiceCategoriesRepository.clearImage(categoryIndex);
-      if (!mounted) return;
-      setState(() => _categoryImages = {..._categoryImages}..remove(categoryIndex));
-    } catch (e) {
-      setState(() => _categoryImageError = 'Couldn\'t remove photo: $e');
-    } finally {
-      if (mounted) setState(() => _uploadingCategoryImage.remove(categoryIndex));
-    }
   }
 
   Future<void> _editItem(int categoryIndex, int itemIndex) async {
@@ -170,27 +89,16 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
                       Text(
                         'Tap an item to edit its title, description, highlights, '
                         'price, or note. Leaving a field blank on the edit screen '
-                        'keeps showing its original text. Tap a category\'s circle '
-                        'to give it a thumbnail photo, shown on the Home page. '
-                        'Long-press a circle that already has a photo to remove it.',
+                        'keeps showing its original text.',
                         style: AppFonts.body(size: 13, color: context.colors.creamDim),
                       ),
-                      if (_categoryImageError != null) ...[
-                        const SizedBox(height: 10),
-                        Text(_categoryImageError!,
-                            style: AppFonts.body(size: 12.5, color: Colors.redAccent)),
-                      ],
                       const SizedBox(height: 20),
                       for (var i = 0; i < kServiceCategories.length; i++) ...[
                         _CategorySection(
                           category: kServiceCategories[i],
                           categoryIndex: i,
                           overrides: _overrides,
-                          imageUrl: _categoryImages[i],
-                          uploading: _uploadingCategoryImage.contains(i),
                           onEditItem: (j) => _editItem(i, j),
-                          onPickImage: () => _pickCategoryImage(i),
-                          onRemoveImage: () => _removeCategoryImage(i),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -205,21 +113,13 @@ class _CategorySection extends StatelessWidget {
   final ServiceCategory category;
   final int categoryIndex;
   final Map<String, ServiceOverride> overrides;
-  final String? imageUrl;
-  final bool uploading;
   final ValueChanged<int> onEditItem;
-  final VoidCallback onPickImage;
-  final VoidCallback onRemoveImage;
 
   const _CategorySection({
     required this.category,
     required this.categoryIndex,
     required this.overrides,
-    required this.imageUrl,
-    required this.uploading,
     required this.onEditItem,
-    required this.onPickImage,
-    required this.onRemoveImage,
   });
 
   @override
@@ -229,52 +129,15 @@ class _CategorySection extends StatelessWidget {
       children: [
         Row(
           children: [
-            GestureDetector(
-              onTap: uploading ? null : onPickImage,
-              onLongPress: (uploading || imageUrl == null || imageUrl!.isEmpty) ? null : onRemoveImage,
-              child: Container(
-                width: 40,
-                height: 40,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.colors.surfaceRaised,
-                  border: Border.all(color: context.colors.border(0.12)),
-                ),
-                child: uploading
-                    ? Center(
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.orchid),
-                        ),
-                      )
-                    : Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (imageUrl != null && imageUrl!.isNotEmpty)
-                            Image.network(
-                              imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Icon(category.icon, size: 18, color: context.colors.orchid),
-                            )
-                          else
-                            Center(child: Icon(category.icon, size: 18, color: context.colors.orchid)),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: context.colors.bgDeep,
-                              ),
-                              child: Icon(Icons.edit_rounded, size: 9, color: context.colors.creamDim),
-                            ),
-                          ),
-                        ],
-                      ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.colors.surfaceRaised,
+                border: Border.all(color: context.colors.border(0.12)),
               ),
+              child: Icon(category.icon, size: 18, color: context.colors.orchid),
             ),
             const SizedBox(width: 10),
             Text(category.title.en,
