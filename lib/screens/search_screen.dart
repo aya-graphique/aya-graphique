@@ -4,6 +4,7 @@ import '../localization/app_strings.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
+import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
 import 'product_detail_screen.dart';
 
@@ -81,7 +82,10 @@ class _SearchScreenState extends State<SearchScreen> {
             ProductGrid(
               products: results,
               onProductTap: (p) => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ProductDetailScreen(product: p)),
+                MaterialPageRoute(
+                  settings: RouteSettings(name: uniqueRouteName('product-detail')),
+                  builder: (_) => ProductDetailScreen(product: p),
+                ),
               ),
             ),
         ],

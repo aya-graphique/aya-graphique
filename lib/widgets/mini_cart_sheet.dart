@@ -8,6 +8,7 @@ import '../screens/checkout_screen.dart';
 import '../services/products_repository.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
+import '../utils/unique_route.dart';
 
 /// Opens a small "mini cart" panel right after the shopper taps + / Add to
 /// cart, showing everything currently in the cart plus a button straight
@@ -148,7 +149,10 @@ class _MiniCartSheet extends StatelessWidget {
                                       onTap: () {
                                         Navigator.of(context).pop();
                                         Navigator.of(context).push(
-                                          MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                                          MaterialPageRoute(
+                                            settings: RouteSettings(name: uniqueRouteName('checkout')),
+                                            builder: (_) => const CheckoutScreen(),
+                                          ),
                                         );
                                       },
                                       child: Container(

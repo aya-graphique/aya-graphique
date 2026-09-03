@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
+import '../utils/unique_route.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/tilt_3d_card.dart';
@@ -38,6 +39,7 @@ class ProjectDetailScreen extends StatelessWidget {
         opaque: false,
         barrierColor: Colors.black.withOpacity(0.95),
         transitionDuration: const Duration(milliseconds: 220),
+        settings: RouteSettings(name: uniqueRouteName('lightbox')),
         pageBuilder: (context, animation, __) => FadeTransition(
           opacity: animation,
           child: _ImageLightbox(images: images, initialIndex: initialIndex),

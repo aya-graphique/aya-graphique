@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/products_repository.dart';
+import '../utils/unique_route.dart';
 import 'main_shell.dart';
 import 'product_detail_screen.dart';
 
@@ -41,7 +42,10 @@ class _ProductLinkScreenState extends State<ProductLinkScreen> {
       }
       if (match == null) return;
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ProductDetailScreen(product: match!)),
+        MaterialPageRoute(
+          settings: RouteSettings(name: uniqueRouteName('product-detail')),
+          builder: (_) => ProductDetailScreen(product: match!),
+        ),
       );
     });
   }

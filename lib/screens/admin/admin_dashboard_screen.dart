@@ -13,6 +13,7 @@ import '../../services/settings_repository.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/currency.dart';
+import '../../utils/unique_route.dart';
 import 'admin_home_banners_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_product_form_screen.dart';
@@ -402,7 +403,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _openOrders() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AdminOrdersScreen()),
+      MaterialPageRoute(
+        settings: RouteSettings(name: uniqueRouteName('admin-orders')),
+        builder: (_) => const AdminOrdersScreen(),
+      ),
     );
     // The badge should reflect anything marked done/reopened while the
     // owner was on the Orders screen.
@@ -444,6 +448,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
+                    settings: RouteSettings(name: uniqueRouteName('admin-banners')),
                     builder: (_) => const AdminHomeBannersScreen(
                       placement: HomeBannerPlacement.mostOrdered,
                       title: 'Banners',
@@ -458,7 +463,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AdminServicesScreen()),
+                  MaterialPageRoute(
+                    settings: RouteSettings(name: uniqueRouteName('admin-services')),
+                    builder: (_) => const AdminServicesScreen(),
+                  ),
                 );
               },
             ),
@@ -508,6 +516,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           IconButton(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
+                settings: RouteSettings(name: uniqueRouteName('admin-banners')),
                 builder: (_) => const AdminHomeBannersScreen(
                   placement: HomeBannerPlacement.mostOrdered,
                   title: 'Banners',
@@ -519,7 +528,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminServicesScreen()),
+              MaterialPageRoute(
+                settings: RouteSettings(name: uniqueRouteName('admin-services')),
+                builder: (_) => const AdminServicesScreen(),
+              ),
             ),
             icon: Icon(Icons.design_services_outlined, color: context.colors.creamDim),
             tooltip: 'Services',

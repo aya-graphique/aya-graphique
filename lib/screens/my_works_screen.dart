@@ -4,6 +4,7 @@ import '../localization/app_strings.dart';
 import '../models/portfolio_project.dart';
 import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
+import '../utils/unique_route.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
@@ -301,6 +302,7 @@ class _CategoryCardState extends State<_CategoryCard> {
         child: GestureDetector(
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
+              settings: RouteSettings(name: uniqueRouteName('category-projects')),
               builder: (_) => _CategoryProjectsScreen(
                 category: widget.category,
                 projects: widget.projects,
@@ -500,7 +502,10 @@ class _ProjectCardState extends State<_ProjectCard> {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)),
+            MaterialPageRoute(
+              settings: RouteSettings(name: uniqueRouteName('project-detail')),
+              builder: (_) => ProjectDetailScreen(project: project),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

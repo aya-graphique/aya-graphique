@@ -4,6 +4,7 @@ import '../localization/app_strings.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
+import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
 import 'checkout_screen.dart';
 
@@ -202,7 +203,10 @@ class _Summary extends StatelessWidget {
             width: double.infinity,
             child: GestureDetector(
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                MaterialPageRoute(
+                  settings: RouteSettings(name: uniqueRouteName('checkout')),
+                  builder: (_) => const CheckoutScreen(),
+                ),
               ),
               child: Container(
                 height: 52,

@@ -23,6 +23,7 @@ import '../widgets/owner_intro_card.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
+import '../utils/unique_route.dart';
 import 'admin/admin_login_screen.dart';
 import 'graphical_services_screen.dart';
 import 'product_detail_screen.dart';
@@ -214,7 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
               products: widget.products,
               isMobile: widget.isMobile,
               onProductTap: (product) => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+                MaterialPageRoute(
+                  settings: RouteSettings(name: uniqueRouteName('product-detail')),
+                  builder: (_) => ProductDetailScreen(product: product),
+                ),
               ),
               onShopTap: widget.onShopTap,
             ),
@@ -1777,7 +1781,10 @@ class _Footer extends StatelessWidget {
 
   Future<void> _openAdmin(BuildContext context) async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
+      MaterialPageRoute(
+        settings: RouteSettings(name: uniqueRouteName('admin-login')),
+        builder: (_) => const AdminLoginScreen(),
+      ),
     );
     onAdminReturn?.call();
   }

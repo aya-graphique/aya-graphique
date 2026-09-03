@@ -5,6 +5,7 @@ import '../services/categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/reveal_on_scroll.dart';
+import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
 import 'product_detail_screen.dart';
 
@@ -86,7 +87,10 @@ class _ShopScreenState extends State<ShopScreen> {
 
   void _openProduct(Product product) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+      MaterialPageRoute(
+        settings: RouteSettings(name: uniqueRouteName('product-detail')),
+        builder: (_) => ProductDetailScreen(product: product),
+      ),
     );
   }
 

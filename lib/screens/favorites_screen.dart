@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/favorites_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
+import '../utils/unique_route.dart';
 import '../widgets/section_heading.dart';
 import 'product_detail_screen.dart';
 
@@ -71,7 +72,10 @@ class FavoritesScreen extends StatelessWidget {
             ProductGrid(
               products: favProducts,
               onProductTap: (p) => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ProductDetailScreen(product: p)),
+                MaterialPageRoute(
+                  settings: RouteSettings(name: uniqueRouteName('product-detail')),
+                  builder: (_) => ProductDetailScreen(product: p),
+                ),
               ),
             ),
         ],
