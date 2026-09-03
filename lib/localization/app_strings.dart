@@ -311,6 +311,8 @@ class AppText {
         'مجموعة مختارة من مشاريع الهوية التجارية والتغليف والإعلانات '
         'والرسوم التوضيحية',
       );
+  String get clientsEyebrow => _t('CLIENTS', 'العملاء');
+  String get clientsTitle => _t('Brands I\'ve worked with.', 'ثقة عملائي.');
   String get experienceLabel => _t('EXPERIENCE', 'الخبرات');
   String get educationLabel => _t('EDUCATION', 'التعليم');
   String get skillsLabel => _t('SKILLS', 'المهارات');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../models/portfolio_project.dart';
@@ -6,10 +7,26 @@ import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/unique_route.dart';
 import '../widgets/animated_backdrop.dart';
+import '../widgets/circle_carousel.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
 import '../widgets/tilt_3d_card.dart';
 import 'project_detail_screen.dart';
+
+/// Every client logo shown in the "Clients" row below the Projects grid
+/// (see [_ClientsSection]) — bundled assets under assets/images/clients/,
+/// each already trimmed/padded to a clean square so it sits nicely inside
+/// a circle regardless of the logo's own original background. Add a new
+/// client by dropping a square-ish logo image into that folder and adding
+/// its path here.
+const List<String> kClientLogos = [
+  'assets/images/clients/client_1.png',
+  'assets/images/clients/client_2.png',
+  'assets/images/clients/client_3.png',
+  'assets/images/clients/client_4.png',
+  'assets/images/clients/client_5.png',
+  'assets/images/clients/client_6.png',
+];
 
 /// A representative glyph per project category, used only to give an
 /// empty (no-image-yet) project cover something more designed than a
@@ -127,9 +144,173 @@ class MyWorksScreen extends StatelessWidget {
             _CategoriesGrid(projects: projects, isMobile: isMobile)
           else
             const SizedBox.shrink(),
+          if (kClientLogos.isNotEmpty) ...[
+            SizedBox(height: isMobile ? 56 : 76),
+            // The rest of this page's Column is CrossAxisAlignment.start
+            // (so headings/text hug the leading edge — the right side in
+            // Arabic/RTL, which is exactly why this block was showing up
+            // pinned to the right instead of centered). Center wraps it
+            // in a box that stretches to the full row width and centers
+            // its child inside that, overriding the inherited start
+            // alignment just for this one section — the heading and the
+            // logo circles below it move together since they're both
+            // inside _ClientsSection's own single child.
+            Center(child: _ClientsSection(isMobile: isMobile)),
+          ],
         ],
       ),
     );
+  }
+}
+
+/// "Clients" row: the same eyebrow-label-plus-divider heading and
+/// Instagram-story-ring circle treatment used for Home's Illustration
+/// Art / Services rows (see _EyebrowCirclesSection/_CategoryCircle in
+/// home_screen.dart) — kept as its own small, self-contained copy here
+/// since those are private to that file. Purely a trust-signal showcase:
+/// no title text under each circle (a wrong/guessed brand name would be
+/// worse than none) and nothing to tap — just the logos, framed and
+/// gently floating like everywhere else this ring style is used.
+class _ClientsSection extends StatelessWidget {
+  final bool isMobile;
+  const _ClientsSection({required this.isMobile});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final strings = context.strings;
+    final sidePadding = EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60);
+    const desktopDiameter = 128.0;
+
+    final circlesArea = isMobile
+        ? MobileCircleCarousel(
+            itemCount: kClientLogos.length,
+            minDiameter: 76,
+            maxDiameter: 110,
+            labelAreaHeight: 0,
+            itemBuilder: (context, i, diameter) => _ClientCircle(
+              imagePath: kClientLogos[i],
+              diameter: diameter,
+              floatDelayIndex: i,
+            ),
+          )
+        : Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 28,
+            runSpacing: 28,
+            children: [
+              for (var i = 0; i < kClientLogos.length; i++)
+                _ClientCircle(
+                  imagePath: kClientLogos[i],
+                  diameter: desktopDiameter,
+                  floatDelayIndex: i,
+                ),
+            ],
+          );
+
+    return RevealOnScroll(
+      child: Column(
+        children: [
+          Padding(
+            padding: sidePadding,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.handshake_outlined, size: isMobile ? 13 : 15, color: colors.orchid),
+                    SizedBox(width: isMobile ? 7 : 10),
+                    Text(strings.clientsEyebrow,
+                        style: AppFonts.label(
+                          text: strings.clientsEyebrow,
+                          color: colors.orchid,
+                          size: isMobile ? 13 : 16,
+                          letterSpacing: isMobile ? 1.2 : 3.0,
+                        )),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  height: 1,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, colors.border(0.14), Colors.transparent],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 26),
+          Padding(padding: sidePadding, child: circlesArea),
+        ],
+      ),
+    );
+  }
+}
+
+/// One client-logo circle: same "story ring" treatment as
+/// home_screen.dart's _CategoryCircle (gradient ring, gentle idle float,
+/// white plate behind the logo) minus the label/tap — this row is a
+/// static trust-signal strip, not a set of navigable items. Uses
+/// Image.asset (the logos are bundled files, not Supabase URLs) with
+/// BoxFit.contain rather than cover, so every logo stays fully legible
+/// and un-cropped no matter its own aspect ratio.
+class _ClientCircle extends StatelessWidget {
+  final String imagePath;
+  final double diameter;
+  final int floatDelayIndex;
+  const _ClientCircle({
+    required this.imagePath,
+    required this.diameter,
+    required this.floatDelayIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: diameter,
+      height: diameter,
+      padding: const EdgeInsets.all(2.5),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: context.colors.violetGradient,
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.violetPop.withOpacity(0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: context.colors.bgDeep, width: 2),
+        ),
+        child: ClipOval(
+          child: Padding(
+            padding: EdgeInsets.all(diameter * 0.16),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.business_rounded,
+                color: context.colors.creamDim,
+                size: diameter * 0.36,
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+        .animate(
+          onPlay: (c) => c.repeat(reverse: true),
+          delay: Duration(milliseconds: 90 * floatDelayIndex),
+        )
+        .moveY(begin: 0, end: -9, duration: 1700.ms, curve: Curves.easeInOut);
   }
 }
 

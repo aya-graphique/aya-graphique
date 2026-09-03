@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
@@ -17,6 +18,40 @@ void main() async {
   // into MainShell as soon as it's ready.
   await SupabaseService.init();
   runApp(const AyaGraphiqueApp());
+
+  // THE REAL FIX for "the browser's own back button only works once, then
+  // goes dead": by default, a plain MaterialApp (Navigator 1.0 — no
+  // MaterialApp.router) drives the web engine in *single-entry history*
+  // mode. In that mode, every route change — no matter how many distinct
+  // Navigator.push calls happen, and no matter how unique their
+  // RouteSettings.name is (see uniqueRouteName / _TabMarkerRoute below) —
+  // is reported to the browser with history.replaceState(), not
+  // pushState(). That collapses the ENTIRE app's navigation into one
+  // single browser history entry, which is why the physical back button
+  // only ever has one real step to give you before it goes dead.
+  // Confirmed by Flutter's own docs — only `Router`-based apps get "a
+  // History API entry ... added to the browser's history stack" on every
+  // navigation: https://docs.flutter.dev/ui/navigation#web-support.
+  //
+  // Calling SystemNavigator.selectMultiEntryHistory() switches that over
+  // — BUT it has to happen here, scheduled for *after* the first frame,
+  // not up above before runApp(). Flutter's own NavigatorState.initState()
+  // unconditionally calls SystemNavigator.selectSingleEntryHistory() the
+  // moment the app's root Navigator is created (this is what
+  // MaterialApp's `reportsRouteUpdateToEngine: true` default does) — and
+  // that initState runs *during* runApp(), i.e. strictly after any call
+  // placed before it. A call made before runApp() was therefore being
+  // silently overwritten a few milliseconds later by Flutter's own
+  // startup code — no error, it just quietly reset back to single-entry
+  // right after. Scheduling this in a post-frame callback guarantees it
+  // runs once the root Navigator's initState (and its single-entry
+  // request) has already happened, so this is the one that actually
+  // sticks. From then on every reported route change genuinely pushes a
+  // new browser history entry, and the back button can walk back through
+  // as many of them as the person has actually visited.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    SystemNavigator.selectMultiEntryHistory();
+  });
 }
 
 class AyaGraphiqueApp extends StatelessWidget {
