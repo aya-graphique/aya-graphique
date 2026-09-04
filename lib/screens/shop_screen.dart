@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../services/categories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
+import '../widgets/product_section.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
 
@@ -155,7 +156,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       // Nothing selected: each category gets its own
                       // labelled section, shown in order.
                       for (var i = 0; i < categories.length; i++) ...[
-                        _ProductSection(
+                        ProductSection(
                           isMobile: widget.isMobile,
                           eyebrow: null,
                           title: categories[i],
@@ -173,64 +174,6 @@ class _ShopScreenState extends State<ShopScreen> {
           const SizedBox(height: 60),
         ],
       ),
-    );
-  }
-}
-
-/// One labelled block of products — either "Best sellers" (with an eyebrow
-/// line above the title) or a single category's own products (just the
-/// category name as the heading, no eyebrow, since it's one of several in
-/// a row rather than a standalone section).
-class _ProductSection extends StatelessWidget {
-  final bool isMobile;
-  final String? eyebrow;
-  final String title;
-  final List<Product> products;
-  final ValueChanged<Product> onProductTap;
-
-  const _ProductSection({
-    required this.isMobile,
-    required this.eyebrow,
-    required this.title,
-    required this.products,
-    required this.onProductTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (products.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: RevealOnScroll(
-              child: eyebrow != null
-                  ? SectionHeading(
-                      eyebrow: eyebrow!,
-                      title: title,
-                      titleSize: isMobile ? 20 : 24,
-                    )
-                  : Text(
-                      title,
-                      style: AppFonts.display(
-                        color: context.colors.cream,
-                        size: AppFonts.isArabic(title)
-                            ? (isMobile ? 18 : 22)
-                            : (isMobile ? 30 : 38),
-                        weight: FontWeight.w700,
-                        text: title,
-                        boostArabicSize: false,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 22),
-        ProductGrid(products: products, onProductTap: onProductTap, singleRowOnDesktop: true),
-      ],
     );
   }
 }

@@ -12,8 +12,6 @@ import 'screens/admin/admin_home_banners_screen.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'screens/admin/admin_orders_screen.dart';
 import 'screens/admin/admin_product_form_screen.dart';
-import 'screens/admin/admin_service_item_edit_screen.dart';
-import 'screens/admin/admin_services_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/main_shell.dart';
 import 'screens/my_works_screen.dart';
@@ -186,27 +184,6 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: 'banners',
           builder: (context, state) => const AdminHomeBannersScreen(),
-        ),
-        GoRoute(
-          path: 'services',
-          builder: (context, state) => const AdminServicesScreen(),
-          routes: [
-            GoRoute(
-              path: 'edit',
-              builder: (context, state) {
-                final args = state.extra;
-                // Same "extra is memory-only" reasoning as the my-works
-                // routes above — fall back to the services list instead
-                // of crashing if this URL gets restored without it.
-                if (args is! ServiceEditArgs) return const _RedirectTo('/admin/dashboard/services');
-                return AdminServiceItemEditScreen(
-                  itemKey: args.itemKey,
-                  baseItem: args.baseItem,
-                  existingOverride: args.existingOverride,
-                );
-              },
-            ),
-          ],
         ),
         GoRoute(
           path: 'product-form',

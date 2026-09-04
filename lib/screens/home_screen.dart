@@ -21,7 +21,7 @@ import '../widgets/facebook_reviews_button.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/owner_intro_card.dart';
-import '../widgets/product_grid.dart';
+import '../widgets/product_section.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
 import 'graphical_services_screen.dart';
@@ -1156,7 +1156,18 @@ class _SkillArtCardState extends State<_SkillArtCard> {
 /// and best-sellers section all live over there now (see ShopScreen).
 /// Capped at 8 products so Home stays a teaser rather than a second full
 /// listing.
-class _ShopPreviewSection extends StatelessWidget {
+/// Teases the shop from Home: a handful of products in a grid, followed by
+/// a "Shop the collection" pill button that hands off to the standalone
+/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
+/// and best-sellers section all live over there now (see ShopScreen).
+///
+/// The preview grid orders products by the same owner-chosen category
+/// order as the main Shop tab (see CategoriesRepository/ShopScreen) before
+/// taking the first few, instead of just whatever order [products] arrived
+/// in — otherwise this teaser could show a completely different first
+/// impression of the shop (e.g. a category the owner pushed to the back
+/// on purpose) than the real thing right behind it.
+class _ShopPreviewSection extends StatefulWidget {
   final List<Product> products;
   final bool isMobile;
   final ValueChanged<Product> onProductTap;
@@ -1170,23 +1181,74 @@ class _ShopPreviewSection extends StatelessWidget {
   });
 
   @override
+  State<_ShopPreviewSection> createState() => _ShopPreviewSectionState();
+}
+
+class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
+  // Same owner-chosen order ShopScreen loads (see
+  // CategoriesRepository.updateOrder) — falls back to alphabetical for any
+  // category not in this list yet, via CategoriesRepository.orderForDisplay.
+  List<String> _knownCategoryOrder = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategoryOrder();
+  }
+
+  Future<void> _loadCategoryOrder() async {
+    final names = await CategoriesRepository.fetchAll();
+    if (!mounted) return;
+    setState(() => _knownCategoryOrder = names);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final preview = products.take(8).toList();
+    final categoryOrder = CategoriesRepository.orderForDisplay(
+      widget.products.map((p) => p.category).toSet(),
+      _knownCategoryOrder,
+    );
+    final categoryRank = {
+      for (var i = 0; i < categoryOrder.length; i++) categoryOrder[i]: i,
+    };
+    // Sorted by category rank, but stably — ties (same category) must
+    // keep their original relative order instead of whatever Dart's
+    // List.sort (not guaranteed stable) happens to do with them, so
+    // products within a category don't visibly shuffle on every rebuild.
+    final indexed = [
+      for (var i = 0; i < widget.products.length; i++) MapEntry(i, widget.products[i]),
+    ]..sort((a, b) {
+        final rankA = categoryRank[a.value.category] ?? categoryOrder.length;
+        final rankB = categoryRank[b.value.category] ?? categoryOrder.length;
+        return rankA != rankB ? rankA.compareTo(rankB) : a.key.compareTo(b.key);
+      });
+    final preview = indexed.map((e) => e.value).take(8).toList();
+    // Grouped by category (each category as its own heading + grid, same
+    // as the standalone Shop tab's default view — see ShopScreen/
+    // ProductSection) instead of one flat grid mixing every category's
+    // cards together. `preview` is already sorted by category rank above,
+    // and a plain Dart Map preserves insertion order, so building this map
+    // by iterating `preview` naturally keeps the categories in that same
+    // order without needing to re-sort.
+    final groupedByCategory = <String, List<Product>>{};
+    for (final product in preview) {
+      groupedByCategory.putIfAbsent(product.category, () => []).add(product);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+          padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 24 : 60),
           child: Align(
             alignment: Alignment.center,
             child: RevealOnScroll(
               child: SectionHeading(
                 eyebrow: context.strings.mostRequestedEyebrow,
                 title: context.strings.artisticProductsLabel,
-                titleSize: isMobile ? 20 : 24,
-                eyebrowSize: isMobile ? 13 : 15,
+                titleSize: widget.isMobile ? 20 : 24,
+                eyebrowSize: widget.isMobile ? 13 : 15,
                 eyebrowIcon: Icons.local_fire_department_rounded,
                 align: TextAlign.center,
               ),
@@ -1194,15 +1256,19 @@ class _ShopPreviewSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Padding(
-          // Matches ShopScreen's outer horizontal inset (ProductGrid adds
-          // its own inner padding on top of this in both places) so the
-          // grid ends up the same effective width — and the cards the
-          // same size — on both Home and the Shop tab.
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40),
-          child: ProductGrid(products: preview, onProductTap: onProductTap),
-        ),
-        const SizedBox(height: 40),
+        // Matches ShopScreen's own default (no active filter) view: each
+        // category gets its own heading + grid, shown in the owner's
+        // chosen category order — see ProductSection.
+        for (final entry in groupedByCategory.entries) ...[
+          ProductSection(
+            isMobile: widget.isMobile,
+            eyebrow: null,
+            title: entry.key,
+            products: entry.value,
+            onProductTap: widget.onProductTap,
+          ),
+          const SizedBox(height: 40),
+        ],
         MarqueeStrip(
           height: 60,
           words: [
@@ -1215,7 +1281,7 @@ class _ShopPreviewSection extends StatelessWidget {
         const SizedBox(height: 40),
         Center(
           child: GestureDetector(
-            onTap: onShopTap,
+            onTap: widget.onShopTap,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 15),
               decoration: BoxDecoration(
