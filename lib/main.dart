@@ -266,7 +266,7 @@ class AyaGraphiqueApp extends StatelessWidget {
       child: Consumer2<ThemeController, FontController>(
         builder: (context, themeController, fontController, _) {
           return MaterialApp.router(
-            title: "Aya's Graphique — Notebooks & Calendars",
+            title: "Aya's Graphique",
             debugShowCheckedModeBanner: false,
             theme: buildAppTheme(AppColors.light, isDark: false),
             darkTheme: buildAppTheme(AppColors.dark, isDark: true),
