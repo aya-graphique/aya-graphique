@@ -101,6 +101,7 @@ class _SocialIconButton extends StatelessWidget {
               ),
             ],
           ),
+          alignment: Alignment.center,
           child: FaIcon(icon, color: Colors.white, size: 20),
         ),
       ),
