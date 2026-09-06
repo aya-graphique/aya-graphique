@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../localization/app_strings.dart';
 import '../providers/cart_provider.dart';
@@ -54,6 +55,56 @@ class _BrandAvatar extends StatelessWidget {
 /// this same pill now, right after the page icons — they used to hide
 /// behind a separate "more" button/pill that had to be opened first, but
 /// they're common enough controls that they belong in the bar itself.
+/// Wraps the logo so it still behaves as a normal "go home" tap target on
+/// every tap, but also secretly counts rapid taps in the background: four
+/// taps within two seconds quietly opens the admin login screen instead.
+/// Not signposted anywhere in the UI on purpose — this is the one hidden
+/// entry point into '/ayalovespurple' for the owner, since there's no
+/// visible admin link on the storefront otherwise.
+class _SecretLogoTap extends StatefulWidget {
+  final VoidCallback onTap;
+  final Widget child;
+  const _SecretLogoTap({required this.onTap, required this.child});
+
+  @override
+  State<_SecretLogoTap> createState() => _SecretLogoTapState();
+}
+
+class _SecretLogoTapState extends State<_SecretLogoTap> {
+  static const _requiredTaps = 4;
+  static const _resetWindow = Duration(seconds: 2);
+
+  int _tapCount = 0;
+  DateTime? _firstTapAt;
+
+  void _handleTap() {
+    final now = DateTime.now();
+    // A tap that lands outside the window starts a fresh count instead
+    // of accumulating with stale earlier taps — the four taps have to be
+    // reasonably quick in succession, not just four taps ever.
+    if (_firstTapAt == null || now.difference(_firstTapAt!) > _resetWindow) {
+      _firstTapAt = now;
+      _tapCount = 1;
+    } else {
+      _tapCount++;
+    }
+
+    if (_tapCount >= _requiredTaps) {
+      _tapCount = 0;
+      _firstTapAt = null;
+      context.push('/ayalovespurple');
+      return;
+    }
+
+    widget.onTap();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: _handleTap, child: widget.child);
+  }
+}
+
 class ShopNavBar extends StatelessWidget {
   final ShopPage active;
   final ValueChanged<ShopPage> onTap;
@@ -82,7 +133,7 @@ class ShopNavBar extends StatelessWidget {
               // the storefront (LanguageController + FontController) — the
               // admin dashboard never reads either one, so it always stays
               // English regardless of what a shopper picks here.
-              GestureDetector(
+              _SecretLogoTap(
                 onTap: () => onTap(ShopPage.home),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

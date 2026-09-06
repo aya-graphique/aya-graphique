@@ -10,6 +10,7 @@ import '../widgets/animated_backdrop.dart';
 import '../widgets/circle_carousel.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 import '../widgets/tilt_3d_card.dart';
 
 /// Every client logo shown in the "Clients" row below the Projects grid
@@ -160,6 +161,8 @@ class MyWorksScreen extends StatelessWidget {
             // inside _ClientsSection's own single child.
             Center(child: _ClientsSection(isMobile: isMobile)),
           ],
+          const SizedBox(height: 56),
+          Center(child: SocialLinksFooter(isMobile: isMobile)),
         ],
       ),
     );
@@ -254,12 +257,12 @@ class _ClientsSection extends StatelessWidget {
 }
 
 /// One client-logo circle: same "story ring" treatment as
-/// home_screen.dart's _CategoryCircle (gradient ring, gentle idle float,
-/// white plate behind the logo) minus the label/tap — this row is a
-/// static trust-signal strip, not a set of navigable items. Uses
-/// Image.asset (the logos are bundled files, not Supabase URLs) with
-/// BoxFit.contain rather than cover, so every logo stays fully legible
-/// and un-cropped no matter its own aspect ratio.
+/// home_screen.dart's _CategoryCircle (gradient ring, gentle idle float)
+/// minus the label/tap — this row is a static trust-signal strip, not a
+/// set of navigable items. Uses Image.asset (the logos are bundled
+/// files, not Supabase URLs) with BoxFit.cover filling the whole circle,
+/// so each logo's own background color reads as the circle's
+/// background instead of sitting on a forced white plate.
 class _ClientCircle extends StatelessWidget {
   final String imagePath;
   final double diameter;
@@ -272,7 +275,23 @@ class _ClientCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // This builder can be handed a non-square box by
+    // MobileCircleCarousel (it pads itemWidth a little beyond the
+    // circle's own diameter to leave breathing room between circles in
+    // the row) — Center keeps this Container at its own true
+    // diameter x diameter square instead of being stretched to fill
+    // that wider box, which is what was flattening the circle into an
+    // oval. widthFactor/heightFactor: 1 is the important part — plain
+    // Center() expands to fill any *bounded* incoming constraints (as
+    // opposed to just an unbounded one), which is exactly what the
+    // desktop Wrap layout hands each child (loose but bounded by the
+    // row's width) — without the factors, that expansion is what broke
+    // the desktop "Clients" row into one circle per line instead of a
+    // horizontal row.
+    return Center(
+      widthFactor: 1,
+      heightFactor: 1,
+      child: Container(
       width: diameter,
       height: diameter,
       padding: const EdgeInsets.all(2.5),
@@ -290,16 +309,16 @@ class _ClientCircle extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
           border: Border.all(color: context.colors.bgDeep, width: 2),
         ),
         child: ClipOval(
-          child: Padding(
-            padding: EdgeInsets.all(diameter * 0.16),
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: Colors.white,
+              alignment: Alignment.center,
+              child: Icon(
                 Icons.business_rounded,
                 color: context.colors.creamDim,
                 size: diameter * 0.36,
@@ -313,7 +332,8 @@ class _ClientCircle extends StatelessWidget {
           onPlay: (c) => c.repeat(reverse: true),
           delay: Duration(milliseconds: 90 * floatDelayIndex),
         )
-        .moveY(begin: 0, end: -9, duration: 1700.ms, curve: Curves.easeInOut);
+        .moveY(begin: 0, end: -9, duration: 1700.ms, curve: Curves.easeInOut),
+    );
   }
 }
 

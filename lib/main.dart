@@ -161,20 +161,21 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const CheckoutScreen(),
     ),
 
-    // Reachable from the storefront footer's "Store admin" link, or
-    // directly via a bookmarked '/admin' URL.
+    // Not linked from anywhere in the storefront UI — only reachable by
+    // typing this exact URL directly. Kept intentionally hard to guess
+    // (not '/admin') so the login screen isn't stumbled on by chance.
     GoRoute(
-      path: '/admin',
+      path: '/ayalovespurple',
       builder: (context, state) => const AdminLoginScreen(),
     ),
     GoRoute(
-      path: '/admin/dashboard',
+      path: '/ayalovespurple/dashboard',
       // Guards this whole branch (and its sub-routes below, since
       // go_router evaluates a parent route's redirect for any location
       // that matches one of its children too): dashboard pages are only
       // ever meant to be reached via a successful sign-in on
       // AdminLoginScreen, never by guessing/bookmarking the URL directly.
-      redirect: (context, state) => AuthService.isSignedIn ? null : '/admin',
+      redirect: (context, state) => AuthService.isSignedIn ? null : '/ayalovespurple',
       builder: (context, state) => const AdminDashboardScreen(),
       routes: [
         GoRoute(

@@ -44,7 +44,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> {
     final key = serviceItemKey(categoryIndex, itemIndex);
     final baseItem = kServiceCategories[categoryIndex].items[itemIndex];
     final changed = await context.push<bool>(
-      '/admin/dashboard/services/edit',
+      '/ayalovespurple/dashboard/services/edit',
       extra: ServiceEditArgs(
         itemKey: key,
         baseItem: baseItem,

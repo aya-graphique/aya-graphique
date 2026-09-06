@@ -8,6 +8,7 @@ import '../widgets/product_grid.dart';
 import '../widgets/product_section.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 
 /// Lets other tabs (currently just Home's product category circles) jump
 /// straight to the standalone Shop tab with one particular category
@@ -171,6 +172,8 @@ class _ShopScreenState extends State<ShopScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 48),
+          SocialLinksFooter(isMobile: widget.isMobile),
           const SizedBox(height: 60),
         ],
       ),

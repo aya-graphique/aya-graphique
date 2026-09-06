@@ -42,11 +42,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     // Replaces this login page's spot in the stack with the dashboard —
     // if a shopper reached this screen from the storefront footer link,
     // the storefront stays underneath so the browser/back-button return
-    // trip still works; if this was opened directly via the `/admin` URL,
-    // there's nothing underneath either way. `context.go('/admin/dashboard')`
+    // trip still works; if this was opened directly via the `/ayalovespurple` URL,
+    // there's nothing underneath either way. `context.go('/ayalovespurple/dashboard')`
     // would instead discard the whole stack, which would break that
     // return-to-storefront path.
-    context.pushReplacement('/admin/dashboard');
+    context.pushReplacement('/ayalovespurple/dashboard');
   }
 
   Future<void> _submit() async {
@@ -177,13 +177,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               ).copyWith(fontWeight: FontWeight.w700),
                             ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Admin accounts are created in the Supabase dashboard, under '
-                    'Authentication → Users. There\'s no public sign-up here.',
-                    textAlign: TextAlign.center,
-                    style: AppFonts.body(size: 12, color: context.colors.creamDim),
                   ),
                 ],
               ),

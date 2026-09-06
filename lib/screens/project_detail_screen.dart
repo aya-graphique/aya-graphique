@@ -7,6 +7,7 @@ import '../providers/language_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/reveal_on_scroll.dart';
+import '../widgets/social_links_footer.dart';
 import '../widgets/tilt_3d_card.dart';
 
 /// A single project's full case-study page, opened by tapping its tile
@@ -158,6 +159,8 @@ class ProjectDetailScreen extends StatelessWidget {
                       onTapImage: (i) => _openLightbox(context, project.images, i),
                     ),
                   ),
+                  const SizedBox(height: 44),
+                  Center(child: SocialLinksFooter(isMobile: isMobile)),
                   const SizedBox(height: 44),
                 ],
               ),

@@ -11,6 +11,7 @@ import '../theme/app_theme.dart';
 import '../utils/currency.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/mini_cart_sheet.dart';
+import '../widgets/social_links_footer.dart';
 import '../widgets/tilt_3d_card.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -90,6 +91,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                 const SizedBox(height: 60),
+                Center(child: SocialLinksFooter(isMobile: isMobile)),
+                const SizedBox(height: 40),
               ],
             ),
           ),

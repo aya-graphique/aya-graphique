@@ -18,6 +18,7 @@ import '../services/settings_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/circle_carousel.dart';
 import '../widgets/facebook_reviews_button.dart';
+import '../widgets/social_links_footer.dart';
 import '../widgets/home_banner_slideshow.dart';
 import '../widgets/marquee_strip.dart';
 import '../widgets/owner_intro_card.dart';
@@ -257,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 16),
           Center(child: FacebookReviewsButton(isMobile: widget.isMobile)),
           const SizedBox(height: 60),
-          _Footer(isMobile: widget.isMobile, onAdminReturn: widget.onAdminReturn),
+          _Footer(isMobile: widget.isMobile),
         ],
       ),
     );
@@ -862,13 +863,13 @@ class _ServicesSection extends StatelessWidget {
 /// underneath — the shared header style for both the Services and Skills
 /// & Arts sections on Home.
 class _StarHeading extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final String title;
   final String? subtitle;
   final bool isMobile;
 
   const _StarHeading({
-    required this.icon,
+    this.icon,
     required this.title,
     required this.isMobile,
     this.subtitle,
@@ -882,8 +883,10 @@ class _StarHeading extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: isMobile ? 20 : 24, color: colors.orchid),
-            SizedBox(width: isMobile ? 8 : 12),
+            if (icon != null) ...[
+              Icon(icon, size: isMobile ? 20 : 24, color: colors.orchid),
+              SizedBox(width: isMobile ? 8 : 12),
+            ],
             Flexible(
               child: Text(title,
                 textAlign: TextAlign.center,
@@ -931,7 +934,6 @@ class _IllustrationArtSection extends StatelessWidget {
           Padding(
             padding: sidePadding,
             child: _StarHeading(
-              icon: Icons.auto_awesome_rounded,
               title: context.strings.illustrationArtEyebrow,
               subtitle: context.strings.illustrationArtSubtitle,
               isMobile: isMobile,
@@ -1836,13 +1838,7 @@ class _CategoryCircleState extends State<_CategoryCircle> {
 
 class _Footer extends StatelessWidget {
   final bool isMobile;
-  final VoidCallback? onAdminReturn;
-  const _Footer({required this.isMobile, this.onAdminReturn});
-
-  Future<void> _openAdmin(BuildContext context) async {
-    await context.push('/admin');
-    onAdminReturn?.call();
-  }
+  const _Footer({required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
@@ -1872,13 +1868,8 @@ class _Footer extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text("© ${DateTime.now().year} Aya's Graphique ", style: AppFonts.body(text: "© ${DateTime.now().year} Aya's Graphique ", color: context.colors.creamDim, size: 12)),
-          const SizedBox(height: 14),
-          GestureDetector(
-            onTap: () => _openAdmin(context),
-            child: Text(context.strings.storeAdmin,
-              style: AppFonts.label(text: context.strings.storeAdmin, size: 11, color: context.colors.creamDim, letterSpacing: 1.2),
-            ),
-          ),
+          const SizedBox(height: 22),
+          SocialLinksFooter(isMobile: isMobile),
         ],
       ),
     );
@@ -1990,15 +1981,14 @@ class _ContactNowButtonState extends State<_ContactNowButton> {
                     .scaleXY(begin: 0.85, end: 1.55, duration: 550.ms, curve: Curves.easeOut)
                     .fadeOut(begin: 0.9, duration: 550.ms, curve: Curves.easeOut),
               ),
-              // Two small sparkle accents — the same auto_awesome glyph
-              // used on the eyebrow pills and marquee elsewhere — that
-              // twinkle in and out on their own loop, staggered so they
-              // never blink in sync. Purely playful, sits just outside
-              // the pill's own footprint.
+              // Two small phone accents that twinkle in and out on
+              // their own loop, staggered so they never blink in sync.
+              // Purely playful, sits just outside the pill's own
+              // footprint.
               Positioned(
                 top: -13,
                 left: 4,
-                child: Icon(Icons.auto_awesome_rounded, size: 13, color: colors.orchid)
+                child: Icon(Icons.phone_rounded, size: 13, color: colors.orchid)
                     .animate(onPlay: (c) => c.repeat())
                     .fadeIn(duration: 650.ms, curve: Curves.easeOut)
                     .moveY(begin: 5, end: -3, duration: 650.ms, curve: Curves.easeOut)
@@ -2008,7 +1998,7 @@ class _ContactNowButtonState extends State<_ContactNowButton> {
               Positioned(
                 bottom: -11,
                 right: 6,
-                child: Icon(Icons.auto_awesome_rounded, size: 10, color: colors.orchid)
+                child: Icon(Icons.phone_rounded, size: 10, color: colors.orchid)
                     .animate(onPlay: (c) => c.repeat(), delay: 1100.ms)
                     .fadeIn(duration: 550.ms, curve: Curves.easeOut)
                     .moveY(begin: 5, end: -3, duration: 550.ms, curve: Curves.easeOut)

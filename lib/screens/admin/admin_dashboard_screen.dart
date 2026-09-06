@@ -351,7 +351,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _openForm({Product? product}) async {
     final changed = await context.push<bool>(
-      '/admin/dashboard/product-form',
+      '/ayalovespurple/dashboard/product-form',
       extra: product,
     );
     if (changed == true) _refresh();
@@ -398,7 +398,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Future<void> _openOrders() async {
-    await context.push('/admin/dashboard/orders');
+    await context.push('/ayalovespurple/dashboard/orders');
     // The badge should reflect anything marked done/reopened while the
     // owner was on the Orders screen.
     _loadPendingOrdersCount();
@@ -437,7 +437,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               label: 'Banners',
               onTap: () {
                 Navigator.of(context).pop();
-                context.push('/admin/dashboard/banners');
+                context.push('/ayalovespurple/dashboard/banners');
               },
             ),
             _DrawerTile(
@@ -484,7 +484,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ? null
             : [
           IconButton(
-            onPressed: () => context.push('/admin/dashboard/banners'),
+            onPressed: () => context.push('/ayalovespurple/dashboard/banners'),
             icon: Icon(Icons.view_carousel_rounded, color: context.colors.creamDim),
             tooltip: 'Banners',
           ),

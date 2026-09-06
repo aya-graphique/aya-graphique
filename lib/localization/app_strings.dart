@@ -326,6 +326,8 @@ class AppText {
   String get cvLabel => _t('CV', 'السيرة الذاتية');
   String get instagramLabel => _t('Instagram', 'إنستجرام');
   String get facebookLabel => _t('Facebook', 'فيسبوك');
+  // Bottom-of-page social footer, shown on every screen.
+  String get followUsLabel => _t('Follow us', 'تابعونا');
   String get tiktokLabel => _t('TikTok', 'تيك توك');
   String get linkedinLabel => _t('LinkedIn', 'لينكدإن');
   String get emptyProfileNotice => _t(

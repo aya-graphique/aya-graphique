@@ -6,6 +6,7 @@ import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/currency.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 
 class CartScreen extends StatelessWidget {
   final bool isMobile;
@@ -44,6 +45,8 @@ class CartScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+          const SizedBox(height: 48),
+          Center(child: SocialLinksFooter(isMobile: isMobile)),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import '../services/settings_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 
 /// A short bilingual string pair. `.t(isArabic)` picks the right one, and
 /// passing that same string into `AppFonts.*(text: ...)` auto-switches the
@@ -538,7 +539,14 @@ class _GraphicalServicesScreenState extends State<GraphicalServicesScreen> {
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(isMobile ? 20 : 60, isMobile ? 90 : 110, isMobile ? 20 : 60, 60),
-      child: content,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          content,
+          const SizedBox(height: 48),
+          Center(child: SocialLinksFooter(isMobile: isMobile)),
+        ],
+      ),
     );
   }
 }

@@ -25,6 +25,10 @@ dependencies:
   # Cart / theme state
   provider: ^6.1.2
 
+  # Brand icons (Instagram, TikTok, etc.) that Material Icons doesn't
+  # include a proper logo glyph for.
+  font_awesome_flutter: ^10.7.0
+
   # Declarative, URL-based routing — every tab and screen is a real,
   # bookmarkable/shareable location, and the browser/phone back button
   # works correctly by construction instead of needing the hand-rolled

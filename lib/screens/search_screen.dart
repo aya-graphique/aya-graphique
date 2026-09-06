@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 
 class SearchScreen extends StatefulWidget {
   final List<Product> products;
@@ -82,6 +83,8 @@ class _SearchScreenState extends State<SearchScreen> {
               products: results,
               onProductTap: (p) => context.push('/product/${p.id}', extra: p),
             ),
+          const SizedBox(height: 48),
+          Center(child: SocialLinksFooter(isMobile: widget.isMobile)),
         ],
       ),
     );

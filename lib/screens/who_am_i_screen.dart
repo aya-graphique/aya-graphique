@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
 import '../models/about_me.dart';
@@ -11,6 +12,14 @@ import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/shimmer_text.dart';
+
+// Fixed Instagram page link — shown on this page regardless of what the
+// admin dashboard's own Instagram field holds (see the contact button
+// below), since that field is no longer kept in sync with this link.
+const _kInstagramUrl =
+    'https://www.instagram.com/ayas_graphique?igsi=MWVmNmNpMTExaWR4aA%3D%3D&utm_source=qr';
+const _kFacebookUrl =
+    'https://www.facebook.com/share/1ZAmX9ByH1/?mibextid=wwXIfr';
 
 // ---------------------------------------------------------------------
 // ✏️ Hardcoded "About me" copy — no longer pulled from the about_me
@@ -421,32 +430,26 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
   Future<void> _openEmail(String email) async {
     final value = email.trim();
     if (value.isEmpty) return;
-    // The app runs in a browser, so a Gmail compose link (opens in a new
-    // tab, "to" pre-filled) is far more reliable than a mailto: link —
-    // mailto: only works if the visitor's OS has a desktop mail app set
-    // as default, which most people testing/browsing on the web don't.
-    final gmailUri = Uri.parse(
-      'https://mail.google.com/mail/?view=cm&fs=1&to=${Uri.encodeComponent(value)}',
-    );
-    var launched = false;
+    // Tapping the email just copies it to the clipboard and confirms
+    // with a toast. Wrapped in try/catch (unlike a bare await) so that
+    // if the browser ever refuses the clipboard write (e.g. no
+    // clipboard-write permission in some embedded/sandboxed contexts)
+    // the tap still visibly does *something* instead of silently
+    // failing with a swallowed, unhandled Future error.
+    var copied = true;
     try {
-      launched = await launchUrl(gmailUri, mode: LaunchMode.externalApplication);
+      await Clipboard.setData(ClipboardData(text: value));
     } catch (_) {
-      launched = false;
+      copied = false;
     }
-    if (!mounted) return;
-    if (launched) return;
-    // Fallback for the rare case even that fails (e.g. pop-ups blocked):
-    // copy the address so the person still walks away with something.
-    await Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
     final isArabic = context.isArabicLanguage;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          isArabic
-              ? 'مقدرناش نفتح جيميل — اتنسخ الإيميل بدل كده: $value'
-              : "Couldn't open Gmail — copied the email instead: $value",
+          copied
+              ? (isArabic ? 'تم النسخ' : 'Copied')
+              : (isArabic ? value : value),
         ),
       ),
     );
@@ -531,15 +534,11 @@ class _Profile extends StatelessWidget {
     final certificates = kCertificates(isArabic);
     final experience = kExperience(isArabic);
     final education = kEducation(isArabic);
-    final hasContact = profile.whatsapp.isNotEmpty ||
-        profile.email.isNotEmpty ||
-        profile.phone.isNotEmpty ||
-        profile.portfolioUrl.isNotEmpty ||
-        profile.cvUrl.isNotEmpty ||
-        profile.instagramUrl.isNotEmpty ||
-        profile.facebookUrl.isNotEmpty ||
-        profile.tiktokUrl.isNotEmpty ||
-        profile.linkedinUrl.isNotEmpty;
+    // Instagram's own contact button is always shown (see below), so
+    // hasContact only needs to account for whether there's anything
+    // *else* worth showing alongside it — but since the section always
+    // has at least Instagram, this can just stay true.
+    const hasContact = true;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -755,7 +754,7 @@ class _Profile extends StatelessWidget {
                         if (profile.email.isNotEmpty)
                           _ContactButton(
                             icon: Icons.mail_outline_rounded,
-                            label: context.strings.emailLabel,
+                            label: profile.email,
                             onTap: () => onOpenEmail(profile.email),
                           ),
                         if (profile.phone.isNotEmpty)
@@ -776,18 +775,24 @@ class _Profile extends StatelessWidget {
                             label: context.strings.cvLabel,
                             onTap: () => onOpenUrl(profile.cvUrl),
                           ),
-                        if (profile.instagramUrl.isNotEmpty)
-                          _ContactButton(
-                            icon: Icons.camera_alt_outlined,
-                            label: context.strings.instagramLabel,
-                            onTap: () => onOpenUrl(profile.instagramUrl),
-                          ),
-                        if (profile.facebookUrl.isNotEmpty)
-                          _ContactButton(
-                            icon: Icons.facebook_outlined,
-                            label: context.strings.facebookLabel,
-                            onTap: () => onOpenUrl(profile.facebookUrl),
-                          ),
+                        // Instagram always shows the fixed page link
+                        // directly (no longer pulled from the admin
+                        // dashboard field, which is no longer kept in
+                        // sync), so this doesn't depend on
+                        // profile.instagramUrl at all.
+                        _ContactButton(
+                          icon: FontAwesomeIcons.instagram,
+                          label: context.strings.instagramLabel,
+                          onTap: () => onOpenUrl(_kInstagramUrl),
+                        ),
+                        // Same fixed-link treatment as Instagram above —
+                        // always shown, independent of the admin
+                        // dashboard's facebookUrl field.
+                        _ContactButton(
+                          icon: FontAwesomeIcons.facebookF,
+                          label: context.strings.facebookLabel,
+                          onTap: () => onOpenUrl(_kFacebookUrl),
+                        ),
                         if (profile.tiktokUrl.isNotEmpty)
                           _ContactButton(
                             icon: Icons.music_note_outlined,
@@ -1589,19 +1594,24 @@ class _ContactButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool filled;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
 
   const _ContactButton({
     required this.icon,
     required this.label,
-    required this.onTap,
+    this.onTap,
+    this.onDoubleTap,
     this.filled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
       onTap: onTap,
+      onDoubleTap: onDoubleTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -1626,6 +1636,7 @@ class _ContactButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

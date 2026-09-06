@@ -66,7 +66,7 @@ class SectionHeading extends StatelessWidget {
         const SizedBox(height: 16),
         Text(title,
           textAlign: align,
-          style: AppFonts.display(text: title, color: context.colors.cream, size: effectiveTitleSize, height: 1.08, boostArabicSize: boostArabicSize),
+          style: AppFonts.display(text: title, color: context.colors.cream, size: effectiveTitleSize, height: 1.35, boostArabicSize: boostArabicSize),
         ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(
               begin: 0.15,
               end: 0,

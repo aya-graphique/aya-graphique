@@ -7,6 +7,7 @@ import '../providers/favorites_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/section_heading.dart';
+import '../widgets/social_links_footer.dart';
 
 class FavoritesScreen extends StatelessWidget {
   final List<Product> products;
@@ -72,6 +73,8 @@ class FavoritesScreen extends StatelessWidget {
               products: favProducts,
               onProductTap: (p) => context.push('/product/${p.id}', extra: p),
             ),
+          const SizedBox(height: 48),
+          Center(child: SocialLinksFooter(isMobile: isMobile)),
         ],
       ),
     );
