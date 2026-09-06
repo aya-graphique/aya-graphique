@@ -10,6 +10,7 @@ import '../models/about_me.dart';
 import '../providers/language_controller.dart';
 import '../services/about_repository.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_toast.dart';
 import '../widgets/reveal_on_scroll.dart';
 import '../widgets/shimmer_text.dart';
 
@@ -417,13 +418,10 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
     // copy the number instead of leaving the tap feeling broken.
     await Clipboard.setData(ClipboardData(text: number));
     if (!mounted) return;
-    final isArabic = context.isArabicLanguage;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isArabic ? 'اتنسخ الرقم: $number' : 'Copied the number: $number',
-        ),
-      ),
+    showAppToast(
+      context,
+      message: context.isArabicLanguage ? 'تم النسخ' : 'Copied',
+      icon: Icons.call_outlined,
     );
   }
 
@@ -443,15 +441,12 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
       copied = false;
     }
     if (!mounted) return;
-    final isArabic = context.isArabicLanguage;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          copied
-              ? (isArabic ? 'تم النسخ' : 'Copied')
-              : (isArabic ? value : value),
-        ),
-      ),
+    showAppToast(
+      context,
+      message: copied
+          ? (context.isArabicLanguage ? 'تم النسخ' : 'Copied')
+          : value,
+      icon: Icons.mail_outline_rounded,
     );
   }
 
