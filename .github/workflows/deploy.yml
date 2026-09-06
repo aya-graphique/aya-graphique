@@ -19,6 +19,12 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # مطلوب إجباريًا لـ actions/deploy-pages@v4 — من غيره بيرفض النشر
+    # برسالة "Missing environment". بيدّي الـ job وصول لعنوان الموقع
+    # كـ ${{ steps.deployment.outputs.page_url }} كمان لو احتجناه.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

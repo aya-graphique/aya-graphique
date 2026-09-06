@@ -18,7 +18,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
+          # Was pinned to 3.29.0, which ships Dart 3.7.0 — too old for
+          # font_awesome_flutter 11.x (requires Dart >=3.9.0, Flutter >=3.27.0).
+          # Track latest stable instead of a fixed version, same as deploy.yml.
           channel: 'stable'
 
       - name: Install dependencies
