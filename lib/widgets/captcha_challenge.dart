@@ -76,7 +76,7 @@ class CaptchaChallengeState extends State<CaptchaChallenge> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Security check',
+        Text('Write code',
             style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
         const SizedBox(height: 8),
         SizedBox(
@@ -167,10 +167,12 @@ class CaptchaChallengeState extends State<CaptchaChallenge> {
                   style: AppFonts.body(size: 16, weight: FontWeight.w700, color: context.colors.cream)
                       .copyWith(letterSpacing: 2),
                   cursorColor: context.colors.orchid,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     isCollapsed: true,
                     hintText: 'Code',
+                    hintStyle: AppFonts.body(size: 16, weight: FontWeight.w700, color: context.colors.creamDim)
+                        .copyWith(letterSpacing: 2, color: context.colors.creamDim.withOpacity(0.18)),
                   ),
                 ),
               ),
