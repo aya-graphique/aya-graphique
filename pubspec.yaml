@@ -27,7 +27,7 @@ dependencies:
 
   # Brand icons (Instagram, TikTok, etc.) that Material Icons doesn't
   # include a proper logo glyph for.
-  font_awesome_flutter: ^10.7.0
+  font_awesome_flutter: ^11.0.0
 
   # Declarative, URL-based routing — every tab and screen is a real,
   # bookmarkable/shareable location, and the browser/phone back button

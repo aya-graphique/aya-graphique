@@ -71,7 +71,7 @@ class SocialLinksFooter extends StatelessWidget {
 }
 
 class _SocialIconButton extends StatelessWidget {
-  final IconData icon;
+  final FaIconData icon;
   final String tooltip;
   final VoidCallback onTap;
   const _SocialIconButton({
@@ -101,7 +101,7 @@ class _SocialIconButton extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
+          child: FaIcon(icon, color: Colors.white, size: 20),
         ),
       ),
     );

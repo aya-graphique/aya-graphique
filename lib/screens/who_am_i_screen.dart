@@ -776,7 +776,7 @@ class _Profile extends StatelessWidget {
                         // sync), so this doesn't depend on
                         // profile.instagramUrl at all.
                         _ContactButton(
-                          icon: FontAwesomeIcons.instagram,
+                          faIcon: FontAwesomeIcons.instagram,
                           label: context.strings.instagramLabel,
                           onTap: () => onOpenUrl(_kInstagramUrl),
                         ),
@@ -784,7 +784,7 @@ class _Profile extends StatelessWidget {
                         // always shown, independent of the admin
                         // dashboard's facebookUrl field.
                         _ContactButton(
-                          icon: FontAwesomeIcons.facebookF,
+                          faIcon: FontAwesomeIcons.facebookF,
                           label: context.strings.facebookLabel,
                           onTap: () => onOpenUrl(_kFacebookUrl),
                         ),
@@ -1586,22 +1586,29 @@ class _CertificateBackContent extends StatelessWidget {
 
 
 class _ContactButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  // font_awesome_flutter 11+ icons are `FaIconData`, not `IconData` (Flutter
+  // made IconData a `final` class, so the package can no longer subclass
+  // it) — so a FontAwesome icon (Instagram, Facebook) comes through here
+  // instead of `icon`, and gets rendered with `FaIcon` instead of `Icon`.
+  final FaIconData? faIcon;
   final String label;
   final bool filled;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
 
   const _ContactButton({
-    required this.icon,
+    this.icon,
+    this.faIcon,
     required this.label,
     this.onTap,
     this.onDoubleTap,
     this.filled = false,
-  });
+  }) : assert(icon != null || faIcon != null, 'Provide either icon or faIcon');
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = filled ? Colors.white : context.colors.cream;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -1620,12 +1627,14 @@ class _ContactButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: filled ? Colors.white : context.colors.cream),
+            faIcon != null
+                ? FaIcon(faIcon, size: 14, color: iconColor)
+                : Icon(icon, size: 14, color: iconColor),
             const SizedBox(width: 7),
             Text(label,
               style: AppFonts.label(text: label, 
                 size: 13.5,
-                color: filled ? Colors.white : context.colors.cream,
+                color: iconColor,
                 letterSpacing: 0.6,
               ).copyWith(fontWeight: FontWeight.w700),
             ),
