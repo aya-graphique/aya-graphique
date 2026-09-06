@@ -50652,7 +50652,7 @@ $1(a){return new A.pe(A.uf(),A.te("hero"),A.te("most_ordered"),$.ai())},
 $S:598}
 A.aaY.prototype={
 $4(a,b,c,d){var s=A.b4z(B.h,!1),r=A.b4z(B.f,!0),q=b.a
-return new A.pC($.b8_(),"Aya's Graphique \u2014 Notebooks & Calendars",s,r,q,!1,null)},
+return new A.pC($.b8_(),"Aya's Graphique",s,r,q,!1,null)},
 $S:597}
 A.rh.prototype={}
 A.aa0.prototype={
