@@ -60,7 +60,10 @@ class _BrandAvatar extends StatelessWidget {
 /// taps within two seconds quietly opens the admin login screen instead.
 /// Not signposted anywhere in the UI on purpose — this is the one hidden
 /// entry point into '/ayalovespurple' for the owner, since there's no
-/// visible admin link on the storefront otherwise.
+/// visible admin link on the storefront otherwise. Used on both the
+/// desktop pill nav (ShopNavBar) and the mobile top bar
+/// (ShopMobileTopBar), so the owner can reach the dashboard from a phone
+/// too.
 class _SecretLogoTap extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
@@ -374,11 +377,12 @@ class ShopMobileTopBar extends StatelessWidget {
             onTap: onMenuTap,
           ),
           const SizedBox(width: 6),
-          GestureDetector(
+          _SecretLogoTap(
             onTap: () => onTap(ShopPage.home),
             // Same plain, solid-colored wordmark as the full pill — see the
             // note in ShopNavBar.build() about ShaderMask + BackdropFilter
-            // not playing nicely together on Flutter Web.
+            // not playing nicely together on Flutter Web. Also carries the
+            // same hidden 4-quick-taps admin entry point as the desktop bar.
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
