@@ -14,6 +14,13 @@ import '../theme/app_theme.dart';
 /// account lockouts on the Supabase Auth side — it just raises the cost of
 /// naive scripted attempts against the UI.
 ///
+/// Built entirely out of plain widgets (Stack/Positioned/Transform) rather
+/// than a CustomPainter — CustomPainter/Canvas drawing is a common source
+/// of renderer-specific glitches on Flutter Web (CanvasKit vs. Skwasm vs.
+/// the HTML renderer can each handle a raw Canvas slightly differently),
+/// so keeping this to ordinary widgets makes it behave the same everywhere
+/// the rest of the app already renders correctly.
+///
 /// Usage: keep a `GlobalKey<CaptchaChallengeState>`, place
 /// `CaptchaChallenge(key: yourKey)` in the form, and on submit check
 /// `yourKey.currentState!.isValid` before doing anything else. Call
@@ -61,14 +68,20 @@ class CaptchaChallengeState extends State<CaptchaChallenge> {
 
   @override
   Widget build(BuildContext context) {
+    // Seed off the code itself so the noise/rotation pattern stays put
+    // across rebuilds that don't change the code (e.g. typing in the
+    // answer field), and only changes when refresh() actually swaps it.
+    final random = Random(_code.hashCode);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Security check',
             style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
         const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        SizedBox(
+          height: 52,
+          child: Row(
           children: [
             Container(
               width: 132,
@@ -79,13 +92,48 @@ class CaptchaChallengeState extends State<CaptchaChallenge> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: context.colors.border(0.08)),
               ),
-              child: CustomPaint(
-                painter: _CaptchaPainter(
-                  code: _code,
-                  accent: context.colors.orchid,
-                  textColor: context.colors.cream,
-                ),
-                child: const SizedBox.expand(),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // A handful of faint diagonal hairlines behind the
+                  // letters — plain rotated Containers instead of
+                  // canvas-drawn lines.
+                  for (var i = 0; i < 4; i++)
+                    Positioned(
+                      top: random.nextDouble() * 44,
+                      left: -10,
+                      right: -10,
+                      child: Transform.rotate(
+                        angle: (random.nextDouble() - 0.5) * 0.6,
+                        child: Container(
+                          height: 1.2,
+                          color: context.colors.orchid.withOpacity(0.22),
+                        ),
+                      ),
+                    ),
+                  // The distorted code itself: each letter individually
+                  // sized, nudged and rotated.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (final ch in _code.split(''))
+                        Transform.translate(
+                          offset: Offset(0, (random.nextDouble() - 0.5) * 10),
+                          child: Transform.rotate(
+                            angle: (random.nextDouble() - 0.5) * 0.5,
+                            child: Text(
+                              ch,
+                              style: TextStyle(
+                                color: context.colors.cream,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -128,68 +176,9 @@ class CaptchaChallengeState extends State<CaptchaChallenge> {
               ),
             ),
           ],
+          ),
         ),
       ],
     );
   }
-}
-
-class _CaptchaPainter extends CustomPainter {
-  _CaptchaPainter({required this.code, required this.accent, required this.textColor});
-
-  final String code;
-  final Color accent;
-  final Color textColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Seed off the code itself so the noise pattern stays put across
-    // rebuilds that don't change the code (e.g. typing in the answer
-    // field), and only changes when refresh() actually swaps the code.
-    final random = Random(code.hashCode);
-
-    final linePaint = Paint()
-      ..color = accent.withOpacity(0.25)
-      ..strokeWidth = 1.2;
-    for (var i = 0; i < 4; i++) {
-      canvas.drawLine(
-        Offset(0, random.nextDouble() * size.height),
-        Offset(size.width, random.nextDouble() * size.height),
-        linePaint,
-      );
-    }
-
-    final dotPaint = Paint()..color = accent.withOpacity(0.35);
-    for (var i = 0; i < 24; i++) {
-      canvas.drawCircle(
-        Offset(random.nextDouble() * size.width, random.nextDouble() * size.height),
-        1.1,
-        dotPaint,
-      );
-    }
-
-    final letterWidth = size.width / code.length;
-    for (var i = 0; i < code.length; i++) {
-      final painter = TextPainter(
-        text: TextSpan(
-          text: code[i],
-          style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w800),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      final dx = letterWidth * i + (letterWidth - painter.width) / 2;
-      final dy = (size.height - painter.height) / 2 + (random.nextDouble() - 0.5) * 8;
-      final angle = (random.nextDouble() - 0.5) * 0.5; // roughly ±14°
-
-      canvas.save();
-      canvas.translate(dx + painter.width / 2, dy + painter.height / 2);
-      canvas.rotate(angle);
-      painter.paint(canvas, Offset(-painter.width / 2, -painter.height / 2));
-      canvas.restore();
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _CaptchaPainter oldDelegate) => oldDelegate.code != code;
 }
