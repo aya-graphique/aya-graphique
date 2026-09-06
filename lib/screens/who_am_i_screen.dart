@@ -425,7 +425,7 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
     );
   }
 
-  Future<void> _openEmail(String email) async {
+  Future<void> _openEmail(BuildContext buttonContext, String email) async {
     final value = email.trim();
     if (value.isEmpty) return;
     // Tapping the email just copies it to the clipboard and confirms
@@ -447,6 +447,11 @@ class _WhoAmIScreenState extends State<WhoAmIScreen> {
           ? (context.isArabicLanguage ? 'تم النسخ' : 'Copied')
           : value,
       icon: Icons.mail_outline_rounded,
+      // Anchor to the email button itself (buttonContext, captured at its
+      // own position in the tree) so the toast pops up right above the
+      // email — not at the fixed top-of-screen spot, which sits right by
+      // the floating nav bar and reads as if the nav bar produced it.
+      anchorContext: buttonContext,
     );
   }
 
@@ -509,7 +514,10 @@ class _Profile extends StatelessWidget {
   final bool isMobile;
   final ValueChanged<String> onOpenUrl;
   final ValueChanged<String> onOpenWhatsapp;
-  final ValueChanged<String> onOpenEmail;
+  // Takes the tapped button's own BuildContext too, so the "Copied" toast
+  // can be anchored right above that button instead of the screen's fixed
+  // top spot (see showAppToast's anchorContext).
+  final void Function(BuildContext buttonContext, String email) onOpenEmail;
   final ValueChanged<String> onOpenPhone;
 
   const _Profile({
@@ -747,10 +755,17 @@ class _Profile extends StatelessWidget {
                             onTap: () => onOpenWhatsapp(profile.whatsapp),
                           ),
                         if (profile.email.isNotEmpty)
-                          _ContactButton(
-                            icon: Icons.mail_outline_rounded,
-                            label: profile.email,
-                            onTap: () => onOpenEmail(profile.email),
+                          // Builder gives us this exact button's own
+                          // BuildContext (its position in the tree, not
+                          // the whole screen's), which onOpenEmail needs
+                          // to anchor the "Copied" toast right above it.
+                          Builder(
+                            builder: (buttonContext) => _ContactButton(
+                              icon: Icons.mail_outline_rounded,
+                              label: profile.email,
+                              onTap: () =>
+                                  onOpenEmail(buttonContext, profile.email),
+                            ),
                           ),
                         if (profile.phone.isNotEmpty)
                           _ContactButton(

@@ -13,14 +13,32 @@ import '../theme/app_theme.dart';
 /// floats centered near the top of the screen — clear of the bottom nav on
 /// mobile and of any Scaffold nesting quirks — and always uses the same
 /// pop-in/settle/fade timeline regardless of which screen triggered it.
+///
+/// Pass [anchorContext] (the context of the widget that was tapped, e.g. a
+/// contact button) to have the toast appear directly above *that* widget
+/// instead of the default fixed spot near the top of the screen — useful on
+/// screens like the floating nav bar layout, where the default position
+/// would otherwise land right next to the nav bar and read as if the nav
+/// bar itself produced the toast.
 void showAppToast(
   BuildContext context, {
   required String message,
   IconData icon = Icons.check_rounded,
   Color? accentColor,
+  BuildContext? anchorContext,
 }) {
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return;
+
+  double? anchorTop;
+  double? anchorCenterX;
+  final anchorBox = anchorContext?.findRenderObject() as RenderBox?;
+  final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+  if (anchorBox != null && anchorBox.attached && overlayBox != null) {
+    final topLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlayBox);
+    anchorTop = topLeft.dy;
+    anchorCenterX = topLeft.dx + anchorBox.size.width / 2;
+  }
 
   final colors = context.colors;
   final accent = accentColor ?? colors.orchid;
@@ -30,6 +48,8 @@ void showAppToast(
       icon: icon,
       accent: accent,
       colors: colors,
+      anchorTop: anchorTop,
+      anchorCenterX: anchorCenterX,
     ),
   );
 
@@ -44,12 +64,19 @@ class _AppToast extends StatefulWidget {
   final IconData icon;
   final Color accent;
   final AppColors colors;
+  // When set, the toast is positioned just above this point (the tapped
+  // widget's top-center in overlay coordinates) instead of the fixed
+  // top-of-screen spot.
+  final double? anchorTop;
+  final double? anchorCenterX;
 
   const _AppToast({
     required this.message,
     required this.icon,
     required this.accent,
     required this.colors,
+    this.anchorTop,
+    this.anchorCenterX,
   });
 
   @override
@@ -93,12 +120,31 @@ class _AppToastState extends State<_AppToast> with SingleTickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
+    final hasAnchor = widget.anchorTop != null;
+
+    // Roughly the toast's own height (icon row + vertical padding) — used
+    // to lift it just clear of the anchor's top edge, since actual layout
+    // size isn't known until after this build.
+    const estimatedToastHeight = 54.0;
+    final top = hasAnchor
+        ? (widget.anchorTop! - estimatedToastHeight)
+            .clamp(media.padding.top + 8, media.size.height)
+        : media.padding.top + 18;
+
+    // Align horizontally under the anchor's center by mapping its x
+    // position to a [-1, 1] Alignment across the full-width Positioned box
+    // below; falls back to dead-center when there's no anchor.
+    final xAlignment = hasAnchor
+        ? ((widget.anchorCenterX! / media.size.width) * 2 - 1).clamp(-1.0, 1.0)
+        : 0.0;
+
     return Positioned(
-      top: media.padding.top + 18,
+      top: top,
       left: 0,
       right: 0,
       child: IgnorePointer(
-        child: Center(
+        child: Align(
+          alignment: Alignment(xAlignment, 0),
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {

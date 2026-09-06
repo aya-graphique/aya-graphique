@@ -4,7 +4,11 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  # font_awesome_flutter 11.x (used for FaIconData in who_am_i_screen.dart /
+  # social_links_footer.dart) requires Dart >=3.9.0 and Flutter >=3.27.0.
+  # Keep this floor in sync with that package, or `pub get` will resolve
+  # fine locally but fail on any CI runner still on an older Flutter/Dart.
+  sdk: '>=3.9.0 <4.0.0'
 
 dependencies:
   flutter:

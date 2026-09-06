@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../config/supabase_config.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/captcha_challenge.dart';
 
 /// Entry point to the admin area. Reachable from the "Store admin" link in
 /// the storefront footer. Anyone can open this screen, but they need the
@@ -19,6 +20,7 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _captchaKey = GlobalKey<CaptchaChallengeState>();
   bool _loading = false;
   String? _error;
   bool _obscure = true;
@@ -50,6 +52,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   Future<void> _submit() async {
+    // Check the CAPTCHA before ever touching Supabase Auth — a wrong or
+    // empty code stops the attempt right here, so scripted login attempts
+    // can't even spend a request against the real auth endpoint.
+    if (_captchaKey.currentState?.isValid != true) {
+      setState(() => _error = 'Enter the code shown above correctly.');
+      _captchaKey.currentState?.refresh();
+      return;
+    }
+
     setState(() {
       _loading = true;
       _error = null;
@@ -63,6 +74,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       _loading = false;
       _error = error;
     });
+    // Fresh code after every attempt — success or failure — so the same
+    // code is never sitting there for a retry loop to reuse.
+    _captchaKey.currentState?.refresh();
     if (error == null) _goToDashboard();
   }
 
@@ -148,6 +162,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     ),
                     onSubmitted: (_) => _submit(),
                   ),
+                  const SizedBox(height: 18),
+                  CaptchaChallenge(key: _captchaKey),
                   if (_error != null) ...[
                     const SizedBox(height: 14),
                     Text(_error!, style: AppFonts.body(size: 13, color: context.colors.danger)),
