@@ -70,7 +70,11 @@ class ProductCard extends StatelessWidget {
           children: [
             Expanded(
               child: LayoutBuilder(
-                builder: (context, cardConstraints) => Stack(
+                builder: (context, cardConstraints) {
+                // Stamp width scales with the card so the graphic stays
+                // proportioned on any grid size.
+                final stampWidth = (cardConstraints.maxWidth * 0.7).clamp(150.0, 260.0);
+                return Stack(
                 fit: StackFit.expand,
                 children: [
                   Container(
@@ -117,20 +121,25 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Sold-out ribbon — a full-width banner fading out from
-                  // the left edge, mirroring a classic "out of stock"
-                  // storefront sash rather than a small pill. Sits above
-                  // everything else on the card, including the dimmed
-                  // photo underneath it.
+                  // Sold-out badge — the "SOLD" rubber-stamp graphic
+                  // supplied for this, centered over the product photo.
+                  // It's a fixed-text image (not localized text), so it
+                  // reads the same in Arabic and English.
                   if (!product.inStock)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      top: 18,
-                      child: _SoldOutRibbon(text: context.strings.soldOut),
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          child: Image.asset(
+                            'assets/images/sold_out_stamp.png',
+                            width: stampWidth,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                     ),
                 ],
-                ),
+                );
+                },
               ),
             ),
             Padding(
@@ -365,11 +374,13 @@ class _ProductImage extends StatelessWidget {
   final bool dimmed;
   const _ProductImage({required this.imageUrl, required this.dimmed});
 
-  // Standard luminance-preserving grayscale matrix.
+  // Luminance-preserving grayscale, then flattened toward mid-grey (the
+  // trailing offset pulls blacks up and whites down) so the result reads
+  // as a muted grey wash rather than a plain black-and-white photo.
   static const List<double> _greyscale = <double>[
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
+    0.1063, 0.3576, 0.0361, 0, 64,
+    0.1063, 0.3576, 0.0361, 0, 64,
+    0.1063, 0.3576, 0.0361, 0, 64,
     0, 0, 0, 1, 0,
   ];
 
@@ -397,53 +408,10 @@ class _ProductImage extends StatelessWidget {
     // Desaturate then knock back the opacity a touch so the photo reads
     // as muted/unavailable instead of a plain black-and-white swap.
     return Opacity(
-      opacity: 0.72,
+      opacity: 0.62,
       child: ColorFiltered(
         colorFilter: const ColorFilter.matrix(_greyscale),
         child: image,
-      ),
-    );
-  }
-}
-
-/// Full-bleed "sold out" sash — solid on the left edge, fading to
-/// transparent toward the right, with the label sitting in the solid
-/// portion. Reads as a single continuous ribbon across the card rather
-/// than a floating pill.
-class _SoldOutRibbon extends StatelessWidget {
-  final String text;
-  const _SoldOutRibbon({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 34,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 16, right: 60),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(100),
-          bottomRight: Radius.circular(100),
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            context.colors.danger,
-            context.colors.danger.withOpacity(0),
-          ],
-        ),
-      ),
-      child: Text(
-        text.toUpperCase(),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppFonts.label(
-          text: text,
-          size: 11,
-          color: Colors.white,
-          letterSpacing: 1.0,
-        ),
       ),
     );
   }
