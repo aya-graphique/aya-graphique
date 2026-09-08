@@ -78,22 +78,9 @@ class ProductCard extends StatelessWidget {
                     // side/top/bottom gaps (when the photo's aspect ratio
                     // doesn't match the card's) don't show as transparent.
                     color: context.colors.surfaceRaised,
-                    child: Image.network(
-                      product.imageUrl,
-                      // .cover fills the entire card area with no empty
-                      // letterbox gaps, cropping the image's edges as
-                      // needed when its proportions don't exactly match
-                      // the card's aspect ratio.
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(color: context.colors.surfaceRaised);
-                      },
-                      errorBuilder: (context, error, stack) => Container(
-                        color: context.colors.surfaceRaised,
-                        child: Icon(Icons.menu_book_rounded,
-                            color: context.colors.creamDim, size: 40),
-                      ),
+                    child: _ProductImage(
+                      imageUrl: product.imageUrl,
+                      dimmed: !product.inStock,
                     ),
                   ),
                   // Save (wishlist) + share icons — physically pinned to
@@ -130,14 +117,17 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Sold-out pill sits on its own line below the top row
-                  // so it never overlaps the "New" text next to it.
+                  // Sold-out ribbon — a full-width banner fading out from
+                  // the left edge, mirroring a classic "out of stock"
+                  // storefront sash rather than a small pill. Sits above
+                  // everything else on the card, including the dimmed
+                  // photo underneath it.
                   if (!product.inStock)
                     Positioned(
-                      left: 10,
-                      top: 46,
-                      right: 88,
-                      child: _Pill(text: context.strings.soldOut, color: context.colors.danger),
+                      left: 0,
+                      right: 0,
+                      top: 18,
+                      child: _SoldOutRibbon(text: context.strings.soldOut),
                     ),
                 ],
                 ),
@@ -363,6 +353,98 @@ class _SaveButton extends StatelessWidget {
           accentColor: saved ? context.colors.creamDim : context.colors.danger,
         );
       },
+    );
+  }
+}
+
+/// Product photo, muted to a dim grayscale wash whenever [dimmed] is true
+/// (i.e. the item is sold out) — the classic "this one's unavailable"
+/// storefront treatment — and shown at full color otherwise.
+class _ProductImage extends StatelessWidget {
+  final String imageUrl;
+  final bool dimmed;
+  const _ProductImage({required this.imageUrl, required this.dimmed});
+
+  // Standard luminance-preserving grayscale matrix.
+  static const List<double> _greyscale = <double>[
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0, 0, 0, 1, 0,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    Widget image = Image.network(
+      imageUrl,
+      // .cover fills the entire card area with no empty letterbox gaps,
+      // cropping the image's edges as needed when its proportions don't
+      // exactly match the card's aspect ratio.
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(color: context.colors.surfaceRaised);
+      },
+      errorBuilder: (context, error, stack) => Container(
+        color: context.colors.surfaceRaised,
+        child: Icon(Icons.menu_book_rounded,
+            color: context.colors.creamDim, size: 40),
+      ),
+    );
+
+    if (!dimmed) return image;
+
+    // Desaturate then knock back the opacity a touch so the photo reads
+    // as muted/unavailable instead of a plain black-and-white swap.
+    return Opacity(
+      opacity: 0.72,
+      child: ColorFiltered(
+        colorFilter: const ColorFilter.matrix(_greyscale),
+        child: image,
+      ),
+    );
+  }
+}
+
+/// Full-bleed "sold out" sash — solid on the left edge, fading to
+/// transparent toward the right, with the label sitting in the solid
+/// portion. Reads as a single continuous ribbon across the card rather
+/// than a floating pill.
+class _SoldOutRibbon extends StatelessWidget {
+  final String text;
+  const _SoldOutRibbon({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 34,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.only(left: 16, right: 60),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(100),
+          bottomRight: Radius.circular(100),
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            context.colors.danger,
+            context.colors.danger.withOpacity(0),
+          ],
+        ),
+      ),
+      child: Text(
+        text.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppFonts.label(
+          text: text,
+          size: 11,
+          color: Colors.white,
+          letterSpacing: 1.0,
+        ),
+      ),
     );
   }
 }

@@ -115,76 +115,172 @@ List<_BioSection> kBioSections(bool isArabic) => isArabic
 
 List<_TimelineEntry> kExperience(bool isArabic) => [
       _TimelineEntry(
+        title: isArabic
+            ? 'مصممة إعلانات رقمية وهويات مطبوعة'
+            : 'Digital Advertising & Print Identity Designer',
+        subtitle: isArabic ? 'شركة سلطان العسل — عن بُعد' : 'Sultan Al Asal — Remote',
+        period: isArabic ? '2026 — حتى الآن' : '2026 — Present',
+      ),
+      _TimelineEntry(
         title: isArabic ? 'مصممة جرافيك أول' : 'Senior Graphic Designer',
-        subtitle: isArabic ? "Aya's Graphique — عمل حر" : "Aya's Graphique — Freelance",
-        period: isArabic ? '2022 — حتى الآن' : '2022 — Present',
-        description: isArabic
-            ? 'قيادة مشاريع الهوية البصرية والتغليف والطباعة من الفكرة '
-                'وحتى الملفات الجاهزة للإنتاج.'
-            : 'Leading brand identity, packaging and print design projects '
-                'end to end, from concept to production-ready files.',
+        subtitle: isArabic
+            ? 'CDA – وكالة إعلانية — عن بُعد، الناصرة، فلسطين'
+            : 'CDA – Advertising Agency — Remote, Nazareth, Palestine',
+        period: '2023 — 2025',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك أول' : 'Senior Graphic Designer',
+        subtitle: isArabic
+            ? 'Graphicue – وكالة إعلانية — عن بُعد، الناصرة، فلسطين'
+            : 'Graphicue – Advertising Agency — Remote, Nazareth, Palestine',
+        period: '2023',
+      ),
+      _TimelineEntry(
+        title: isArabic
+            ? 'مدرِّبة في مجال التصميم الجرافيكي'
+            : 'Graphic Design Mentor',
+        subtitle: isArabic ? 'ورش عمل خاصة' : 'Private workshops',
+        period: isArabic ? '2020 — حتى الآن' : '2020 — Present',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مؤسسة العلامة التجارية الشخصية' : 'Founder',
+        subtitle: "Aya's Graphique",
+        period: isArabic ? '2021 — حتى الآن' : '2021 — Present',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك إبداعية' : 'Creative Graphic Designer',
+        subtitle: isArabic
+            ? 'Wash@home — عن بُعد، الولايات المتحدة الأمريكية'
+            : 'Wash@home — Remote, United States',
+        period: isArabic ? 'مايو 2022 — 2023' : 'May 2022 — 2023',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك إبداعية' : 'Creative Graphic Designer',
+        subtitle: 'Droplen',
+        period: isArabic ? 'ديسمبر 2020 — 2021' : 'December 2020 — 2021',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'صانعة محتوى' : 'Content Creator',
+        subtitle: 'Droplen',
+        period: isArabic ? 'يونيو 2021' : 'June 2021',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك إبداعية' : 'Creative Graphic Designer',
+        subtitle: "Dude's Restaurant",
+        period: isArabic ? 'أبريل 2021' : 'April 2021',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك إبداعية' : 'Creative Graphic Designer',
+        subtitle: 'La Pearl Dental Clinic',
+        period: isArabic ? 'أبريل 2021' : 'April 2021',
+      ),
+      _TimelineEntry(
+        title: isArabic ? 'مصممة جرافيك إبداعية' : 'Creative Graphic Designer',
+        subtitle: 'Pop Up Wash Cars',
+        period: isArabic ? 'أبريل 2021' : 'April 2021',
+      ),
+      _TimelineEntry(
+        title: isArabic
+            ? 'مدرِّبة في مجال البرمجيات وتطبيقات الهاتف المحمول'
+            : 'Mentor — Software & Mobile App Development',
+        subtitle: 'Droplen',
+        period: isArabic
+            ? 'يوليو 2020 — سبتمبر 2020'
+            : 'July 2020 — September 2020',
+      ),
+      _TimelineEntry(
+        title: isArabic
+            ? 'فنانة بالرسم الجداري ومصممة جرافيك'
+            : 'Wall Mural Artist & Graphic Designer',
+        subtitle: 'Zeina International Nursery',
+        period: isArabic ? 'أبريل 2017 — نوفمبر 2019' : 'April 2017 — November 2019',
         highlights: isArabic
             ? const [
-                'تصميم أكثر من 30 هوية بصرية كاملة لعملاء محليين وعرب',
-                'إدارة علاقة العميل من أول جلسة الاستماع وحتى تسليم الملفات',
-                'إشراف على مطبوعات المتجر: الدفاتر والتقويمات والمنتجات الورقية',
+                'الاجتماع مع العملاء أو المدير الفني لتحديد نطاق المشروع',
+                'استخدام برامج الرسم الرقمي وتحرير الصور وتصميم وتنسيق الصفحات لإنشاء التصاميم',
+                'تصميم العناصر البصرية مثل الشعارات والصور الأصلية والرسومات التوضيحية',
+                'تصميم وتنسيق التخطيطات، بما يشمل اختيار الألوان والصور والخطوط',
+                'تقديم وعرض المفاهيم التصميمية على العملاء أو المديرين الفنيين',
+                'تنفيذ التعديلات المطلوبة من العملاء أو المديرين الفنيين',
+                'مراجعة التصميمات والتأكد من خلوها من الأخطاء قبل الطباعة أو النشر',
               ]
             : const [
-                'Delivered 30+ full brand identities for local and regional clients',
-                'Owned the client relationship end to end, from discovery to handoff',
-                "Art-directed the store's own print line — notebooks, calendars, stationery",
+                'Met with clients or the art director to determine project scope',
+                'Used digital illustration, photo editing and layout software to create designs',
+                'Created visual elements such as logos, original images and illustrations',
+                'Designed layouts, including selection of colors, images and typefaces',
+                'Presented design concepts to clients or art directors',
+                'Incorporated changes recommended by clients or art directors',
+                'Reviewed designs for errors before printing or publishing',
               ],
       ),
       _TimelineEntry(
         title: isArabic ? 'مصممة جرافيك' : 'Graphic Designer',
-        subtitle: isArabic ? 'اسم الاستوديو' : 'Studio Name',
-        period: '2019 — 2022',
-        description: isArabic
-            ? 'تصميم المواد التسويقية والمحتوى الاجتماعي وتخطيطات الطباعة '
-                'لمجموعة من العملاء المحليين.'
-            : 'Designed marketing collateral, social content and '
-                'print layouts for a range of local clients.',
+        subtitle: isArabic
+            ? 'شركة تطوير للاستشارات الهندسية — دوام جزئي'
+            : 'Tatweer Company for Engineering Consultancies — Part-time',
+        period: isArabic ? 'أكتوبر 2017 — يناير 2018' : 'October 2017 — January 2018',
         highlights: isArabic
             ? const [
-                'تصميم محتوى سوشيال ميديا شهري لأكثر من 15 عميل',
-                'تجهيز ملفات طباعة جاهزة للمطابع مع ضبط الألوان والقياسات',
+                'تنفيذ التعديلات المطلوبة من العملاء أو المديرين الفنيين',
+                'مراجعة التصميمات والتأكد من خلوها من الأخطاء قبل الطباعة أو النشر',
+                'تصميم العناصر البصرية مثل الشعارات والصور الأصلية والرسومات التوضيحية',
+                'إعداد وتنسيق التخطيطات واختيار الألوان والصور والخطوط',
               ]
             : const [
-                'Produced monthly social content for 15+ client accounts',
-                'Prepared print-ready files with accurate color and bleed setup',
+                'Incorporated changes recommended by clients or art directors',
+                'Reviewed designs for errors before printing or publishing',
+                'Created visual elements such as logos, original images and illustrations',
+                'Designed layouts, including selection of colors, images and typefaces',
               ],
       ),
       _TimelineEntry(
-        title: isArabic ? 'متدربة تصميم جرافيك' : 'Graphic Design Intern',
-        subtitle: isArabic ? 'وكالة إعلانية' : 'Advertising Agency',
-        period: '2018 — 2019',
-        description: isArabic
-            ? 'أول خطوة احترافية — دعم فريق التصميم في الحملات الإعلانية '
-                'وتنفيذ التعديلات السريعة تحت ضغط المواعيد.'
-            : 'First professional step — supported the design team on ad '
-                'campaigns and turned around quick revisions under deadline.',
+        title: isArabic ? 'مصممة جرافيك' : 'Graphic Designer',
+        subtitle: 'Younix',
+        period: isArabic ? 'يوليو 2017 — ديسمبر 2017' : 'July 2017 — December 2017',
+      ),
+      _TimelineEntry(
+        title: isArabic
+            ? 'فنانة بالرسم الجداري ومدرِّبة للأطفال'
+            : "Wall Mural Artist & Children's Art Instructor",
+        subtitle: 'Lotus Wholeness Center',
+        period: isArabic ? 'أغسطس 2015 — نوفمبر 2015' : 'August 2015 — November 2015',
         highlights: isArabic
-            ? const ['المشاركة في تنفيذ حملتين إعلانيتين كاملتين']
-            : const ['Contributed to two full ad campaign rollouts'],
+            ? const [
+                'تنفيذ أعمال الرسم الجداري',
+                'تعليم الأطفال أساسيات الرسم وكيفية استخدام الألوان والرسم على الجدران',
+                'العمل بشكل جزئي في مجال المحاسبة بالمركز',
+              ]
+            : const [
+                'Created wall murals',
+                "Taught children painting basics and how to use colors and paint on walls",
+                'Worked part-time in accounting at the center',
+              ],
       ),
     ];
 
 List<_TimelineEntry> kEducation(bool isArabic) => [
       _TimelineEntry(
-        title: isArabic ? 'بكالوريوس التصميم الجرافيكي' : 'B.A. in Graphic Design',
+        title: isArabic
+            ? 'بكالوريوس الفنون التطبيقية – قسم الإعلان'
+            : "Bachelor's Degree in Advertising",
         subtitle: isArabic
-            ? 'كلية الفنون التطبيقية، جامعة حلوان'
-            : 'Faculty of Applied Arts, Helwan University',
-        period: '2015 — 2019',
+            ? 'جامعة 6 أكتوبر'
+            : 'October 6 University',
+        period: '2023',
         description: isArabic
-            ? 'تخرجت بمشروع تخرج في تصميم الهوية البصرية، بتقدير امتياز.'
-            : 'Graduated with a brand-identity thesis project, with honors.',
+            ? 'درست في كلية الفنون التطبيقية، قسم الإعلان، جامعة 6 أكتوبر '
+                'للحصول على درجة البكالوريوس، خلال الفترة من 2015/2016 إلى 2023.'
+            : "Studied at the Faculty of Applied Arts, Advertising "
+                "Department, October 6 University, for a Bachelor's "
+                'degree, from 2015/2016 to 2023.',
       ),
       _TimelineEntry(
-        title: isArabic ? 'شهادة احترافية في الـ UI/UX' : 'UI/UX Design Certificate',
-        subtitle: isArabic ? 'منصة تدريب أونلاين' : 'Online Training Platform',
-        period: '2020',
-        description: '',
+        title: isArabic ? 'الثانوية العامة' : 'High School Diploma',
+        subtitle: isArabic
+            ? 'مدرسة الصالحية الأهلية الثانوية، جدة، المملكة العربية السعودية'
+            : 'El Salhya El Ahlya High School, Jeddah, Saudi Arabia',
+        period: '2014/2015',
       ),
     ];
 
