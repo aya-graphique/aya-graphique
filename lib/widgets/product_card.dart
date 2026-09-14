@@ -11,7 +11,6 @@ import '../utils/currency.dart';
 import 'app_toast.dart';
 import 'mini_cart_sheet.dart';
 import 'new_arrival_badge.dart';
-import 'tilt_3d_card.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -58,13 +57,27 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tilt3DCard(
-      maxTiltDegrees: 6,
-      liftOnHover: 6,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(gradient: context.colors.cardGradient),
+        decoration: BoxDecoration(
+          gradient: context.colors.cardGradient,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -271,6 +284,8 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

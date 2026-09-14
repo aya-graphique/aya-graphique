@@ -12,7 +12,7 @@ import '../utils/currency.dart';
 import '../widgets/animated_backdrop.dart';
 import '../widgets/mini_cart_sheet.dart';
 import '../widgets/social_links_footer.dart';
-import '../widgets/tilt_3d_card.dart';
+import '../widgets/image_zoom_lens.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -141,8 +141,23 @@ class _Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<_Gallery> {
-  final _controller = PageController();
+  // Very large virtual page count so swiping past the last real photo wraps
+  // around to the first one (and vice-versa) instead of hitting a hard edge.
+  // The actual image shown is always `virtualIndex % images.length`.
+  static const int _kVirtualCount = 100000;
+
+  late final PageController _controller;
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final imagesLength = widget.product.galleryImages.length;
+    final mid = _kVirtualCount ~/ 2;
+    // Start on a virtual page that maps back to real index 0.
+    final startPage = imagesLength > 0 ? mid - (mid % imagesLength) : 0;
+    _controller = PageController(initialPage: startPage);
+  }
 
   @override
   void dispose() {
@@ -156,9 +171,18 @@ class _GalleryState extends State<_Gallery> {
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 1000),
-      child: Tilt3DCard(
-        maxTiltDegrees: 5,
-        liftOnHover: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: AspectRatio(
           // مربع 1:1 بحد أقصى 1000px (محدد بالـ ConstrainedBox أعلاه)
@@ -175,19 +199,28 @@ class _GalleryState extends State<_Gallery> {
                         behavior: const _DraggableScrollBehavior(),
                         child: PageView.builder(
                           controller: _controller,
-                          itemCount: images.length,
-                          onPageChanged: (i) => setState(() => _index = i),
-                          itemBuilder: (context, i) => Image.network(
-                            images[i],
+                          itemCount: images.length > 1 ? _kVirtualCount : images.length,
+                          onPageChanged: (i) => setState(() => _index = i % images.length),
+                          itemBuilder: (context, i) {
+                            final actualIndex = i % images.length;
+                            return ImageZoomLens(
+                            imageProvider: NetworkImage(images[actualIndex]),
                             // .contain so the full product photo is always visible,
                             // uncropped — .cover was slicing off part of the image
                             // whenever its proportions didn't match this fixed
                             // aspect-ratio frame.
                             fit: BoxFit.contain,
+                            lensSize: widget.isMobile ? 170 : 220,
+                            zoomFactor: 2.5,
+                            // اللمس/السحب بيفضل بيتحكم في تبديل صور المنتج
+                            // (PageView)، فالعدسة بتشتغل بالـ mouse hover بس
+                            // على الديسكتوب/الويب.
+                            enabled: !widget.isMobile,
                             errorBuilder: (context, error, stack) => Center(
                               child: Icon(Icons.menu_book_rounded, color: context.colors.creamDim, size: 64),
                             ),
-                          ),
+                            );
+                          },
                         ),
                       ),
                       if (images.length > 1 && !widget.isMobile) ...[
@@ -247,6 +280,7 @@ class _GalleryState extends State<_Gallery> {
                     ],
                   ),
           ),
+        ),
         ),
       ),
     );
