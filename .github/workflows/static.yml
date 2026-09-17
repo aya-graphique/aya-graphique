@@ -26,8 +26,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # base-href '/' لأن الموقع بيتقرا من دومين مخصص (ayaattiaabed.com)
+      # على الجذر مباشرة — مش من صفحة مشروع زي username.github.io/repo-name.
       - name: Build web
-        run: flutter build web --base-href /aya-graphique/
+        run: flutter build web --release --base-href /
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
