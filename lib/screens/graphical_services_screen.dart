@@ -394,6 +394,17 @@ class _GraphicalServicesScreenState extends State<GraphicalServicesScreen> {
     _loadWhatsapp();
     _loadOverrides();
     widget.focusController?.addListener(_onFocusRequest);
+    // The Services tab is lazily built on first visit (go_router only
+    // creates a StatefulShellRoute branch the first time it's navigated
+    // to), so the very first tap on a Home service card fires
+    // ServicesFocusController.focusCategory() *before* this widget (and
+    // its listener above) exists — that notifyListeners() call has
+    // nobody to notify and is lost. Catching an already-pending request
+    // here too (once the first frame is up) makes that first tap jump
+    // to the right category exactly like every tap after it does.
+    if (widget.focusController?.requestedIndex != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onFocusRequest());
+    }
   }
 
   @override
