@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="/">
+  <base href="/aya-graphique/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -33,20 +33,151 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0D0512">
 
-  <!-- No branded splash overlay anymore: while Flutter downloads and boots,
-       the page background is the app's real brand background (the same
-       deep violet the app opens into in dark mode, its default theme)
-       instead of stark white, so there's no white flash and no mismatched
-       color hand-off once Flutter paints. -->
+  <!-- Brand background immediately (no white flash), plus a pure
+       CSS/HTML loading indicator with a numeric percentage.
+
+       Important note: the browser has no reliable way to report real
+       byte-level download progress for Flutter's own bootstrap
+       (flutter_bootstrap.js is auto-generated on every `flutter build`,
+       so we can't safely hook into its internals without it breaking on
+       the next build). So this is a smooth, decelerating *estimated*
+       percentage — it always reaches 100% and disappears at exactly the
+       right moment (when main.dart calls window.hideAppLoader() after
+       the real UI's first frame), it just isn't tied to literal bytes
+       downloaded in between. -->
   <style>
     html, body {
       height: 100%;
       margin: 0;
       background-color: #0D0512;
     }
+
+    #app-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background-color: #0D0512;
+      z-index: 9999;
+      transition: opacity 0.35s ease;
+    }
+
+    #app-loading .ring-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+    }
+
+    #app-loading svg {
+      width: 64px;
+      height: 64px;
+      transform: rotate(-90deg);
+    }
+
+    #app-loading circle {
+      fill: none;
+      stroke-width: 4;
+    }
+
+    #app-loading .ring-bg {
+      stroke: rgba(255, 255, 255, 0.14);
+    }
+
+    #app-loading .ring-fg {
+      stroke: #B78CE0; /* light violet accent on the dark brand bg */
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.15s linear;
+    }
+
+    #app-loading .ring-percent {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    #app-loading.app-loading-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+  <div id="app-loading">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 64 64">
+        <circle class="ring-bg" cx="32" cy="32" r="28"></circle>
+        <circle class="ring-fg" id="app-loading-ring" cx="32" cy="32" r="28"></circle>
+      </svg>
+      <div class="ring-percent" id="app-loading-percent">0%</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var RADIUS = 28;
+      var CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+      var ring = document.getElementById('app-loading-ring');
+      var label = document.getElementById('app-loading-percent');
+      var overlay = document.getElementById('app-loading');
+      ring.style.strokeDasharray = CIRCUMFERENCE.toFixed(1);
+      ring.style.strokeDashoffset = CIRCUMFERENCE.toFixed(1);
+
+      var progress = 0;
+      var done = false;
+      var tickTimer = null;
+
+      function paint(p) {
+        var clamped = Math.max(0, Math.min(100, p));
+        label.textContent = Math.round(clamped) + '%';
+        ring.style.strokeDashoffset =
+          (CIRCUMFERENCE * (1 - clamped / 100)).toFixed(1);
+      }
+
+      // Ticks up quickly at first, then decelerates as it approaches 90%
+      // — never claims 100% on its own, since we don't actually know
+      // when things are done until Flutter tells us.
+      tickTimer = setInterval(function () {
+        if (done) return;
+        progress += (90 - progress) * 0.06;
+        paint(progress);
+      }, 100);
+
+      // Called from lib/main.dart (WidgetsBinding.instance.addPostFrameCallback)
+      // right after the real Flutter UI paints its first frame.
+      window.hideAppLoader = function () {
+        if (done) return;
+        done = true;
+        clearInterval(tickTimer);
+        paint(100);
+        setTimeout(function () {
+          overlay.classList.add('app-loading-hidden');
+          setTimeout(function () {
+            if (overlay && overlay.parentNode) {
+              overlay.parentNode.removeChild(overlay);
+            }
+          }, 400);
+        }, 150);
+      };
+
+      // Safety net: if something goes wrong (very old browser, network
+      // failure mid-boot, etc.) and Flutter never gets a chance to call
+      // hideAppLoader itself, don't leave visitors staring at a spinner
+      // forever — drop it after 20s regardless.
+      setTimeout(function () {
+        if (window.hideAppLoader) window.hideAppLoader();
+      }, 20000);
+    })();
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
