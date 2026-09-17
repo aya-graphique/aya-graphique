@@ -1,0 +1,24 @@
+تعديلات لتسريع فتح الموقع (Aya's Graphique)
+================================================
+
+1) اتشالت 4 صور PNG مش مستخدمة خالص في الكود (كانت بتتحمّل من غير أي فايدة):
+   - assets/images/certificates/certificate_graphic_design.png  (1.4MB)
+   - assets/images/services_hero_banner.png                      (960KB)
+   - assets/images/private_workshop_promo.png                    (860KB)
+   - assets/images/advertising_designs_promo.png                 (852KB)
+   لو محتاجاها فعلاً في مكان في التطبيق، ضيفيها تاني بس بجودة أقل.
+
+2) assets/images/aya_hero_flag_photo.png اتحولت لـ JPEG (573KB -> 85KB)
+   وده الملف الوحيد اللي كان بيتنادى عليه فعلياً من الكود (lib/screens/home_screen.dart)
+   فعدّلت الامتداد جوا الكود كمان (.png -> .jpg) عشان يفضل شغال.
+
+3) باقي الصور (certificate_*.jpg, sold_out_stamp.png, aya_hero_mobile.png)
+   اتعمللها ضغط/optimize بسيط بدون فقدان واضح في الجودة.
+
+النتيجة: مجلد assets/images/ نزل من 10MB لـ 5.4MB (~45% تقليل).
+
+طريقة التركيب:
+- استبدلي مجلد assets/images بالكامل بده اللي جوا الملف ده.
+- استبدلي lib/screens/home_screen.dart بالنسخة المعدّلة جوا الملف ده.
+- شغّلي: flutter clean && flutter build web --release
+- ادفعي الـ build الجديد لنفس مكان النشر (GitHub Pages).

@@ -655,7 +655,7 @@ class _HeroPortrait extends StatelessWidget {
     this.size,
     this.fill = false,
     this.noSideCrop = false,
-    this.assetPath = 'assets/images/aya_hero_flag_photo.png',
+    this.assetPath = 'assets/images/aya_hero_flag_photo.jpg',
   }) : assert(size != null || fill, 'Provide a size, or set fill: true');
 
   @override

@@ -1,3 +1,6 @@
+import 'dart:js' as js;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +26,26 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // No splash screen: while the page/engine is loading, the browser just
-  // shows a plain brand-colored background (set in web/index.html) instead
-  // of a white flash or a dedicated splash widget. The app opens directly
-  // into MainShell as soon as it's ready.
+  // While the page/engine is loading, web/index.html shows a small CSS
+  // spinner over the brand-colored background (no white flash, no
+  // dedicated Dart splash widget needed) — see hideAppLoader() below.
   await SupabaseService.init();
   runApp(const AyaGraphiqueApp());
+
+  // web/index.html shows a plain CSS spinner the instant the page loads
+  // (before Flutter/CanvasKit have even downloaded). Once our actual UI
+  // has painted its first real frame, tell the page to fade that
+  // spinner out and remove it — see window.hideAppLoader in index.html.
+  if (kIsWeb) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        js.context.callMethod('hideAppLoader');
+      } catch (_) {
+        // Ignore — the 20s fallback timeout in index.html will remove
+        // the spinner on its own if this ever fails for some reason.
+      }
+    });
+  }
 }
 
 /// Every route in the app, as a real go_router location — this is what
