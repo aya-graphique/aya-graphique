@@ -57,12 +57,11 @@ List<PortfolioProject> kProjects(bool isArabic) => [
             ? 'تصميم صندوق سلسلة ألعاب تعليمية للأطفال بأسلوب الرسم الطباشيري.'
             : 'Packaging design for a kids\' educational game series in a chalk-drawing style.',
         fullDescription: isArabic
-            ? 'تصميم كامل لصندوق لعبة "السنجوب المستكشف"، سلسلة ألعاب تعليمية '
-                'مخصصة لجيل الطفولة المبكرة. اتعمل تصميم الشخصية بمساعدة الـ AI '
-                'بأسلوب رسم طباشيري دافئ يناسب عالم الأطفال، مع كتابة يدوية '
-                'حرة لاسم اللعبة تديله طابع شخصي وممتع. المشروع اتسلم '
-                'للمطبعة بالـ Diecut كامل لكل أوجه الصندوق (العلوي والسفلي) '
-                'جاهز للطباعة والتصنيع.'
+            ? 'تصميم لعبة "السنجوب المستكشف"\n'
+                'يحتوي المشروع على تصميم الشخصية باستخدام الai مع استخدام '
+                'اسلوب الرسم الطباشيري، والكتابة اليدوية الحرة لاسم اللعبة '
+                'مع تسليم المشروع من خلال Diecut للمطبعة بالآوجه الكاملة '
+                'للصندوق'
             : 'Full packaging design for "The Explorer Squirrel", an '
                 'educational game series for early childhood. The character '
                 'was designed with AI assistance in a warm chalk-drawing '
@@ -106,26 +105,26 @@ List<PortfolioProject> kProjects(bool isArabic) => [
         description: isArabic
             ? 'حملة إعلانية عن عروض اليوم الوطني السعودي للعلامة الرائدة سلطان العسل.'
             : 'An ad campaign for Saudi National Day offers by the leading brand Sultan Aleasl.',
-        fullDescription: isArabic
-            ? 'سلسلة تصاميم إعلانية لحملة اليوم الوطني السعودي الـ96 لعلامة '
-                '"سلطان العسل"، بعنوان "عزّنا بطبعنا". بعض التصاميم بيبرز '
-                'باقة عروض مختلفة (باقة السعادة، باقة الملوك، باقة خير أرضنا، '
-                'باقة سند، باقة همّة) بخصومات متدرجة، وباقي التصاميم بيركز '
-                'على منتجات بعينها (سدر وضهيانه، سمرة الجنوب، سدر رجال ألمع، '
-                'سدر جبلي الباحة، والشمع الطبيعي)، مع تصوير منتج فاخر '
-                'ولمسات بصرية مستوحاة من التراث السعودي (النقوش، الأقمشة '
-                'التقليدية) تعكس هوية العلامة وتناسب روح المناسبة الوطنية.'
-            : 'A series of ad designs for Sultan Aleasl\'s campaign marking '
-                'Saudi Arabia\'s 96th National Day, themed "Our pride is in '
-                'our nature." Some designs highlight a different offer '
-                'bundle with tiered discounts (Happiness, Kings, Our Land\'s '
-                'Bounty, Sanad and Himma), while the rest spotlight individual '
-                'products (Sidr Dahyana, Samra Al-Janoub, Sidr Rijal Alma, '
-                'Al-Baha Mountain Sidr and natural honeycomb) — all paired '
-                'with premium product photography and visual details '
-                'inspired by Saudi heritage (patterns, traditional fabrics) '
-                'that reflect the brand\'s identity and the spirit of the '
-                'occasion.',
+        // fullDescription: isArabic
+        //     ? 'سلسلة تصاميم إعلانية لحملة اليوم الوطني السعودي الـ96 لعلامة '
+        //         '"سلطان العسل"، بعنوان "عزّنا بطبعنا". بعض التصاميم بيبرز '
+        //         'باقة عروض مختلفة (باقة السعادة، باقة الملوك، باقة خير أرضنا، '
+        //         'باقة سند، باقة همّة) بخصومات متدرجة، وباقي التصاميم بيركز '
+        //         'على منتجات بعينها (سدر وضهيانه، سمرة الجنوب، سدر رجال ألمع، '
+        //         'سدر جبلي الباحة، والشمع الطبيعي)، مع تصوير منتج فاخر '
+        //         'ولمسات بصرية مستوحاة من التراث السعودي (النقوش، الأقمشة '
+        //         'التقليدية) تعكس هوية العلامة وتناسب روح المناسبة الوطنية.'
+        //     : 'A series of ad designs for Sultan Aleasl\'s campaign marking '
+        //         'Saudi Arabia\'s 96th National Day, themed "Our pride is in '
+        //         'our nature." Some designs highlight a different offer '
+        //         'bundle with tiered discounts (Happiness, Kings, Our Land\'s '
+        //         'Bounty, Sanad and Himma), while the rest spotlight individual '
+        //         'products (Sidr Dahyana, Samra Al-Janoub, Sidr Rijal Alma, '
+        //         'Al-Baha Mountain Sidr and natural honeycomb) — all paired '
+        //         'with premium product photography and visual details '
+        //         'inspired by Saudi heritage (patterns, traditional fabrics) '
+        //         'that reflect the brand\'s identity and the spirit of the '
+        //         'occasion.',
         coverOverride: 'assets/images/projects/project_3/cover.png',
         // 10 finished ad designs (4:5 portrait) — shown in the uncropped
         // grid layout rather than the bento, so no ad gets its title or
