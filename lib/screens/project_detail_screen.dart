@@ -16,7 +16,14 @@ import '../widgets/tilt_3d_card.dart';
 /// Behance link) leads at the very top — above every photo, not just
 /// above a lone cover shot — then the project's 5 photos follow in a
 /// distinctive "bento" gallery: one featured shot plus 4 supporting
-/// ones, each tilting toward the pointer on hover (see [Tilt3DCard]).
+/// ones, each tilting toward the pointer on hover (see [Tilt3DCard]) —
+/// or fewer tiles, re-laid-out to fit, when a project has fewer than 5
+/// photos (no empty placeholder slots).
+/// Projects with more than 5 photos keep going below the bento in an
+/// even grid of full-ratio tiles (see [_PortraitGrid]) — nothing past
+/// the 5th photo is dropped. A project can also opt out of the bento
+/// entirely ([ProjectGalleryLayout.grid]) so every photo — e.g. a set of
+/// ad designs — shows whole, uncropped.
 class ProjectDetailScreen extends StatelessWidget {
   final PortfolioProject project;
   const ProjectDetailScreen({super.key, required this.project});
@@ -31,8 +38,8 @@ class ProjectDetailScreen extends StatelessWidget {
 
   // Opens the tapped photo full-screen, pinch/scroll-zoomable, and lets
   // the user swipe between the rest of this project's real photos
-  // (the padded placeholder slots in the bento grid are never tappable,
-  // so [images] here is always the project's actual, un-padded list).
+  // ([images] here is always the project's full, actual photo list — the
+  // tapped tile's index maps straight onto it).
   //
   // This is a real go_router route (not a bare Navigator.push overlay
   // like a dialog) specifically so it gets its own browser/back-button
@@ -65,13 +72,17 @@ class ProjectDetailScreen extends StatelessWidget {
     final categoryLabel = project.category.labelFor(isArabic);
     final description = project.descriptionFor();
     final hasUrl = project.url.trim().isNotEmpty;
-    // Exactly 5 slots for the bento gallery below — padded with empty
-    // strings (rendered as violet placeholder plates) if fewer than 5
-    // images were supplied, and capped at 5 if more were.
-    final gallery = List<String>.generate(
-      5,
-      (i) => i < project.images.length ? project.images[i] : '',
-    );
+    // The bento shows the project's first 5 real photos — no empty
+    // placeholder slots: with 3 photos it lays out 3 tiles, with 2 it
+    // lays out 2, and so on. Any photos beyond the 5th don't fit the
+    // bento, so they go into [extraImages] and render in the grid that
+    // follows it.
+    final gallery = project.images.take(5).toList();
+    final extraImages =
+        project.images.length > 5 ? project.images.sublist(5) : const <String>[];
+    // Grid projects skip the bento altogether and show every photo whole.
+    final useGrid =
+        project.galleryLayout == ProjectGalleryLayout.grid && project.images.isNotEmpty;
 
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
@@ -153,11 +164,34 @@ class ProjectDetailScreen extends StatelessWidget {
                   const SizedBox(height: 36),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 60),
-                    child: _BentoGallery(
-                      images: gallery,
-                      isMobile: isMobile,
-                      onTapImage: (i) => _openLightbox(context, project.images, i),
-                    ),
+                    child: useGrid
+                        ? _PortraitGrid(
+                            images: project.images,
+                            startIndex: 0,
+                            isMobile: isMobile,
+                            onTapImage: (i) => _openLightbox(context, project.images, i),
+                          )
+                        : Column(
+                            children: [
+                              _BentoGallery(
+                                images: gallery,
+                                isMobile: isMobile,
+                                onTapImage: (i) => _openLightbox(context, project.images, i),
+                              ),
+                              if (extraImages.isNotEmpty) ...[
+                                SizedBox(height: isMobile ? 12 : 18),
+                                _PortraitGrid(
+                                  images: extraImages,
+                                  // Extras continue the project's photo
+                                  // list right after the bento's 5, so
+                                  // the lightbox index is offset by 5.
+                                  startIndex: 5,
+                                  isMobile: isMobile,
+                                  onTapImage: (i) => _openLightbox(context, project.images, i),
+                                ),
+                              ],
+                            ],
+                          ),
                   ),
                   const SizedBox(height: 44),
                   Center(child: SocialLinksFooter(isMobile: isMobile)),
@@ -172,76 +206,150 @@ class ProjectDetailScreen extends StatelessWidget {
   }
 }
 
-/// The project's 5 photos laid out as an asymmetric "bento" mosaic
-/// instead of a plain stack — one larger featured shot up top, then 4
-/// supporting shots below it. Each tile tilts toward the pointer on
-/// hover (desktop) and eases into view as it scrolls onscreen, so the
-/// gallery reads as a deliberate showcase rather than a photo dump.
+/// The project's photos laid out as an asymmetric "bento" mosaic instead
+/// of a plain stack. It adapts to however many real photos there are
+/// (1 to 5) — it never pads with empty placeholder plates:
+///   * 5 — wide featured + tall side shot, then three even shots
+///   * 4 — two staggered rows (wide+tall, then tall+wide)
+///   * 3 — one row: wide | tall | wide
+///   * 2 — wide featured + tall side shot
+///   * 1 — a single large shot
+/// On mobile: one featured shot full-width, then the rest in 2-up rows
+/// (a last odd photo takes the full row). Each tile tilts toward the
+/// pointer on hover (desktop) and eases into view as it scrolls onscreen.
 class _BentoGallery extends StatelessWidget {
-  final List<String> images; // always length 5 (some may be '')
+  final List<String> images; // only the project's real photos: 1–5 of them
   final bool isMobile;
   final ValueChanged<int> onTapImage;
   const _BentoGallery({required this.images, required this.isMobile, required this.onTapImage});
+
+  Widget _tile(int i, double height) =>
+      _GalleryTile(path: images[i], height: height, index: i, onTap: () => onTapImage(i));
+
+  // One row of tiles: [indices] sized by matching [flex] weights.
+  Widget _row(List<int> indices, List<int> flex, double height, double gap) {
+    return SizedBox(
+      height: height,
+      child: Row(
+        children: [
+          for (var k = 0; k < indices.length; k++) ...[
+            if (k > 0) SizedBox(width: gap),
+            Expanded(flex: flex[k], child: _tile(indices[k], height)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = images.length;
+    if (n == 0) return const SizedBox.shrink();
+    final gap = isMobile ? 12.0 : 18.0;
+
+    if (isMobile) {
+      // One featured shot full-width, then 2-up rows; if the count of
+      // remaining photos is odd, the last one gets a full-width row.
+      return Column(
+        children: [
+          SizedBox(width: double.infinity, child: _tile(0, n == 1 ? 300 : 260)),
+          for (var i = 1; i < n; i += 2) ...[
+            SizedBox(height: gap),
+            Row(
+              children: [
+                Expanded(child: _tile(i, 170)),
+                if (i + 1 < n) ...[
+                  SizedBox(width: gap),
+                  Expanded(child: _tile(i + 1, 170)),
+                ],
+              ],
+            ),
+          ],
+        ],
+      );
+    }
+
+    // Desktop.
+    if (n == 1) {
+      return SizedBox(width: double.infinity, child: _tile(0, 460));
+    }
+    if (n == 2) {
+      return _row([0, 1], [3, 2], 380, gap);
+    }
+    if (n == 3) {
+      return _row([0, 1, 2], [3, 2, 3], 380, gap);
+    }
+    if (n == 4) {
+      return Column(
+        children: [
+          _row([0, 1], [3, 2], 340, gap),
+          SizedBox(height: gap),
+          _row([2, 3], [2, 3], 340, gap),
+        ],
+      );
+    }
+    // 5 photos: a wide featured shot + a tall side shot sharing the top
+    // row, then three even shots underneath.
+    return Column(
+      children: [
+        _row([0, 1], [3, 2], 380, gap),
+        SizedBox(height: gap),
+        _row([2, 3, 4], [1, 1, 1], 230, gap),
+      ],
+    );
+  }
+}
+
+/// A project's photos as an even grid of uncropped tiles. Used both for
+/// photos 6+ of a bento project (the ones that don't fit its 5 slots)
+/// and, for [ProjectGalleryLayout.grid] projects, for every photo.
+/// An even grid (2 across on mobile, 3–4 on desktop) whose tiles keep the
+/// 4:5 portrait ratio the ad designs are made in, so each design shows
+/// whole instead of being center-cropped like in the bento. A short last
+/// row is centered rather than left-hanging. Tapping a tile opens the
+/// same lightbox as the bento does, at this photo's place in the full
+/// list ([startIndex] + its position here).
+class _PortraitGrid extends StatelessWidget {
+  final List<String> images; // real photos only, no '' placeholders
+  final int startIndex;
+  final bool isMobile;
+  final ValueChanged<int> onTapImage;
+  const _PortraitGrid({
+    required this.images,
+    required this.startIndex,
+    required this.isMobile,
+    required this.onTapImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     final gap = isMobile ? 12.0 : 18.0;
 
-    if (isMobile) {
-      // One tall featured shot full-width, then two even 2-up rows —
-      // still a mosaic, just single-column-friendly for narrow screens.
-      return Column(
-        children: [
-          _GalleryTile(path: images[0], height: 260, index: 0, onTap: () => onTapImage(0)),
-          SizedBox(height: gap),
-          Row(
-            children: [
-              Expanded(child: _GalleryTile(path: images[1], height: 170, index: 1, onTap: () => onTapImage(1))),
-              SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[2], height: 170, index: 2, onTap: () => onTapImage(2))),
-            ],
-          ),
-          SizedBox(height: gap),
-          Row(
-            children: [
-              Expanded(child: _GalleryTile(path: images[3], height: 170, index: 3, onTap: () => onTapImage(3))),
-              SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[4], height: 170, index: 4, onTap: () => onTapImage(4))),
-            ],
-          ),
-        ],
-      );
-    }
-
-    // Desktop bento: a wide featured shot + a tall side shot sharing the
-    // top row, then three even shots underneath — five photos, five
-    // distinct proportions, nothing repeating the plain "stack" reading.
-    return Column(
-      children: [
-        SizedBox(
-          height: 380,
-          child: Row(
-            children: [
-              Expanded(flex: 3, child: _GalleryTile(path: images[0], height: 380, index: 0, onTap: () => onTapImage(0))),
-              SizedBox(width: gap),
-              Expanded(flex: 2, child: _GalleryTile(path: images[1], height: 380, index: 1, onTap: () => onTapImage(1))),
-            ],
-          ),
-        ),
-        SizedBox(height: gap),
-        SizedBox(
-          height: 230,
-          child: Row(
-            children: [
-              Expanded(child: _GalleryTile(path: images[2], height: 230, index: 2, onTap: () => onTapImage(2))),
-              SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[3], height: 230, index: 3, onTap: () => onTapImage(3))),
-              SizedBox(width: gap),
-              Expanded(child: _GalleryTile(path: images[4], height: 230, index: 4, onTap: () => onTapImage(4))),
-            ],
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 2 across on mobile, 4 on a wide desktop, 3 on narrower ones.
+        final columns = isMobile ? 2 : (constraints.maxWidth >= 1000 ? 4 : 3);
+        final tileWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
+        return Wrap(
+          alignment: WrapAlignment.center,
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (var i = 0; i < images.length; i++)
+              SizedBox(
+                width: tileWidth,
+                child: _GalleryTile(
+                  path: images[i],
+                  height: tileWidth * 1.25, // 4:5 portrait
+                  // Stagger the reveal within a row, not across the
+                  // whole list, so tiles further down don't wait ages.
+                  index: i % columns,
+                  onTap: () => onTapImage(startIndex + i),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

@@ -51,17 +51,30 @@ IconData _iconForCategory(ProjectCategory category) {
 List<PortfolioProject> kProjects(bool isArabic) => [
       PortfolioProject(
         id: 'project-1',
-        title: isArabic ? 'اسم المشروع الأول' : 'First Project Name',
-        category: ProjectCategory.logoIdentity,
+        title: isArabic ? 'السنجوب المستكشف' : 'The Explorer Squirrel',
+        category: ProjectCategory.packaging,
         description: isArabic
-            ? 'وصف مختصر للمشروع: إيه اللي اتعمل فيه وليه.'
-            : 'A short description of the project: what it is and why.',
+            ? 'تصميم صندوق سلسلة ألعاب تعليمية للأطفال بأسلوب الرسم الطباشيري.'
+            : 'Packaging design for a kids\' educational game series in a chalk-drawing style.',
+        fullDescription: isArabic
+            ? 'تصميم كامل لصندوق لعبة "السنجوب المستكشف"، سلسلة ألعاب تعليمية '
+                'مخصصة لجيل الطفولة المبكرة. اتعمل تصميم الشخصية بمساعدة الـ AI '
+                'بأسلوب رسم طباشيري دافئ يناسب عالم الأطفال، مع كتابة يدوية '
+                'حرة لاسم اللعبة تديله طابع شخصي وممتع. المشروع اتسلم '
+                'للمطبعة بالـ Diecut كامل لكل أوجه الصندوق (العلوي والسفلي) '
+                'جاهز للطباعة والتصنيع.'
+            : 'Full packaging design for "The Explorer Squirrel", an '
+                'educational game series for early childhood. The character '
+                'was designed with AI assistance in a warm chalk-drawing '
+                'style, paired with free hand-lettering for the game name. '
+                'The project was delivered to the print shop as a complete '
+                'diecut covering every face of the box, ready for print and '
+                'production.',
+        coverOverride: 'assets/images/projects/project_1/cover.png',
         images: const [
-          'assets/images/projects/project_1/1.jpg',
-          'assets/images/projects/project_1/2.jpg',
-          'assets/images/projects/project_1/3.jpg',
-          'assets/images/projects/project_1/4.jpg',
-          'assets/images/projects/project_1/5.jpg',
+          'assets/images/projects/project_1/1.png',
+          'assets/images/projects/project_1/2.png',
+          'assets/images/projects/project_1/3.png',
         ],
         url: '',
       ),
@@ -86,17 +99,51 @@ List<PortfolioProject> kProjects(bool isArabic) => [
       ),
       PortfolioProject(
         id: 'project-3',
-        title: isArabic ? 'اسم المشروع الثالث' : 'Third Project Name',
+        title: isArabic
+            ? 'اليوم الوطني السعودي - سلطان العسل'
+            : 'Saudi National Day - Sultan Aleasl',
         category: ProjectCategory.advertising,
         description: isArabic
-            ? 'وصف مختصر للمشروع التالت.'
-            : 'A short description of the third project.',
+            ? 'حملة إعلانية عن عروض اليوم الوطني السعودي للعلامة الرائدة سلطان العسل.'
+            : 'An ad campaign for Saudi National Day offers by the leading brand Sultan Aleasl.',
+        fullDescription: isArabic
+            ? 'سلسلة تصاميم إعلانية لحملة اليوم الوطني السعودي الـ96 لعلامة '
+                '"سلطان العسل"، بعنوان "عزّنا بطبعنا". بعض التصاميم بيبرز '
+                'باقة عروض مختلفة (باقة السعادة، باقة الملوك، باقة خير أرضنا، '
+                'باقة سند، باقة همّة) بخصومات متدرجة، وباقي التصاميم بيركز '
+                'على منتجات بعينها (سدر وضهيانه، سمرة الجنوب، سدر رجال ألمع، '
+                'سدر جبلي الباحة، والشمع الطبيعي)، مع تصوير منتج فاخر '
+                'ولمسات بصرية مستوحاة من التراث السعودي (النقوش، الأقمشة '
+                'التقليدية) تعكس هوية العلامة وتناسب روح المناسبة الوطنية.'
+            : 'A series of ad designs for Sultan Aleasl\'s campaign marking '
+                'Saudi Arabia\'s 96th National Day, themed "Our pride is in '
+                'our nature." Some designs highlight a different offer '
+                'bundle with tiered discounts (Happiness, Kings, Our Land\'s '
+                'Bounty, Sanad and Himma), while the rest spotlight individual '
+                'products (Sidr Dahyana, Samra Al-Janoub, Sidr Rijal Alma, '
+                'Al-Baha Mountain Sidr and natural honeycomb) — all paired '
+                'with premium product photography and visual details '
+                'inspired by Saudi heritage (patterns, traditional fabrics) '
+                'that reflect the brand\'s identity and the spirit of the '
+                'occasion.',
+        coverOverride: 'assets/images/projects/project_3/cover.png',
+        // 10 finished ad designs (4:5 portrait) — shown in the uncropped
+        // grid layout rather than the bento, so no ad gets its title or
+        // price cut off (see ProjectGalleryLayout).
+        galleryLayout: ProjectGalleryLayout.grid,
         images: const [
-          'assets/images/projects/project_3/1.jpg',
-          'assets/images/projects/project_3/2.jpg',
-          'assets/images/projects/project_3/3.jpg',
-          'assets/images/projects/project_3/4.jpg',
-          'assets/images/projects/project_3/5.jpg',
+          'assets/images/projects/project_3/1.png', // باقة السعادة
+          'assets/images/projects/project_3/2.png', // باقة سند
+          'assets/images/projects/project_3/3.png', // باقة همّة
+          'assets/images/projects/project_3/4.png', // باقة خير أرضنا
+          // باقة الملوك — the same file as the grid cover above, listed
+          // here too so it's also viewable inside the project itself.
+          'assets/images/projects/project_3/cover.png',
+          'assets/images/projects/project_3/5.png', // جركن سدر وضهيانه
+          'assets/images/projects/project_3/6.png', // جركن سمرة الجنوب
+          'assets/images/projects/project_3/7.png', // سدر رجال ألمع
+          'assets/images/projects/project_3/8.png', // سدر جبلي الباحة
+          'assets/images/projects/project_3/9.png', // عرض الشمع الطبيعي
         ],
         url: '',
       ),

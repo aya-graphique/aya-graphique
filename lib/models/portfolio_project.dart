@@ -4,6 +4,15 @@
 /// [ProjectCategoryLabel.labelFor].
 enum ProjectCategory { logoIdentity, packaging, advertising, artwork }
 
+/// How a project's photos are laid out on its detail page.
+///  * [bento] — the asymmetric mosaic (1 featured + 4 supporting shots,
+///    center-cropped to fit their tiles). Suits photos/packshots, where
+///    a crop doesn't lose anything.
+///  * [grid] — an even grid of full 4:5 portrait tiles with NO cropping.
+///    Use it for finished designs (ads, posters) whose text/prices sit
+///    near the edges and would be cut off by the bento's wide tiles.
+enum ProjectGalleryLayout { bento, grid }
+
 extension ProjectCategoryLabel on ProjectCategory {
   String labelFor(bool isArabic) {
     switch (this) {
@@ -30,9 +39,11 @@ extension ProjectCategoryLabel on ProjectCategory {
 /// underneath. [fullDescription] is the longer write-up ([description]
 /// stays short, for the grid caption only — the grid card itself doesn't
 /// currently show it, but it's kept for a future compact caption/tooltip
-/// use). Supply exactly 5 entries in [images] for the gallery to lay out
-/// as intended (1 featured + 4 supporting shots) — fewer still work but
-/// leave empty violet slots. [coverOverride] is optional: set it when a
+/// use). The first 5 entries in [images] lay out as the bento (1 featured
+/// + 4 supporting shots); with fewer than 5 the bento simply re-lays-out
+/// around the photos that exist (no empty slots), and any entries beyond
+/// the 5th continue in an even grid below the bento, so a project can
+/// hold as many photos as needed. [coverOverride] is optional: set it when a
 /// 6th "packshot" photo should stand alone as the grid cover, kept out
 /// of the 5-photo gallery entirely (otherwise the grid cover just falls
 /// back to images.first, same as before).
@@ -51,8 +62,9 @@ class PortfolioProject {
   // page. Falls back to [description] when left blank, so a project
   // with only a short blurb still shows something on its detail page.
   final String fullDescription;
-  // Every photo for this project, in display order. Feeds the 5-photo
-  // bento gallery on the detail page — and, when [coverOverride] is
+  // Every photo for this project, in display order. The first 5 feed the
+  // bento gallery on the detail page, the rest the grid under it (and
+  // all of them are swipeable in the lightbox) — and, when [coverOverride] is
   // empty, also doubles as the grid cover (images.first). Leave empty
   // and both the grid card and the detail page show a plain violet
   // gradient plate instead.
@@ -66,6 +78,9 @@ class PortfolioProject {
   // shown as a "View on Behance" button on the detail page. Leave empty
   // to hide that button.
   final String url;
+  // Which gallery layout the detail page uses — see [ProjectGalleryLayout].
+  // Defaults to the bento, so existing projects are unchanged.
+  final ProjectGalleryLayout galleryLayout;
 
   const PortfolioProject({
     required this.id,
@@ -76,6 +91,7 @@ class PortfolioProject {
     this.images = const [],
     this.coverOverride = '',
     this.url = '',
+    this.galleryLayout = ProjectGalleryLayout.bento,
   });
 
   String get coverImage =>
