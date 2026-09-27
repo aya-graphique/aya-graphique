@@ -1152,23 +1152,20 @@ class _SkillArtCardState extends State<_SkillArtCard> {
   }
 }
 
-/// Teases the shop from Home: a handful of products in a grid, followed by
-/// a "Shop the collection" pill button that hands off to the standalone
-/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
-/// and best-sellers section all live over there now (see ShopScreen).
-/// Capped at 8 products so Home stays a teaser rather than a second full
-/// listing.
-/// Teases the shop from Home: a handful of products in a grid, followed by
-/// a "Shop the collection" pill button that hands off to the standalone
-/// Shop tab (see [HomeScreen.onShopTap]) — the full grid, category filter,
-/// and best-sellers section all live over there now (see ShopScreen).
+/// Teases the shop from Home: every category as its own heading + full
+/// swipeable row of that category's products, followed by a "Shop the
+/// collection" pill button that hands off to the standalone Shop tab (see
+/// [HomeScreen.onShopTap]) — the wrapping grid, category filter, and
+/// best-sellers section all live over there now (see ShopScreen). No cap
+/// on product count: every product in every category shows here, just as
+/// a horizontally-swipeable row instead of a wrapping grid.
 ///
-/// The preview grid orders products by the same owner-chosen category
-/// order as the main Shop tab (see CategoriesRepository/ShopScreen) before
-/// taking the first few, instead of just whatever order [products] arrived
-/// in — otherwise this teaser could show a completely different first
-/// impression of the shop (e.g. a category the owner pushed to the back
-/// on purpose) than the real thing right behind it.
+/// The preview orders categories using the same owner-chosen category
+/// order as the main Shop tab (see CategoriesRepository/ShopScreen)
+/// instead of just whatever order [products] arrived in — otherwise this
+/// teaser could show a completely different first impression of the shop
+/// (e.g. a category the owner pushed to the back on purpose) than the
+/// real thing right behind it.
 class _ShopPreviewSection extends StatefulWidget {
   final List<Product> products;
   final bool isMobile;
@@ -1225,16 +1222,19 @@ class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
         final rankB = categoryRank[b.value.category] ?? categoryOrder.length;
         return rankA != rankB ? rankA.compareTo(rankB) : a.key.compareTo(b.key);
       });
-    final preview = indexed.map((e) => e.value).take(8).toList();
-    // Grouped by category (each category as its own heading + grid, same
-    // as the standalone Shop tab's default view — see ShopScreen/
-    // ProductSection) instead of one flat grid mixing every category's
-    // cards together. `preview` is already sorted by category rank above,
-    // and a plain Dart Map preserves insertion order, so building this map
-    // by iterating `preview` naturally keeps the categories in that same
+    // Grouped by category (each category as its own heading + horizontally
+    // swipeable row, same as the standalone Shop tab's default view — see
+    // ShopScreen/ProductSection) instead of one flat grid mixing every
+    // category's cards together. No cap on how many products land in the
+    // preview: every product in every category shows up here, same as on
+    // the Shop tab, just laid out as a swipeable row instead of a wrapping
+    // grid. `indexed` is already sorted by category rank above, and a
+    // plain Dart Map preserves insertion order, so building this map by
+    // iterating `indexed` naturally keeps the categories in that same
     // order without needing to re-sort.
     final groupedByCategory = <String, List<Product>>{};
-    for (final product in preview) {
+    for (final entry in indexed) {
+      final product = entry.value;
       groupedByCategory.putIfAbsent(product.category, () => []).add(product);
     }
 
@@ -1259,7 +1259,8 @@ class _ShopPreviewSectionState extends State<_ShopPreviewSection> {
         ),
         const SizedBox(height: 24),
         // Matches ShopScreen's own default (no active filter) view: each
-        // category gets its own heading + grid, shown in the owner's
+        // category gets its own heading + full swipeable row (every product
+        // in that category, not a capped preview), shown in the owner's
         // chosen category order — see ProductSection.
         for (final entry in groupedByCategory.entries) ...[
           ProductSection(
