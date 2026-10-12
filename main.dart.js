@@ -325,11 +325,11 @@ b_t(a){var s,r,q,p=new Float32Array(16)
 for(s=0;s<4;++s)for(r=s*4,q=0;q<4;++q)p[q*4+s]=a[r+q]
 return p},
 ac7(a){var s,r,q,p=new Float32Array(9)
-for(s=a.length,r=0;r<9;++r){q=B.tl[r]
+for(s=a.length,r=0;r<9;++r){q=B.tk[r]
 if(q<s)p[r]=a[q]
 else p[r]=0}return p},
 b8x(a){var s,r,q,p=new Float32Array(9)
-for(s=a.length,r=0;r<9;++r){q=B.tl[r]
+for(s=a.length,r=0;r<9;++r){q=B.tk[r]
 if(q<s)p[r]=a[q]
 else p[r]=0}return p},
 ac8(a){var s=new Float32Array(2)
@@ -1049,7 +1049,7 @@ p.adH()
 return p},
 bek(a){return new A.aib($.as,a)},
 aXt(){var s,r,q,p,o=v.G,n=o.window,m=A.bdT(n.navigator)
-if(m==null||m.length===0)return B.tq
+if(m==null||m.length===0)return B.tp
 s=A.b([],t.ss)
 for(n=m.length,r=0;r<m.length;m.length===n||(0,A.M)(m),++r){q=m[r]
 p=new o.Intl.Locale(q)
@@ -1604,10 +1604,10 @@ return s},
 aZP(a){var s=!1
 if($.bQ().gdh()===B.bt||$.bQ().gdh()===B.cB)if(a!=null)s=a===".SF Pro Text"||a===".SF Pro Display"||a===".SF UI Text"||a===".SF UI Display"
 return s},
-b6A(){if(A.b89())return B.to
+b6A(){if(A.b89())return B.tn
 if($.bQ().gdh()===B.bt||$.bQ().gdh()===B.cB)return B.Pv
 throw A.h(A.al("Should only be called on Mac or iOS."))},
-bmE(){if(A.b89())return B.to
+bmE(){if(A.b89())return B.tn
 if($.bQ().gdh()===B.bt||$.bQ().gdh()===B.cB)return A.b6A()
 return B.Ps},
 b7H(a,b){var s,r,q,p,o=new A.d2("")
@@ -8209,9 +8209,9 @@ r=a<2.5?(a-2)*10:(a-2.5)*2+6-1
 q=B.m.bT(B.d.fP(r),0,9)
 p=r-q
 s=1-p
-o=B.tm[q]
+o=B.tl[q]
 n=o[0]
-m=B.tm[q+1]
+m=B.tl[q+1]
 return new A.aE(s*n+p*m[0],1-1/(s*o[1]+p*m[1]))},
 a6g(a,b,c,d){var s,r=b.W(0,a),q=new A.N(Math.abs(c.a),Math.abs(c.b)),p=q.gdW(),o=p===0?B.kp:q.dU(0,p),n=r.a,m=Math.abs(n)/o.a,l=r.b,k=Math.abs(l)/o.b
 n/=m
@@ -14801,8 +14801,8 @@ break
 case 4:s=l.a
 s===$&&A.a()
 s=A.c4(s,200)
-r=A.c4(A.agR(l,B.ts,B.Py),24)
-q=A.c4(A.agR(l,B.ts,B.Qq),32)
+r=A.c4(A.agR(l,B.tr,B.Py),24)
+q=A.c4(A.agR(l,B.tr,B.Qq),32)
 p=A.c4(l.a,10)
 o=A.c4(l.a,12)
 l.d===$&&A.a()
@@ -14812,8 +14812,8 @@ break
 case 5:s=l.a
 s===$&&A.a()
 s=A.c4(A.Gb(s+240),40)
-r=A.c4(A.agR(l,B.tu,B.Ra),24)
-q=A.c4(A.agR(l,B.tu,B.Rb),32)
+r=A.c4(A.agR(l,B.tt,B.Ra),24)
+q=A.c4(A.agR(l,B.tt,B.Rb),32)
 p=A.c4(l.a+15,8)
 o=A.c4(l.a+15,12)
 l.d===$&&A.a()
@@ -15364,7 +15364,7 @@ b2_(a,b,c){if(b!=null&&!b.j(0,B.F))return A.b1q(b.bE(A.bef(c)),a)
 return a},
 bef(a){var s,r,q,p,o,n
 if(a<0)return 0
-for(s=0;r=B.tt[s],q=r.a,a>=q;){if(a===q||s+1===6)return r.b;++s}p=B.tt[s-1]
+for(s=0;r=B.ts[s],q=r.a,a>=q;){if(a===q||s+1===6)return r.b;++s}p=B.ts[s-1]
 o=p.a
 n=p.b
 return n+(a-o)/(q-o)*(r.b-n)},
@@ -31479,7 +31479,7 @@ aVL:function aVL(a){this.a=a},
 aVK:function aVK(a,b){this.a=a
 this.b=b},
 bcj(a){var s,r
-for(s=0;s<8;++s){r=B.tp[s]
+for(s=0;s<8;++s){r=B.to[s]
 if(r.b===a)return r}return null},
 j6:function j6(a,b,c){this.c=a
 this.a=b
@@ -34673,7 +34673,7 @@ $S:2}
 A.aUf.prototype={
 $1(a){var s=A.dX().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/af7e796e161ae0bb1ff0758c71a7105418bd9ded/":s)+a},
+return(s==null?"https://www.gstatic.com/flutter-canvaskit/deb287481e3ce9468f3434937ced4240a70539ca/":s)+a},
 $S:40}
 A.Vp.prototype={
 gD(a){var s=this.a
@@ -56004,7 +56004,7 @@ J.bbV(A.d(s,!1,t.l),a)},
 $S:523}
 A.aLZ.prototype={
 $2(a,b){var s,r,q,p,o,n,m,l=this,k=null,j=b.b
-if(j==null)j=B.tw
+if(j==null)j=B.tv
 s=l.a
 r=s.gWe()
 q=l.b
@@ -56064,9 +56064,9 @@ k.push(A.bs(new A.kh(s),s,s))
 return A.hd(A.ay(k,B.G,B.j,B.o),s,new A.Y(o,n,m,60),s,B.a0)}}
 A.a1c.prototype={
 C(a){var s,r,q,p,o,n,m=null,l=A.d(a,!0,t.p).a===B.e?B.f:B.h,k=A.d(a,!0,t.e).a===B.k,j=this.c,i=j?20:60,h=new A.Y(i,0,i,0)
-if(j)s=A.bfT(new A.aHu(),6,0,110,76,m)
+if(j)s=A.bfT(new A.aHu(),7,0,110,76,m)
 else{i=A.b([],t.D)
-for(r=0;r<6;++r)i.push(new A.w2(B.tk[r],128,r,m))
+for(r=0;r<7;++r)i.push(new A.w2(B.tA[r],128,r,m))
 s=A.lx(B.fq,i,B.co,28,28)}i=A.b_(B.Nc,m,m,B.t,m,m,m,m,m,m,m,j?13:15,m,m)
 q=A.b5(m,m,j?7:10)
 p=k?"\u0627\u0644\u0639\u0645\u0644\u0627\u0621":"CLIENTS"
@@ -56075,7 +56075,7 @@ o=j?13:16
 n=t.D
 return A.hV(A.ay(A.b([new A.ad(h,A.ay(A.b([A.aM(A.b([i,q,A.F(p,m,m,m,A.bi(!0,B.t,j?1.2:3,o,k,B.C),m,m)],n),B.u,m,B.j,B.T,0),B.ca,A.aa(m,m,B.i,m,m,new A.a9(m,m,m,m,m,new A.e3(B.b5,B.c4,B.aF,A.b([B.F,l.bq(0,0.14),B.F],t.W),m,m),B.w),m,1,m,m,m,m,m,60)],n),B.u,B.j,B.o),m),B.kq,new A.ad(h,s,m)],n),B.u,B.j,B.o),B.J,m,40)}}
 A.aHu.prototype={
-$3(a,b,c){return new A.w2(B.tk[b],c,b,null)},
+$3(a,b,c){return new A.w2(B.tA[b],c,b,null)},
 $C:"$3",
 $R:3,
 $S:527}
@@ -58100,7 +58100,7 @@ r.d=s
 o=s}return A.yf(new A.aSc(r,new A.n9(p===B.k),q),o,t.F5)}}
 A.aSc.prototype={
 $2(a,b){var s,r,q,p,o,n,m=null,l="You might also like",k="\u0642\u062f \u064a\u0639\u062c\u0628\u0643 \u0623\u064a\u0636\u064b\u0627",j=b.b
-if(j==null)j=B.tw
+if(j==null)j=B.tv
 s=J.n5(j,new A.aS9(this.a))
 s=A.aYP(s,8,s.$ti.i("w.E"))
 r=A.Z(s,A.n(s).i("w.E"))
@@ -64263,7 +64263,7 @@ n=o.ch
 o=o.cx
 r=q.gaoK()
 q.a.toString
-return new A.AH(p,p,p,p,p,p,p,p,n,p,p,p,p,p,p,q.gaoR(),o,p,B.a11,s,p,r,p,p,B.tq,!1,!1,p,p,p,new A.h5(q,t.bT))},
+return new A.AH(p,p,p,p,p,p,p,p,n,p,p,p,p,p,p,q.gaoR(),o,p,B.a11,s,p,r,p,p,B.tp,!1,!1,p,p,p,new A.h5(q,t.bT))},
 C(a){var s,r=this.afv(a)
 this.a.toString
 s=this.d
@@ -65962,7 +65962,7 @@ return new A.BA(s.d,s.c,null)},
 $S:346}
 A.BA.prototype={
 C(a){var s=null
-return A.b2r(A.aYc(B.y,s,s,B.tx,A.b_h(),s,new A.aMT(this),s,A.b([new A.a29(this.d,s,s,A.aW6(),!0,s,s)],t.Ql),!1,s,B.Ej))},
+return A.b2r(A.aYc(B.y,s,s,B.tw,A.b_h(),s,new A.aMT(this),s,A.b([new A.a29(this.d,s,s,A.aW6(),!0,s,s)],t.Ql),!1,s,B.Ej))},
 gN(){return this.d}}
 A.aMT.prototype={
 $2(a,b){this.a.c.$1(b)
@@ -76901,8 +76901,8 @@ s=r.V
 r.cT=s==null?null:s.gR9()
 a.a=!1},
 pW(a,b,c){var s,r,q,p,o=this
-o.fe=A.b43(o.fe,B.ty)
-o.he=A.b43(o.he,B.ty)
+o.fe=A.b43(o.fe,B.tx)
+o.he=A.b43(o.he,B.tx)
 s=o.fe
 r=s!=null&&!s.ga8(s)
 s=o.he
@@ -86998,7 +86998,7 @@ A.jq.prototype={
 L(){return"ModifierKey."+this.b}}
 A.He.prototype={
 gaE6(){var s,r,q=A.y(t.xS,t.Dj)
-for(s=0;s<9;++s){r=B.tA[s]
+for(s=0;s<9;++s){r=B.tz[s]
 if(this.aD9(r))q.n(0,r,B.eW)}return q}}
 A.oi.prototype={}
 A.atb.prototype={
@@ -87036,7 +87036,7 @@ i=$.dN
 if(i!=null)i.$1(new A.bm(r,q,"services library",j,p,!1))}}return!1},
 auQ(a1){var s,r,q,p,o,n,m,l,k,j,i,h,g=a1.c,f=g.gaE6(),e=t.v3,d=A.y(e,t.bd),c=A.aW(e),b=this.d,a=A.ed(new A.bt(b,A.n(b).i("bt<1>")),e),a0=a1 instanceof A.qC
 if(a0)a.G(0,g.gkN())
-for(s=g.a,r=null,q=0;q<9;++q){p=B.tA[q]
+for(s=g.a,r=null,q=0;q<9;++q){p=B.tz[q]
 o=$.b9A()
 n=o.h(0,new A.e_(p,B.d1))
 if(n==null)continue
@@ -96684,7 +96684,7 @@ guL(){var s=this.a,r=this.b
 if(r==null)s=null
 else{r.a.toString
 s=!0}return s===!0},
-gz_(){return B.tz},
+gz_(){return B.ty},
 mP(){},
 o6(){var s=A.aYX()
 s.be(new A.avD(this),t.H)
@@ -97348,7 +97348,7 @@ C(a){var s,r,q=this,p=null,o=q.gam6(),n=A.pR(a),m=q.bM$,l=q.d
 l===$&&A.a()
 s=q.a.ay
 if(l.gR()==null){r=q.gT8()
-r=J.mc(r.slice(0),A.a3(r).c)}else r=B.tz
+r=J.mc(r.slice(0),A.a3(r).c)}else r=B.ty
 return A.b2r(new A.dS(new A.aqZ(q,a),A.qc(B.c8,new A.Qv(!1,A.aXB(A.nF(!0,p,A.K_(m,new A.z6(r,s,l)),p,p,p,q.y,!1,p,p,p,p,p,!0),p,n),p),p,o,q.gapl(),p,p,o),p,t.w3))}}
 A.aqU.prototype={
 $1(a){var s,r=this.a
@@ -107691,7 +107691,7 @@ A.aIl.prototype={
 $1(a){return this.a.$2(a,this.b)},
 $S:20}
 A.aIm.prototype={
-$5(a,b,c,d,e){var s=a.gD(a),r=this.a.a,q=r.r,p=d==null?B.tx:d,o=r.w
+$5(a,b,c,d,e){var s=a.gD(a),r=this.a.a,q=r.r,p=d==null?B.tw:d,o=r.w
 return A.b5y(q,r.y,r.z,new A.h5(s,t.bT),c,b.d,a,e,p,o)},
 $C:"$5",
 $R:5,
@@ -109082,7 +109082,7 @@ break A}if("SIGNED_OUT"===r){s=B.ez
 break A}if("TOKEN_REFRESHED"===r){s=B.fB
 break A}if("USER_UPDATED"===r){s=B.pg
 break A}if("MFA_CHALLENGE_VERIFIED"===r){s=B.pf
-break A}s=A.aXU(B.tp,new A.akJ(m))
+break A}s=A.aXU(B.to,new A.akJ(m))
 break A}q=s
 if(q!=null){p=null
 if(n.h(a,"session")!=null)p=A.Iy(n.h(a,"session"))
@@ -116912,8 +116912,8 @@ B.JC=new A.Q(1,0.8901960784313725,0.43529411764705883,0.5450980392156862,B.q)
 B.JR=new A.Q(1,0.8980392156862745,0.2823529411764706,0.30196078431372547,B.q)
 B.aF=new A.JJ(0,"clamp")
 B.Q5=s([B.pY,B.lJ,B.J6,B.lB],t.W)
-B.tr=s([0,0.32,0.68,1],t.n)
-B.a79=new A.e3(B.bV,B.dL,B.aF,B.Q5,B.tr,null)
+B.tq=s([0,0.32,0.68,1],t.n)
+B.a79=new A.e3(B.bV,B.dL,B.aF,B.Q5,B.tq,null)
 B.PZ=s([B.lA,B.E,B.t],t.W)
 B.ng=s([0,0.55,1],t.n)
 B.a1=new A.e3(B.b5,B.c4,B.aF,B.PZ,B.ng,null)
@@ -116932,7 +116932,7 @@ B.Jo=new A.Q(1,0.7607843137254902,0.24705882352941178,0.38823529411764707,B.q)
 B.Jt=new A.Q(1,0.7529411764705882,0.1607843137254902,0.1803921568627451,B.q)
 B.Jh=new A.Q(1,0.984313725490196,0.9725490196078431,0.9921568627450981,B.q)
 B.Pw=s([B.Jh,B.n,B.JB,B.lK],t.W)
-B.a7a=new A.e3(B.bV,B.dL,B.aF,B.Pw,B.tr,null)
+B.a7a=new A.e3(B.bV,B.dL,B.aF,B.Pw,B.tq,null)
 B.Rg=s([B.lK,B.n,B.n],t.W)
 B.Op=new A.e3(B.bV,B.dL,B.aF,B.Rg,B.ng,null)
 B.h=new A.QN(B.n,B.n,B.lK,B.E,B.qk,B.qk,B.Jn,B.Jo,B.Jt,B.Op)
@@ -118217,15 +118217,15 @@ B.Fs=new A.bd("Social media, website, apps, screens, ..etc","\u0633\u0648\u0634\
 B.FK=new A.bd("10 designs = 4,000 L.E","10 \u062a\u0635\u0645\u064a\u0645\u0627\u062a = 4,000 \u062c.\u0645")
 B.G6=new A.bd("15 designs = 5,000 L.E","15 \u062a\u0635\u0645\u064a\u0645 = 5,000 \u062c.\u0645")
 B.Gm=new A.bd("25 designs = 8,500 L.E","25 \u062a\u0635\u0645\u064a\u0645 = 8,500 \u062c.\u0645")
-B.tn=s([B.FK,B.G6,B.Gm],t.d0)
-B.X8=new A.hx(B.Gj,B.Fs,null,B.du,B.tn,null)
+B.tm=s([B.FK,B.G6,B.Gm],t.d0)
+B.X8=new A.hx(B.Gj,B.Fs,null,B.du,B.tm,null)
 B.Fx=new A.bd("Illustration Art","\u0631\u0633\u0648\u0645 \u062a\u0648\u0636\u064a\u062d\u064a\u0629")
 B.Gd=new A.bd("For packaging printing & digital uses","\u0644\u0644\u0637\u0628\u0627\u0639\u0629 \u0639\u0644\u0649 \u0627\u0644\u062a\u063a\u0644\u064a\u0641 \u0648\u0627\u0644\u0627\u0633\u062a\u062e\u062f\u0627\u0645\u0627\u062a \u0627\u0644\u0631\u0642\u0645\u064a\u0629")
 B.G7=new A.bd("Custom quote \u2014 book a call to discuss scope","\u0639\u0631\u0636 \u0633\u0639\u0631 \u0645\u062e\u0635\u0635 \u2014 \u0627\u062d\u062c\u0632 \u0645\u0643\u0627\u0644\u0645\u0629 \u0644\u0645\u0646\u0627\u0642\u0634\u0629 \u0627\u0644\u0646\u0637\u0627\u0642")
 B.X2=new A.hx(B.Fx,B.Gd,null,B.du,B.du,B.G7)
 B.G4=new A.bd("Advertising Design","\u062a\u0635\u0645\u064a\u0645 \u0625\u0639\u0644\u0627\u0646\u064a")
 B.FA=new A.bd("For social media and printing","\u0644\u0644\u0633\u0648\u0634\u064a\u0627\u0644 \u0645\u064a\u062f\u064a\u0627 \u0648\u0627\u0644\u0637\u0628\u0627\u0639\u0629")
-B.X9=new A.hx(B.G4,B.FA,null,B.du,B.tn,null)
+B.X9=new A.hx(B.G4,B.FA,null,B.du,B.tm,null)
 B.Fw=new A.bd("Company Profile & Books","\u0628\u0631\u0648\u0641\u0627\u064a\u0644 \u0627\u0644\u0634\u0631\u0643\u0629 \u0648\u0627\u0644\u0643\u062a\u064a\u0628\u0627\u062a")
 B.Ge=new A.bd("Starts from 4,000 L.E","\u064a\u0628\u062f\u0623 \u0645\u0646 4,000 \u062c.\u0645")
 B.PY=s([B.Ge],t.d0)
@@ -118252,7 +118252,6 @@ B.X5=new A.hx(B.FR,null,B.Gq,B.nk,B.nj,null)
 B.Qv=s([B.X4,B.Xb,B.X5],t.Go)
 B.WY=new A.zN(B.rW,B.Fo,B.Gf,B.Qv)
 B.jp=s([B.WZ,B.X_,B.WY],A.aQ("I<zN>"))
-B.tk=s(["assets/images/clients/client_1.png","assets/images/clients/client_2.png","assets/images/clients/client_3.png","assets/images/clients/client_4.png","assets/images/clients/client_5.png","assets/images/clients/client_6.png"],t.s)
 B.OZ=s([4,9,14,19],t.t)
 B.R3=s([137,80,78,71,13,10,26,10],t.Z)
 B.Nz=new A.pY(0,"png")
@@ -118280,7 +118279,7 @@ B.Q2=s([0.41233895,0.35762064,0.18051042],t.n)
 B.PA=s([0.2126,0.7152,0.0722],t.n)
 B.Ri=s([0.01932141,0.11916382,0.95034478],t.n)
 B.Pb=s([B.Q2,B.PA,B.Ri],t.zg)
-B.tl=s([0,4,12,1,5,13,3,7,15],t.t)
+B.tk=s([0,4,12,1,5,13,3,7,15],t.t)
 B.Pe=s([65533],t.t)
 B.Pn=s([0,0.55,0.72,0.88,1],t.n)
 B.a5L=new A.iW(0,1)
@@ -118313,11 +118312,11 @@ B.PP=s([4.08649929,2.23811846],t.n)
 B.Q7=s([4.85481134,2.47563463],t.n)
 B.Pz=s([5.62945551,2.72948597],t.n)
 B.PM=s([6.43023796,2.98020421],t.n)
-B.tm=s([B.PL,B.OE,B.QR,B.QU,B.Pu,B.PD,B.Qh,B.PP,B.Q7,B.Pz,B.PM],t.zg)
+B.tl=s([B.PL,B.OE,B.QR,B.QU,B.Pu,B.PD,B.Qh,B.PP,B.Q7,B.Pz,B.PM],t.zg)
 B.Ps=s(["Arial"],t.s)
 B.Pt=s([B.ll,B.lm],A.aQ("I<D8>"))
 B.Pv=s(["-apple-system","BlinkMacSystemFont"],t.s)
-B.to=s(["BlinkMacSystemFont"],t.s)
+B.tn=s(["BlinkMacSystemFont"],t.s)
 B.Py=s([18,15,10,12,15,18,15,12,12],t.n)
 B.PC=s(["Created wall murals","Taught children painting basics and how to use colors and paint on walls","Worked part-time in accounting at the center"],t.s)
 B.PF=s(["Noto Color Emoji","Noto Sans Symbols","Noto Sans SC","Noto Sans TC","Noto Sans HK","Noto Sans JP","Noto Sans KR"],t.s)
@@ -118325,7 +118324,7 @@ B.Nr=new A.nN("Illustration","\u0631\u0633\u0640\u0645","Digital and traditional
 B.Ns=new A.nN("Freeform Arabic","\u062e\u0637 \u0639\u0631\u0628\u064a \u062d\u064f\u0631","Reviving the ancient Arabic script with contemporary touches in artworks that blend authenticity with abstraction","\u0627\u062d\u064a\u0627\u0621 \u0627\u0644\u062d\u0631\u0648\u0641 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0639\u0631\u064a\u0642\u0629 \u0648\u0644\u0645\u0633\u0627\u062a \u0645\u0639\u0627\u0635\u0631\u0629 \u0641\u064a \u0627\u0639\u0645\u0627\u0644 \u0641\u0646\u064a\u0629 \u062a\u062f\u0645\u062c \u0627\u0644\u0623\u0635\u0627\u0644\u0629 \u0628\u0627\u0644\u062a\u062c\u0631\u064a\u062f","assets/images/illustration_khat.jpg")
 B.PG=s([B.Nr,B.Ns],t.du)
 B.Fa=new A.j6("",6,"userDeleted")
-B.tp=s([B.ex,B.fA,B.ey,B.ez,B.fB,B.pg,B.Fa,B.pf],A.aQ("I<j6>"))
+B.to=s([B.ex,B.fA,B.ey,B.ez,B.fB,B.pg,B.Fa,B.pf],A.aQ("I<j6>"))
 B.PK=s([u._,u.b,u.y,"\u0625\u0639\u062f\u0627\u062f \u0648\u062a\u0646\u0633\u064a\u0642 \u0627\u0644\u062a\u062e\u0637\u064a\u0637\u0627\u062a \u0648\u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0648\u0627\u0644\u0635\u0648\u0631 \u0648\u0627\u0644\u062e\u0637\u0648\u0637"],t.s)
 B.PN=s(["assets/images/projects/project_1/1.png","assets/images/projects/project_1/2.png","assets/images/projects/project_1/3.png"],t.s)
 B.bw=new A.fV(0,"icon")
@@ -118341,20 +118340,20 @@ B.cH=new A.fV(9,"counter")
 B.dI=new A.fV(10,"container")
 B.PO=s([B.bw,B.bN,B.aR,B.bS,B.bT,B.bU,B.aM,B.bF,B.cG,B.cH,B.dI],A.aQ("I<fV>"))
 B.Rv=new A.uc("en",null,"US")
-B.tq=s([B.Rv],t.ss)
-B.ts=s([0,41,61,101,131,181,251,301,360],t.n)
+B.tp=s([B.Rv],t.ss)
+B.tr=s([0,41,61,101,131,181,251,301,360],t.n)
 B.a5v=new A.p0(0,0)
 B.a5A=new A.p0(1,0.05)
 B.a5y=new A.p0(3,0.08)
 B.a5z=new A.p0(6,0.11)
 B.a5x=new A.p0(8,0.12)
 B.a5w=new A.p0(12,0.14)
-B.tt=s([B.a5v,B.a5A,B.a5y,B.a5z,B.a5x,B.a5w],A.aQ("I<p0>"))
+B.ts=s([B.a5v,B.a5A,B.a5y,B.a5z,B.a5x,B.a5w],A.aQ("I<p0>"))
 B.a56=new A.oU("From childhood passion to advertising:","Like many children, my journey began with a simple passion for drawing; pens moving spontaneously across walls, without limited ideas, rules, or restrictions. Over time, this passion led me to the Faculty of Applied Arts, where I discovered a different world of art. I learned that drawing can transform from a spontaneous expression into an idea, a concept, a message, and a design that targets an entire segment of the audience, addressing their needs with a clear and concise message.")
 B.a51=new A.oU("My vision:","What if we combined the boundless passion of childhood with the expertise of a designer who has learned how to transform ideas into visually compelling messages tailored to a specific function and objective?")
 B.a55=new A.oU("My goal:","To combine concept, artistry, and strategy to create advertising designs that are not only beautiful but also visually appealing, understandable, impactful, and effective for the brand, thereby increasing its reach.")
 B.PR=s([B.a56,B.a51,B.a55],t._x)
-B.tu=s([0,21,51,121,151,191,271,321,360],t.n)
+B.tt=s([0,21,51,121,151,191,271,321,360],t.n)
 B.Q_=s([-1,0,0,1,0,0,-1,0,1,0,0,0,-1,1,0,1,1,1,1,0],t.n)
 B.Gz=new A.Rm(2,"outer")
 B.q7=new A.Q(0.09803921568627451,0,0,0,B.q)
@@ -118410,18 +118409,18 @@ B.k4=new A.Yh(1,"page")
 B.k5=new A.fN(B.bo,B.k4)
 B.Qw=s([B.Hf,B.k5],A.aQ("I<bC>"))
 B.QL=s([],t.QP)
-B.ty=s([],A.aQ("I<bq0>"))
+B.tx=s([],A.aQ("I<bq0>"))
 B.QI=s([],t.E)
 B.QD=s([],t.sV)
 B.QE=s([],t.du)
 B.QB=s([],t.fJ)
 B.QG=s([],t.ER)
 B.a7b=s([],t.ss)
-B.tx=s([],t.tc)
+B.tw=s([],t.tc)
 B.js=s([],t.jl)
-B.tz=s([],t.wi)
+B.ty=s([],t.wi)
 B.QJ=s([],A.aQ("I<fC<@>>"))
-B.tw=s([],t._V)
+B.tv=s([],t._V)
 B.nh=s([],t.AO)
 B.bB=s([],t.yo)
 B.jq=s([],t.i3)
@@ -118471,7 +118470,7 @@ B.nE=new A.jq(5,"numLockModifier")
 B.nF=new A.jq(6,"scrollLockModifier")
 B.nG=new A.jq(7,"functionModifier")
 B.yE=new A.jq(8,"symbolModifier")
-B.tA=s([B.f0,B.f1,B.f2,B.f3,B.nD,B.nE,B.nF,B.nG,B.yE],A.aQ("I<jq>"))
+B.tz=s([B.f0,B.f1,B.f2,B.f3,B.nD,B.nE,B.nF,B.nG,B.yE],A.aQ("I<jq>"))
 B.a5c=new A.oX("Bachelor's Degree Certificate \u2013 Applied Arts","October 6 University \u2014 Faculty of Applied Arts","2023","Graduation certificate confirming the award of a Bachelor's degree in Applied Arts (Advertising) from October 6 University, with a cumulative GPA of 3.13/4 (Very Good) \u2014 September 2023.",u.N,0.706875)
 B.a5d=new A.oX("Seminar: The Role of AI in Advertising Design",u.P,"2024",'Certificate of appreciation from the Advertising Department, Faculty of Applied Arts, for delivering a seminar on "The Role of Artificial Intelligence in Advertising Design" to advertising students during the 2023/2024 academic year.',u.O,0.706875)
 B.a59=new A.oX("Seminar: Art and Design",u.P,"2025",'Certificate of appreciation from the Faculty of Applied Arts for delivering a seminar titled "Art and Design" to fourth-year Advertising students in the Typography and Calendar Design course \u2014 November 2025.',u.x,1.4146772767462423)
@@ -118486,6 +118485,7 @@ B.Rl=s(["assets/images/projects/project_3/1.png","assets/images/projects/project
 B.Rm=s(["pointerdown","pointermove","pointerleave","pointerup","pointercancel","touchstart","touchend","touchmove","touchcancel","mousedown","mousemove","mouseleave","mouseup","wheel"],t.s)
 B.Rp=s(["assets/images/projects/project_2/1.jpg","assets/images/projects/project_2/2.jpg","assets/images/projects/project_2/3.jpg","assets/images/projects/project_2/4.jpg","assets/images/projects/project_2/5.jpg"],t.s)
 B.Rq=s(["assets/images/projects/project_4/1.jpg","assets/images/projects/project_4/2.jpg","assets/images/projects/project_4/3.jpg","assets/images/projects/project_4/4.jpg","assets/images/projects/project_4/5.jpg"],t.s)
+B.tA=s(["assets/images/clients/client_1.png","assets/images/clients/client_2.png","assets/images/clients/client_3.png","assets/images/clients/client_4.png","assets/images/clients/client_5.png","assets/images/clients/client_6.png","assets/images/clients/client_7.png"],t.s)
 B.Rr=s([0,0.3,0.5,0.7,1],t.n)
 B.mW=new A.iy(100)
 B.Mn=new A.iy(200)
@@ -119110,9 +119110,9 @@ B.nd=s(["Noto Sans TC"],t.s)
 B.Qi=s(["Noto Sans HK","Noto Sans TC"],t.s)
 B.Pa=s(["Noto Sans JP"],t.s)
 B.OD=s(["Noto Sans KR"],t.s)
-B.tv=s(["Noto Sans SC"],t.s)
+B.tu=s(["Noto Sans SC"],t.s)
 B.Rn=s(["Noto Sans SC","Noto Sans TC"],t.s)
-B.jF=new A.cm(B.TM,[B.nd,B.nd,B.nd,B.Qi,B.Pa,B.OD,B.tv,B.tv,B.Rn],t.VJ)
+B.jF=new A.cm(B.TM,[B.nd,B.nd,B.nd,B.Qi,B.Pa,B.OD,B.tu,B.tu,B.Rn],t.VJ)
 B.TH={Abort:0,Again:1,AltLeft:2,AltRight:3,ArrowDown:4,ArrowLeft:5,ArrowRight:6,ArrowUp:7,AudioVolumeDown:8,AudioVolumeMute:9,AudioVolumeUp:10,Backquote:11,Backslash:12,Backspace:13,BracketLeft:14,BracketRight:15,BrightnessDown:16,BrightnessUp:17,BrowserBack:18,BrowserFavorites:19,BrowserForward:20,BrowserHome:21,BrowserRefresh:22,BrowserSearch:23,BrowserStop:24,CapsLock:25,Comma:26,ContextMenu:27,ControlLeft:28,ControlRight:29,Convert:30,Copy:31,Cut:32,Delete:33,Digit0:34,Digit1:35,Digit2:36,Digit3:37,Digit4:38,Digit5:39,Digit6:40,Digit7:41,Digit8:42,Digit9:43,DisplayToggleIntExt:44,Eject:45,End:46,Enter:47,Equal:48,Escape:49,Esc:50,F1:51,F10:52,F11:53,F12:54,F13:55,F14:56,F15:57,F16:58,F17:59,F18:60,F19:61,F2:62,F20:63,F21:64,F22:65,F23:66,F24:67,F3:68,F4:69,F5:70,F6:71,F7:72,F8:73,F9:74,Find:75,Fn:76,FnLock:77,GameButton1:78,GameButton10:79,GameButton11:80,GameButton12:81,GameButton13:82,GameButton14:83,GameButton15:84,GameButton16:85,GameButton2:86,GameButton3:87,GameButton4:88,GameButton5:89,GameButton6:90,GameButton7:91,GameButton8:92,GameButton9:93,GameButtonA:94,GameButtonB:95,GameButtonC:96,GameButtonLeft1:97,GameButtonLeft2:98,GameButtonMode:99,GameButtonRight1:100,GameButtonRight2:101,GameButtonSelect:102,GameButtonStart:103,GameButtonThumbLeft:104,GameButtonThumbRight:105,GameButtonX:106,GameButtonY:107,GameButtonZ:108,Help:109,Home:110,Hyper:111,Insert:112,IntlBackslash:113,IntlRo:114,IntlYen:115,KanaMode:116,KeyA:117,KeyB:118,KeyC:119,KeyD:120,KeyE:121,KeyF:122,KeyG:123,KeyH:124,KeyI:125,KeyJ:126,KeyK:127,KeyL:128,KeyM:129,KeyN:130,KeyO:131,KeyP:132,KeyQ:133,KeyR:134,KeyS:135,KeyT:136,KeyU:137,KeyV:138,KeyW:139,KeyX:140,KeyY:141,KeyZ:142,KeyboardLayoutSelect:143,Lang1:144,Lang2:145,Lang3:146,Lang4:147,Lang5:148,LaunchApp1:149,LaunchApp2:150,LaunchAssistant:151,LaunchControlPanel:152,LaunchMail:153,LaunchScreenSaver:154,MailForward:155,MailReply:156,MailSend:157,MediaFastForward:158,MediaPause:159,MediaPlay:160,MediaPlayPause:161,MediaRecord:162,MediaRewind:163,MediaSelect:164,MediaStop:165,MediaTrackNext:166,MediaTrackPrevious:167,MetaLeft:168,MetaRight:169,MicrophoneMuteToggle:170,Minus:171,NonConvert:172,NumLock:173,Numpad0:174,Numpad1:175,Numpad2:176,Numpad3:177,Numpad4:178,Numpad5:179,Numpad6:180,Numpad7:181,Numpad8:182,Numpad9:183,NumpadAdd:184,NumpadBackspace:185,NumpadClear:186,NumpadClearEntry:187,NumpadComma:188,NumpadDecimal:189,NumpadDivide:190,NumpadEnter:191,NumpadEqual:192,NumpadMemoryAdd:193,NumpadMemoryClear:194,NumpadMemoryRecall:195,NumpadMemoryStore:196,NumpadMemorySubtract:197,NumpadMultiply:198,NumpadParenLeft:199,NumpadParenRight:200,NumpadSubtract:201,Open:202,PageDown:203,PageUp:204,Paste:205,Pause:206,Period:207,Power:208,PrintScreen:209,PrivacyScreenToggle:210,Props:211,Quote:212,Resume:213,ScrollLock:214,Select:215,SelectTask:216,Semicolon:217,ShiftLeft:218,ShiftRight:219,ShowAllWindows:220,Slash:221,Sleep:222,Space:223,Super:224,Suspend:225,Tab:226,Turbo:227,Undo:228,WakeUp:229,ZoomToggle:230}
 B.Bz=new A.E(458907)
 B.Bf=new A.E(458873)
