@@ -27,6 +27,7 @@ const List<String> kClientLogos = [
   'assets/images/clients/client_5.png',
   'assets/images/clients/client_6.png',
   'assets/images/clients/client_7.png',
+  'assets/images/clients/client_8.png',
 ];
 
 /// A representative glyph per project category, used only to give an
