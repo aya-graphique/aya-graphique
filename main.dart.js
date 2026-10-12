@@ -56064,9 +56064,9 @@ k.push(A.bs(new A.kh(s),s,s))
 return A.hd(A.ay(k,B.G,B.j,B.o),s,new A.Y(o,n,m,60),s,B.a0)}}
 A.a1c.prototype={
 C(a){var s,r,q,p,o,n,m=null,l=A.d(a,!0,t.p).a===B.e?B.f:B.h,k=A.d(a,!0,t.e).a===B.k,j=this.c,i=j?20:60,h=new A.Y(i,0,i,0)
-if(j)s=A.bfT(new A.aHu(),7,0,110,76,m)
+if(j)s=A.bfT(new A.aHu(),8,0,110,76,m)
 else{i=A.b([],t.D)
-for(r=0;r<7;++r)i.push(new A.w2(B.tA[r],128,r,m))
+for(r=0;r<8;++r)i.push(new A.w2(B.tA[r],128,r,m))
 s=A.lx(B.fq,i,B.co,28,28)}i=A.b_(B.Nc,m,m,B.t,m,m,m,m,m,m,m,j?13:15,m,m)
 q=A.b5(m,m,j?7:10)
 p=k?"\u0627\u0644\u0639\u0645\u0644\u0627\u0621":"CLIENTS"
@@ -118485,7 +118485,7 @@ B.Rl=s(["assets/images/projects/project_3/1.png","assets/images/projects/project
 B.Rm=s(["pointerdown","pointermove","pointerleave","pointerup","pointercancel","touchstart","touchend","touchmove","touchcancel","mousedown","mousemove","mouseleave","mouseup","wheel"],t.s)
 B.Rp=s(["assets/images/projects/project_2/1.jpg","assets/images/projects/project_2/2.jpg","assets/images/projects/project_2/3.jpg","assets/images/projects/project_2/4.jpg","assets/images/projects/project_2/5.jpg"],t.s)
 B.Rq=s(["assets/images/projects/project_4/1.jpg","assets/images/projects/project_4/2.jpg","assets/images/projects/project_4/3.jpg","assets/images/projects/project_4/4.jpg","assets/images/projects/project_4/5.jpg"],t.s)
-B.tA=s(["assets/images/clients/client_1.png","assets/images/clients/client_2.png","assets/images/clients/client_3.png","assets/images/clients/client_4.png","assets/images/clients/client_5.png","assets/images/clients/client_6.png","assets/images/clients/client_7.png"],t.s)
+B.tA=s(["assets/images/clients/client_1.png","assets/images/clients/client_2.png","assets/images/clients/client_3.png","assets/images/clients/client_4.png","assets/images/clients/client_5.png","assets/images/clients/client_6.png","assets/images/clients/client_7.png","assets/images/clients/client_8.png"],t.s)
 B.Rr=s([0,0.3,0.5,0.7,1],t.n)
 B.mW=new A.iy(100)
 B.Mn=new A.iy(200)
