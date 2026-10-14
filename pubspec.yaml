@@ -85,6 +85,8 @@ flutter:
     - assets/images/projects/project_1/
     - assets/images/projects/project_2/
     - assets/images/projects/project_3/
+    - assets/images/projects/project_4/
+    - assets/images/projects/project_5/
     - assets/images/clients/
     - assets/icon/
   fonts:

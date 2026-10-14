@@ -30,6 +30,14 @@ const List<String> kClientLogos = [
   'assets/images/clients/client_8.png',
 ];
 
+/// Optional cover photo per category for the top-level "My Works" grid.
+/// A category with no entry here keeps the designed violet placeholder
+/// plate. (assets/images/ is already registered in pubspec.yaml.)
+const Map<ProjectCategory, String> kCategoryCovers = {
+  ProjectCategory.advertising: 'assets/images/category_advertising.jpg',
+  ProjectCategory.packaging: 'assets/images/category_packaging.jpg',
+};
+
 /// A representative glyph per project category, used only to give an
 /// empty (no-image-yet) project cover something more designed than a
 /// flat gradient — a large, faint watermark hinting at the kind of work
@@ -150,17 +158,61 @@ List<PortfolioProject> kProjects(bool isArabic) => [
       ),
       PortfolioProject(
         id: 'project-4',
-        title: isArabic ? 'اسم المشروع الرابع' : 'Fourth Project Name',
-        category: ProjectCategory.artwork,
+        title: isArabic ? 'خصم ٥٠٪ - سلطان العسل' : '50% Off - Sultan Aleasl',
+        category: ProjectCategory.advertising,
         description: isArabic
-            ? 'وصف مختصر للمشروع الرابع.'
-            : 'A short description of the fourth project.',
+            ? 'حملة إعلانية للعلامة التجارية سلطان العسل في المملكة العربية السعودية، عن عروض الخصومات والتخفيضات.'
+            : 'An ad campaign for the Sultan Aleasl brand in Saudi Arabia, promoting discounts and special offers.',
+        fullDescription: isArabic
+            ? 'حملة إعلانية للعلامة التجارية سلطان العسل في المملكة العربية '
+                'السعودية، الموجودة في جنوب السعودية ومن مناحل وأراضي جنوب '
+                'السعودية، عن عروض الخصومات والتخفيضات.'
+            : 'An ad campaign for the Sultan Aleasl brand in Saudi Arabia, '
+                'based in the south of the Kingdom and sourced from the '
+                'apiaries and lands of southern Saudi Arabia, promoting '
+                'discounts and special offers.',
+        coverOverride: 'assets/images/projects/project_4/cover.png',
+        // 9 finished ad designs (4:5 portrait) — uncropped grid layout so
+        // no headline or discount figure is cut off.
+        galleryLayout: ProjectGalleryLayout.grid,
         images: const [
-          'assets/images/projects/project_4/1.jpg',
-          'assets/images/projects/project_4/2.jpg',
-          'assets/images/projects/project_4/3.jpg',
-          'assets/images/projects/project_4/4.jpg',
-          'assets/images/projects/project_4/5.jpg',
+          // The cover ("قلنا نفرّحكم بخصومات تصل لـ 50%") is listed too so
+          // it is also viewable inside the project.
+          'assets/images/projects/project_4/cover.png',
+          'assets/images/projects/project_4/1.png', // وفّر ميزانيتك واشترِ أكثر
+          'assets/images/projects/project_4/2.png', // آخر فرصة للتوفير
+          'assets/images/projects/project_4/3.png', // تبغى العسل الأصلي؟
+          'assets/images/projects/project_4/4.png', // لا ترجع من عسير ويدك فاضية
+          'assets/images/projects/project_4/5.png', // نداء لكل المصيفين
+          'assets/images/projects/project_4/6.png', // نوّرت عسير
+          'assets/images/projects/project_4/7.png', // يا زين الهدية
+          'assets/images/projects/project_4/8.png', // السعر اللي تبغاه
+        ],
+        url: '',
+      ),
+      PortfolioProject(
+        id: 'project-5',
+        title: isArabic ? 'عسل المكسرات للنساء - سلطان العسل' : 'Nuts Honey for Women - Sultan Aleasl',
+        category: ProjectCategory.advertising,
+        description: isArabic
+            ? 'حملة إعلانية عن فوائد عسل المكسرات للنساء وعن الطاقة التي يوفرها لهن؛ حملة تستهدف نساء السعودية والمجتمع السعودي.'
+            : 'An ad campaign on the benefits of nuts honey for women and the energy it gives them, targeting women in Saudi Arabia and Saudi society.',
+        fullDescription: isArabic
+            ? 'حملة إعلانية عن فوائد عسل المكسرات للنساء وعن الطاقة التي '
+                'يوفرها لهن؛ حملة تستهدف نساء السعودية والمجتمع السعودي.'
+            : 'An ad campaign on the benefits of nuts honey for women and the '
+                'energy it gives them, targeting women in Saudi Arabia and '
+                'Saudi society.',
+        coverOverride: 'assets/images/projects/project_5/cover.png',
+        // 6 finished ad designs (4:5 portrait) — uncropped grid layout.
+        galleryLayout: ProjectGalleryLayout.grid,
+        images: const [
+          'assets/images/projects/project_5/cover.png', // تركيزك يفصل بنص اليوم؟
+          'assets/images/projects/project_5/1.png', // طاقتك وصحة يومك
+          'assets/images/projects/project_5/2.png', // ابدئي إشراقتك من الداخل
+          'assets/images/projects/project_5/3.png', // خلّي الحلا صحي
+          'assets/images/projects/project_5/4.png', // خليكي دايم حاضرة
+          'assets/images/projects/project_5/5.png', // درعك ومناعة عيلتك
         ],
         url: '',
       ),
@@ -577,11 +629,41 @@ class _CategoryCardState extends State<_CategoryCard> {
                   // project photo — so every category card shows the
                   // same clean, icon-led look regardless of what photos
                   // exist inside it.
-                  _ProjectPlaceholderArt(
-                    category: widget.category,
-                    hovering: _hovering,
-                    colors: colors,
-                  ),
+                  if (kCategoryCovers[widget.category] != null) ...[
+                    AnimatedScale(
+                      scale: _hovering ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 260),
+                      child: Image.asset(
+                        kCategoryCovers[widget.category]!,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        errorBuilder: (_, __, ___) => _ProjectPlaceholderArt(
+                          category: widget.category,
+                          hovering: _hovering,
+                          colors: colors,
+                        ),
+                      ),
+                    ),
+                    // Dark scrim so the white category name stays legible
+                    // over the photo.
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.25),
+                            Colors.black.withOpacity(0.50),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ] else
+                    _ProjectPlaceholderArt(
+                      category: widget.category,
+                      hovering: _hovering,
+                      colors: colors,
+                    ),
                   // Category name, front and center — plain text with a
                   // soft shadow for legibility over the artwork, no pill
                   // background boxing it in.
