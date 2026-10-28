@@ -515,6 +515,14 @@ create policy "Authenticated update access to service_category_images"
   on service_category_images for update
   using (auth.role() = 'authenticated');
 
+-- Lets the admin dashboard's "Remove photo" (long-press on a category
+-- circle) actually delete the row — without this policy the delete is
+-- silently blocked by RLS.
+drop policy if exists "Authenticated delete access to service_category_images" on service_category_images;
+create policy "Authenticated delete access to service_category_images"
+  on service_category_images for delete
+  using (auth.role() = 'authenticated');
+
 -- The owner-managed "Illustration & Art" circles row on the Home page —
 -- unlike the fixed 3-item Services row above, this is a fully open-ended
 -- list the owner adds/edits/deletes/reorders from the admin dashboard.

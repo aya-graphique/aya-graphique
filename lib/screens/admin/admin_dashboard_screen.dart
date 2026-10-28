@@ -441,6 +441,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               },
             ),
             _DrawerTile(
+              icon: Icons.design_services_outlined,
+              label: 'Services',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push('/ayalovespurple/dashboard/services');
+              },
+            ),
+            _DrawerTile(
               icon: Icons.receipt_long_rounded,
               label: 'Orders',
               badgeCount: _pendingOrdersCount,
@@ -487,6 +495,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             onPressed: () => context.push('/ayalovespurple/dashboard/banners'),
             icon: Icon(Icons.view_carousel_rounded, color: context.colors.creamDim),
             tooltip: 'Banners',
+          ),
+          IconButton(
+            onPressed: () => context.push('/ayalovespurple/dashboard/services'),
+            icon: Icon(Icons.design_services_outlined, color: context.colors.creamDim),
+            tooltip: 'Services',
           ),
           IconButton(
             onPressed: _openOrders,
