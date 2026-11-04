@@ -10,6 +10,7 @@ import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/home_data_controller.dart';
 import 'providers/language_controller.dart';
+import 'screens/admin/admin_coupons_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/admin/admin_home_banners_screen.dart';
 import 'screens/admin/admin_login_screen.dart';
@@ -200,6 +201,10 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: 'orders',
           builder: (context, state) => const AdminOrdersScreen(),
+        ),
+        GoRoute(
+          path: 'coupons',
+          builder: (context, state) => const AdminCouponsScreen(),
         ),
         GoRoute(
           path: 'banners',

@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_strings.dart';
+import '../models/coupon.dart';
 import '../providers/cart_provider.dart';
 import '../providers/language_controller.dart';
+import '../services/coupons_repository.dart';
 import '../services/orders_repository.dart';
 import '../services/settings_repository.dart';
 import '../theme/app_theme.dart';
@@ -100,6 +102,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     buffer.writeln();
     buffer.writeln('Subtotal: ${formatPrice(cart.subtotal)}');
+    if (cart.discount > 0 && cart.coupon != null) {
+      buffer.writeln('Discount (${cart.coupon!.code}): -${formatPrice(cart.discount)}');
+    }
     buffer.writeln('Shipping: ${formatPrice(cart.shipping)}');
     buffer.writeln('Total: ${formatPrice(cart.total)}');
     buffer.writeln();
@@ -178,6 +183,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         paymentSenderInfo: _senderInfoCtrl.text.trim(),
         cart: cart,
       );
+    } on CouponException catch (e) {
+      // The code stopped working between "Apply" and "Place order" (it
+      // expired, ran out of uses, ...). Drop it so the shopper sees the
+      // real total and can decide, instead of placing a surprise order.
+      if (!mounted) return;
+      setState(() => _placing = false);
+      cart.removeCoupon();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.stringsRead.couponReason(e.reason, e.minOrder))),
+      );
+      return;
     } catch (e) {
       if (!mounted) return;
       setState(() => _placing = false);
@@ -666,6 +682,20 @@ class _OrderReview extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Divider(color: context.colors.border(0.12), height: 1),
           ),
+          _CouponBox(cart: cart),
+          if (cart.coupon != null && cart.discount > 0) ...[
+            const SizedBox(height: 14),
+            _SummaryLine(label: context.strings.subtotal, value: formatPrice(cart.subtotal)),
+            const SizedBox(height: 6),
+            _SummaryLine(
+              label: '${context.strings.discount} (${cart.coupon!.code})',
+              value: '- ${formatPrice(cart.discount)}',
+              valueColor: context.colors.success,
+            ),
+            const SizedBox(height: 6),
+            _SummaryLine(label: context.strings.shipping, value: formatPrice(cart.shipping)),
+          ],
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -703,6 +733,215 @@ class _OrderReview extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SummaryLine extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  const _SummaryLine({required this.label, required this.value, this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(label,
+              style: AppFonts.body(text: label, color: context.colors.creamDim, size: 13.5)),
+        ),
+        Text(value,
+            style: AppFonts.body(
+                text: value,
+                size: 13.5,
+                weight: FontWeight.w600,
+                color: valueColor ?? context.colors.cream)),
+      ],
+    );
+  }
+}
+
+/// "Have a discount code?" — a text field + Apply button. Once a code is
+/// applied it turns into a green chip showing the saving, with a Remove
+/// button. The code is checked on the server (validate_coupon); the app
+/// never decides by itself whether a code is good.
+class _CouponBox extends StatefulWidget {
+  final CartProvider cart;
+  const _CouponBox({required this.cart});
+
+  @override
+  State<_CouponBox> createState() => _CouponBoxState();
+}
+
+class _CouponBoxState extends State<_CouponBox> {
+  final _ctrl = TextEditingController();
+  bool _checking = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _apply() async {
+    final code = _ctrl.text.trim();
+    if (code.isEmpty || _checking) return;
+    final strings = context.stringsRead;
+    setState(() {
+      _checking = true;
+      _error = null;
+    });
+    try {
+      final res = await CouponsRepository.validate(code, widget.cart.subtotal);
+      if (!mounted) return;
+      if (res.valid && res.coupon != null) {
+        widget.cart.applyCoupon(res.coupon!);
+        _ctrl.clear();
+        setState(() => _checking = false);
+      } else {
+        setState(() {
+          _checking = false;
+          _error = strings.couponReason(res.reason, res.minOrder);
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _checking = false;
+        _error = strings.couponNetworkError;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final applied = widget.cart.coupon;
+
+    if (applied != null) {
+      final below = widget.cart.couponBelowMinimum;
+      return Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+        decoration: BoxDecoration(
+          color: colors.success.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: colors.success.withOpacity(0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.sell_rounded, size: 18, color: colors.success),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(context.strings.couponApplied(applied.code),
+                      style: AppFonts.body(
+                          text: context.strings.couponApplied(applied.code),
+                          size: 13.5,
+                          weight: FontWeight.w700,
+                          color: colors.cream)),
+                  if (below) ...[
+                    const SizedBox(height: 3),
+                    Text(context.strings.couponBelowMinimumNote,
+                        style: AppFonts.body(
+                            text: context.strings.couponBelowMinimumNote,
+                            size: 11.5,
+                            color: colors.creamDim)),
+                  ],
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: widget.cart.removeCoupon,
+              child: Text(context.strings.couponRemove,
+                  style: AppFonts.body(
+                      text: context.strings.couponRemove,
+                      size: 12.5,
+                      weight: FontWeight.w700,
+                      color: colors.danger)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.strings.couponLabel,
+            style: AppFonts.body(
+                text: context.strings.couponLabel, size: 12.5, color: colors.creamDim)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                textCapitalization: TextCapitalization.characters,
+                textDirection: TextDirection.ltr,
+                onSubmitted: (_) => _apply(),
+                style: AppFonts.body(size: 14.5, color: colors.cream, text: 'a'),
+                cursorColor: colors.orchid,
+                decoration: InputDecoration(
+                  hintText: context.strings.couponHint,
+                  hintStyle: AppFonts.body(
+                      text: context.strings.couponHint,
+                      color: colors.creamDim.withOpacity(0.6),
+                      size: 13.5),
+                  isDense: true,
+                  filled: true,
+                  fillColor: colors.surfaceRaised,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: colors.orchid, width: 1.4),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: _checking ? null : _apply,
+              child: Container(
+                height: 46,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  gradient: colors.violetGradient,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Center(
+                  child: _checking
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+                        )
+                      : Text(context.strings.couponApply,
+                          style: AppFonts.label(
+                                  text: context.strings.couponApply,
+                                  size: 12.5,
+                                  color: Colors.white,
+                                  letterSpacing: 0.8)
+                              .copyWith(fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 8),
+          Text(_error!,
+              style: AppFonts.body(text: _error!, size: 12.5, color: colors.danger)),
+        ],
+      ],
     );
   }
 }

@@ -133,6 +133,11 @@ class _MiniCartSheet extends StatelessWidget {
                                   child: Column(
                                     children: [
                                       _row(context, strings.subtotal, formatPrice(cart.subtotal)),
+                                      if (cart.coupon != null && cart.discount > 0) ...[
+                                        const SizedBox(height: 8),
+                                        _row(context, '${strings.discount} (${cart.coupon!.code})',
+                                            '- ${formatPrice(cart.discount)}'),
+                                      ],
                                       const SizedBox(height: 8),
                                       _row(context, strings.shipping, formatPrice(cart.shipping)),
                                       const SizedBox(height: 12),

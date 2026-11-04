@@ -51,6 +51,26 @@ next launch. Everything is driven by `ThemeController` in
 `context.colors` instead of a hardcoded `AppColors.xxx`, so it repaints
 automatically when the mode changes.
 
+## Discount codes
+
+The store owner can create discount codes from the admin dashboard
+(**Discount codes** — the tag icon in the app bar, or the menu on mobile).
+
+- Percentage or fixed-amount (EGP) codes, optional minimum order, optional
+  cap for percentage codes, max number of uses, start/end dates, and an
+  on/off switch. Codes are stored uppercase, so `ramadan20` = `RAMADAN20`.
+- Shoppers type the code in the **Order review** box at checkout.
+- The discount is checked and calculated on the server
+  (`validate_coupon` / `redeem_coupon` in `supabase/coupons.sql`); the app
+  never decides by itself. A use is only counted when the order is placed.
+- Orders store the code and the discount (`coupon_code`, `discount_amount`),
+  and both show in the admin Orders list, the WhatsApp message and the
+  owner's notification email.
+
+**Setup (once):** run `supabase/coupons.sql` in the Supabase SQL editor. If
+you want the email to show the discount line, redeploy the edge function:
+`supabase functions deploy notify-new-order`.
+
 ## Running it
 
 1. Install Flutter (3.22+): https://docs.flutter.dev/get-started/install

@@ -433,6 +433,11 @@ class _OrderTileState extends State<_OrderTile> {
                     Divider(color: context.colors.border(0.12), height: 1),
                     const SizedBox(height: 8),
                     _summaryRow('Subtotal', formatPrice(o.subtotal)),
+                    if (o.discountAmount > 0)
+                      _summaryRow(
+                        o.couponCode.isEmpty ? 'Discount' : 'Discount (${o.couponCode})',
+                        '- ${formatPrice(o.discountAmount)}',
+                      ),
                     _summaryRow('Shipping', formatPrice(o.shipping)),
                     _summaryRow('Total', formatPrice(o.total), emphasize: true),
                     const SizedBox(height: 16),

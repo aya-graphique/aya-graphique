@@ -86,6 +86,9 @@ serve(async (req) => {
           <ul>${itemsHtml}</ul>
           <p>
             Subtotal: ${Number(order.subtotal).toFixed(2)} EGP<br/>
+            ${Number(order.discount_amount) > 0
+              ? `Discount${order.coupon_code ? ` (${order.coupon_code})` : ''}: -${Number(order.discount_amount).toFixed(2)} EGP<br/>`
+              : ''}
             Shipping: ${Number(order.shipping).toFixed(2)} EGP<br/>
             <b>Total: ${Number(order.total).toFixed(2)} EGP</b>
           </p>

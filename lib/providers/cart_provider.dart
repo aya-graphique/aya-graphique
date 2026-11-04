@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/coupon.dart';
 import '../models/product.dart';
 import '../services/settings_repository.dart';
 
@@ -37,7 +38,32 @@ class CartProvider extends ChangeNotifier {
   /// The flat shipping fee, set by the store admin from the dashboard.
   double get shipping => _shipping;
 
-  double get total => _lines.isEmpty ? 0 : subtotal + shipping;
+  AppliedCoupon? _coupon;
+
+  /// The discount code the shopper applied at checkout, if any.
+  AppliedCoupon? get coupon => _coupon;
+
+  /// Money taken off the subtotal by [coupon] (0 when there's no code, or
+  /// the cart has dropped below the code's minimum order). Updates live as
+  /// quantities change; the server recalculates it when the order is placed.
+  double get discount => _coupon?.discountFor(subtotal) ?? 0;
+
+  /// True when a code is applied but the cart is currently under its minimum.
+  bool get couponBelowMinimum =>
+      _coupon != null && subtotal > 0 && subtotal < _coupon!.minOrder;
+
+  double get total => _lines.isEmpty ? 0 : subtotal - discount + shipping;
+
+  void applyCoupon(AppliedCoupon coupon) {
+    _coupon = coupon;
+    notifyListeners();
+  }
+
+  void removeCoupon() {
+    if (_coupon == null) return;
+    _coupon = null;
+    notifyListeners();
+  }
 
   /// Pulls the current shipping fee from Supabase. Call once on app start.
   Future<void> loadShipping() async {
@@ -86,6 +112,7 @@ class CartProvider extends ChangeNotifier {
 
   void clear() {
     _lines.clear();
+    _coupon = null;
     notifyListeners();
     _persist();
   }

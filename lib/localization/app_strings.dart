@@ -150,6 +150,46 @@ class AppText {
   String get subtotal => _t('Subtotal', 'المجموع الفرعي');
   String get shipping => _t('Shipping', 'الشحن');
   String get total => _t('Total', 'الإجمالي');
+
+  // Discount codes
+  String get discount => _t('Discount', 'الخصم');
+  String get couponLabel => _t('Discount code', 'كود الخصم');
+  String get couponHint => _t('Enter your code', 'أدخل الكود');
+  String get couponApply => _t('Apply', 'تطبيق');
+  String get couponRemove => _t('Remove', 'إزالة');
+  String couponApplied(String code) =>
+      _t('Code $code applied', 'تم تطبيق الكود $code');
+  String get couponNetworkError => _t(
+        'Couldn\'t check the code right now. Please try again.',
+        'تعذر التحقق من الكود الآن. حاول مرة أخرى.',
+      );
+  String get couponBelowMinimumNote => _t(
+        'Your cart is below this code\'s minimum — the discount isn\'t applied yet.',
+        'قيمة سلتك أقل من الحد الأدنى للكود — لم يُطبَّق الخصم بعد.',
+      );
+
+  /// A friendly message for each reason the server can give for rejecting
+  /// a code (see validate_coupon in supabase/coupons.sql).
+  String couponReason(String reason, double minOrder) {
+    switch (reason) {
+      case 'inactive':
+        return _t('This code is not active.', 'هذا الكود غير مفعّل.');
+      case 'not_started':
+        return _t('This code isn\'t valid yet.', 'هذا الكود لم يبدأ بعد.');
+      case 'expired':
+        return _t('This code has expired.', 'انتهت صلاحية هذا الكود.');
+      case 'exhausted':
+        return _t('This code has reached its usage limit.', 'تم استهلاك الحد الأقصى لاستخدام هذا الكود.');
+      case 'min_order':
+        final amount = minOrder.toStringAsFixed(minOrder == minOrder.roundToDouble() ? 0 : 2);
+        return _t(
+          'Add more to your cart — this code needs a minimum of $amount EGP.',
+          'أضف المزيد إلى سلتك — هذا الكود يتطلب حدًا أدنى $amount جنيه.',
+        );
+      default:
+        return _t('This code isn\'t valid.', 'هذا الكود غير صحيح.');
+    }
+  }
   String get proceedToCheckout => _t('Proceed to checkout', 'إتمام الطلب');
   String get estimatedDelivery =>
       _t('Estimated delivery: 2–4 business days', 'التوصيل المتوقع خلال 2–4 أيام عمل');

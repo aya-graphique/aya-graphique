@@ -36,6 +36,8 @@ class Order {
   final double subtotal;
   final double shipping;
   final double total;
+  final String couponCode;
+  final double discountAmount;
   final DateTime createdAt;
   final List<OrderItem> items;
 
@@ -52,6 +54,8 @@ class Order {
     required this.subtotal,
     required this.shipping,
     required this.total,
+    this.couponCode = '',
+    this.discountAmount = 0,
     required this.createdAt,
     required this.items,
   });
@@ -71,6 +75,8 @@ class Order {
       subtotal: (map['subtotal'] as num).toDouble(),
       shipping: (map['shipping'] as num).toDouble(),
       total: (map['total'] as num).toDouble(),
+      couponCode: map['coupon_code'] as String? ?? '',
+      discountAmount: (map['discount_amount'] as num?)?.toDouble() ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       items: rawItems
           .map((row) => OrderItem.fromMap(row as Map<String, dynamic>))
@@ -92,6 +98,8 @@ class Order {
       subtotal: subtotal,
       shipping: shipping,
       total: total,
+      couponCode: couponCode,
+      discountAmount: discountAmount,
       createdAt: createdAt,
       items: items,
     );

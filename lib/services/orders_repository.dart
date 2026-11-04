@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../config/supabase_config.dart';
+import '../models/coupon.dart';
 import '../models/order.dart';
 import '../providers/cart_provider.dart';
+import 'coupons_repository.dart';
 import 'supabase_service.dart';
 
 class OrdersRepository {
@@ -24,6 +26,24 @@ class OrdersRepository {
     if (!SupabaseConfig.isConfigured) {
       throw StateError('Supabase isn\'t configured, so orders can\'t be saved.');
     }
+    // If a discount code is applied, the server re-checks it and counts the
+    // use right now, and its answer (not the app's) decides the discount.
+    // Throws CouponException if the code stopped being valid since the
+    // shopper applied it, so checkout can tell them instead of charging
+    // the wrong amount.
+    var discount = 0.0;
+    var couponCode = '';
+    final applied = cart.coupon;
+    if (applied != null) {
+      final res = await CouponsRepository.redeem(applied.code, cart.subtotal);
+      if (!res.valid) {
+        throw CouponException(res.reason, minOrder: res.minOrder);
+      }
+      discount = res.discount;
+      couponCode = res.coupon?.code ?? applied.code;
+    }
+    final total = cart.subtotal - discount + cart.shipping;
+
     final orderRow = await SupabaseService.client
         .from('orders')
         .insert({
@@ -36,7 +56,11 @@ class OrdersRepository {
           'payment_sender_info': paymentSenderInfo,
           'subtotal': cart.subtotal,
           'shipping': cart.shipping,
-          'total': cart.total,
+          'total': total,
+          // Only sent when a code was used, so checkout keeps working on a
+          // database that hasn't had supabase/coupons.sql run yet.
+          if (couponCode.isNotEmpty) 'coupon_code': couponCode,
+          if (couponCode.isNotEmpty) 'discount_amount': discount,
         })
         .select('id')
         .single();
@@ -72,6 +96,9 @@ class OrdersRepository {
       paymentSenderInfo: paymentSenderInfo,
       cart: cart,
       items: items,
+      discount: discount,
+      couponCode: couponCode,
+      total: total,
     );
 
     return orderId;
@@ -106,6 +133,9 @@ class OrdersRepository {
     String paymentSenderInfo = '',
     required CartProvider cart,
     required List<Map<String, dynamic>> items,
+    double discount = 0,
+    String couponCode = '',
+    required double total,
   }) {
     SupabaseService.client.functions.invoke(
       'notify-new-order',
@@ -120,7 +150,9 @@ class OrdersRepository {
           'payment_sender_info': paymentSenderInfo,
           'subtotal': cart.subtotal,
           'shipping': cart.shipping,
-          'total': cart.total,
+          'discount_amount': discount,
+          'coupon_code': couponCode,
+          'total': total,
         },
         'items': items,
       },

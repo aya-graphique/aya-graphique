@@ -193,6 +193,11 @@ class _Summary extends StatelessWidget {
           Text(context.strings.orderSummary, style: AppFonts.display(text: context.strings.orderSummary, color: context.colors.cream, size: 18, weight: FontWeight.w700)),
           const SizedBox(height: 18),
           _row(context, context.strings.subtotal, formatPrice(cart.subtotal)),
+          if (cart.coupon != null && cart.discount > 0) ...[
+            const SizedBox(height: 8),
+            _row(context, '${context.strings.discount} (${cart.coupon!.code})',
+                '- ${formatPrice(cart.discount)}'),
+          ],
           const SizedBox(height: 8),
           _row(context, context.strings.shipping, formatPrice(cart.shipping)),
           Padding(
