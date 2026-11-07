@@ -36,12 +36,16 @@ alter table products add column if not exists discount_percent numeric(5, 2) not
 -- Safe to re-run on a database created before this column existed.
 alter table products add column if not exists sales_count integer not null default 0;
 
--- A product can show up to 3 photos in its gallery (image_url plus these
--- two optional extras). Both default to '' (empty = not set), same as
+-- A product can show up to 7 photos in its gallery (image_url plus these
+-- six optional extras). All default to '' (empty = not set), same as
 -- image_url, so the storefront gallery just skips whichever slots are
 -- blank. Safe to re-run on a database created before these existed.
 alter table products add column if not exists image_url_2 text not null default '';
 alter table products add column if not exists image_url_3 text not null default '';
+alter table products add column if not exists image_url_4 text not null default '';
+alter table products add column if not exists image_url_5 text not null default '';
+alter table products add column if not exists image_url_6 text not null default '';
+alter table products add column if not exists image_url_7 text not null default '';
 
 alter table products enable row level security;
 

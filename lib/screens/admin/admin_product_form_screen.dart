@@ -27,8 +27,15 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   late final _description = TextEditingController(text: widget.existing?.description ?? '');
   late final _price = TextEditingController(text: widget.existing?.price.toString() ?? '');
   late final _imageUrl = TextEditingController(text: widget.existing?.imageUrl ?? '');
-  late final _imageUrl2 = TextEditingController(text: widget.existing?.imageUrl2 ?? '');
-  late final _imageUrl3 = TextEditingController(text: widget.existing?.imageUrl3 ?? '');
+  // Photos 2–7 (optional), one controller per slot.
+  late final List<TextEditingController> _extraImageCtrls = List.generate(
+    Product.maxPhotos - 1,
+    (i) => TextEditingController(
+      text: (widget.existing != null && i < widget.existing!.extraImages.length)
+          ? widget.existing!.extraImages[i]
+          : '',
+    ),
+  );
   late final _tags = TextEditingController(text: widget.existing?.tags.join(', ') ?? '');
   late final _rating = TextEditingController(text: widget.existing?.rating.toString() ?? '4.8');
   late final _stock = TextEditingController(text: widget.existing?.stock.toString() ?? '0');
@@ -44,8 +51,8 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   bool _addingNewCategory = false;
   bool _loadingCategories = true;
   bool _saving = false;
-  // Which of the 3 photo slots (1/2/3) is mid-upload, if any — lets each
-  // slot show its own spinner instead of all 3 lighting up at once.
+  // Which photo slot (1–7) is mid-upload, if any — lets each slot show
+  // its own spinner instead of all of them lighting up at once.
   int? _uploadingSlot;
   String? _error;
 
@@ -81,8 +88,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     _description.dispose();
     _price.dispose();
     _imageUrl.dispose();
-    _imageUrl2.dispose();
-    _imageUrl3.dispose();
+    for (final c in _extraImageCtrls) {
+      c.dispose();
+    }
     _tags.dispose();
     _rating.dispose();
     _stock.dispose();
@@ -142,8 +150,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
       price: double.tryParse(_price.text.trim()) ?? 0,
       category: categoryName,
       imageUrl: _imageUrl.text.trim(),
-      imageUrl2: _imageUrl2.text.trim(),
-      imageUrl3: _imageUrl3.text.trim(),
+      extraImages: _extraImageCtrls.map((c) => c.text.trim()).toList(),
       tags: _tags.text.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList(),
       rating: double.tryParse(_rating.text.trim()) ?? 4.8,
       stock: int.tryParse(_stock.text.trim()) ?? 0,
@@ -262,10 +269,10 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                 }),
               ),
               const SizedBox(height: 16),
-              Text('Photos (up to 3)', style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
+              Text('Photos (up to 7)', style: AppFonts.label(color: context.colors.orchid, size: 11, letterSpacing: 1.4)),
               const SizedBox(height: 4),
               Text(
-                'Photo 1 is required. Photos 2 and 3 are optional — the storefront gallery only shows the ones you fill in.',
+                'Photo 1 is required. Photos 2–7 are optional — the storefront gallery only shows the ones you fill in.',
                 style: AppFonts.body(size: 12, color: context.colors.creamDim),
               ),
               const SizedBox(height: 10),
@@ -276,22 +283,16 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                 onUpload: () => _pickAndUploadImage(1, _imageUrl),
                 onChanged: () => setState(() {}),
               ),
-              const SizedBox(height: 14),
-              _PhotoSlot(
-                label: 'Photo 2 (optional)',
-                controller: _imageUrl2,
-                uploading: _uploadingSlot == 2,
-                onUpload: () => _pickAndUploadImage(2, _imageUrl2),
-                onChanged: () => setState(() {}),
-              ),
-              const SizedBox(height: 14),
-              _PhotoSlot(
-                label: 'Photo 3 (optional)',
-                controller: _imageUrl3,
-                uploading: _uploadingSlot == 3,
-                onUpload: () => _pickAndUploadImage(3, _imageUrl3),
-                onChanged: () => setState(() {}),
-              ),
+              for (var i = 0; i < _extraImageCtrls.length; i++) ...[
+                const SizedBox(height: 14),
+                _PhotoSlot(
+                  label: 'Photo ${i + 2} (optional)',
+                  controller: _extraImageCtrls[i],
+                  uploading: _uploadingSlot == i + 2,
+                  onUpload: () => _pickAndUploadImage(i + 2, _extraImageCtrls[i]),
+                  onChanged: () => setState(() {}),
+                ),
+              ],
               const SizedBox(height: 16),
               _TextField(label: 'Tags (comma separated)', controller: _tags),
               const SizedBox(height: 16),
@@ -453,7 +454,7 @@ class _CategoryChip extends StatelessWidget {
 
 /// One gallery photo slot: an "upload from device" button, a fallback
 /// "paste a URL" field, and a live preview once something's there.
-/// Reused 3x (once per photo) so all 3 slots behave identically.
+/// Reused once per photo so all 7 slots behave identically.
 class _PhotoSlot extends StatelessWidget {
   final String label;
   final TextEditingController controller;

@@ -109,8 +109,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-/// Swipeable gallery over the product's up-to-3 photos (imageUrl,
-/// imageUrl2, imageUrl3). Every slide shares the exact same frame — size,
+/// Swipeable gallery over the product's up-to-7 photos (imageUrl,
+/// extraImages). Every slide shares the exact same frame — size,
 /// aspect ratio, tilt card, gradient background — so flipping between
 /// photos never shifts the layout. Empty slots (product.galleryImages
 /// already strips those out) simply never get a slide, and if a product
