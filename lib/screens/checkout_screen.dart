@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -212,6 +213,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // can actually pay. WhatsApp is *not* opened automatically here — it's
     // only opened when the customer taps "Open WhatsApp" on the next
     // screen, once they're done paying.
+    //
+    // NOTE: Safari (iOS + macOS) blocks any link/app opened after an
+    // `await` because the tap's "user gesture" has expired by then, so this
+    // automatic attempt is silently ignored there. That's why the success
+    // dialog below also has an explicit "Pay" button — a direct tap always
+    // works on Safari.
+    final paymentMethodAtOrder = _paymentMethod;
     if (_paymentMethod == PaymentMethod.instapay) {
       await _openInstaPay();
     } else if (_paymentMethod == PaymentMethod.vodafoneCash) {
@@ -229,6 +237,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       builder: (dialogContext) => _OrderSuccessDialog(
         name: _nameCtrl.text.trim(),
         onOpenWhatsApp: () => _openWhatsApp(whatsAppMessage),
+        paymentMethod: paymentMethodAtOrder,
+        paymentNumber: _paymentNumber,
+        onPay: paymentMethodAtOrder == PaymentMethod.instapay
+            ? (_instapayLink.isEmpty ? null : _openInstaPay)
+            : (_paymentNumber.isEmpty ? null : _openVodafoneCashContact),
       ),
     );
   }
@@ -949,10 +962,16 @@ class _CouponBoxState extends State<_CouponBox> {
 class _OrderSuccessDialog extends StatelessWidget {
   final String name;
   final VoidCallback onOpenWhatsApp;
+  final PaymentMethod paymentMethod;
+  final String paymentNumber;
+  final VoidCallback? onPay;
 
   const _OrderSuccessDialog({
     required this.name,
     required this.onOpenWhatsApp,
+    required this.paymentMethod,
+    required this.paymentNumber,
+    this.onPay,
   });
 
   @override
@@ -981,6 +1000,74 @@ class _OrderSuccessDialog extends StatelessWidget {
               style: AppFonts.body(text: context.strings.thanksMessage(name), color: context.colors.creamDim, size: 14),
             ),
             const SizedBox(height: 14),
+            if (onPay != null) ...[
+              Text(context.strings.payNowHint,
+                textAlign: TextAlign.center,
+                style: AppFonts.body(text: context.strings.payNowHint, color: context.colors.creamDim, size: 13),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: onPay,
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: paymentMethod == PaymentMethod.instapay
+                          ? const Color(0xFF6C2EB5)
+                          : const Color(0xFFE60000),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: Text(
+                        paymentMethod == PaymentMethod.instapay
+                            ? context.strings.payWithInstaPay
+                            : context.strings.payWithVodafoneCash,
+                        textAlign: TextAlign.center,
+                        style: AppFonts.label(
+                          text: paymentMethod == PaymentMethod.instapay
+                              ? context.strings.payWithInstaPay
+                              : context.strings.payWithVodafoneCash,
+                          size: 13, color: Colors.white, letterSpacing: 0.6,
+                        ).copyWith(fontWeight: FontWeight.w700, height: 1.3),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (paymentMethod == PaymentMethod.vodafoneCash && paymentNumber.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: paymentNumber));
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(context.stringsRead.numberCopied)),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.copy_rounded, size: 16, color: context.colors.creamDim),
+                      const SizedBox(width: 8),
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(paymentNumber,
+                          style: AppFonts.body(text: paymentNumber, color: context.colors.cream, size: 15)
+                              .copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(context.strings.copyNumber,
+                        style: AppFonts.body(text: context.strings.copyNumber, color: context.colors.creamDim, size: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+            ],
             SizedBox(
               width: double.infinity,
               child: GestureDetector(

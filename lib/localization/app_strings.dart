@@ -314,6 +314,18 @@ class AppText {
       );
   String get backToShop => _t('Back to shop', 'العودة للتسوق');
 
+  // Order-success dialog: explicit "pay now" buttons. Safari (iOS/macOS)
+  // blocks links/apps opened automatically after an async call, so the
+  // customer can always tap these to open the payment app themselves.
+  String get payWithInstaPay => _t('Pay with InstaPay', 'ادفع عبر إنستاباي');
+  String get payWithVodafoneCash => _t('Open Vodafone Cash number', 'افتح رقم فودافون كاش');
+  String get payNowHint => _t(
+        'Tap below to open the payment app and send the total.',
+        'اضغط بالأسفل لفتح تطبيق الدفع وإرسال قيمة الطلب.',
+      );
+  String get copyNumber => _t('Copy number', 'نسخ الرقم');
+  String get numberCopied => _t('Number copied', 'تم نسخ الرقم');
+
   String couldntOpenWhatsApp(String err) =>
       _t('Couldn\'t open WhatsApp: $err', 'تعذر فتح واتساب: $err');
   String couldntOpenInstaPay(String err) =>
