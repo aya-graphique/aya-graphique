@@ -239,6 +239,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         onOpenWhatsApp: () => _openWhatsApp(whatsAppMessage),
         paymentMethod: paymentMethodAtOrder,
         paymentNumber: _paymentNumber,
+        instapayLink: _instapayLink,
         onPay: paymentMethodAtOrder == PaymentMethod.instapay
             ? (_instapayLink.isEmpty ? null : _openInstaPay)
             : (_paymentNumber.isEmpty ? null : _openVodafoneCashContact),
@@ -959,11 +960,85 @@ class _CouponBoxState extends State<_CouponBox> {
   }
 }
 
+/// Shows a value (InstaPay link / Vodafone Cash number) with a tap-to-copy
+/// button. After copying, the row visibly switches to a green "Copied"
+/// state for a couple of seconds — shown inline because a SnackBar would
+/// be hidden behind the dialog.
+class _CopyRow extends StatefulWidget {
+  final String value;
+  const _CopyRow({required this.value});
+
+  @override
+  State<_CopyRow> createState() => _CopyRowState();
+}
+
+class _CopyRowState extends State<_CopyRow> {
+  bool _copied = false;
+
+  Future<void> _copy() async {
+    try {
+      await Clipboard.setData(ClipboardData(text: widget.value));
+    } catch (_) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _copied = true);
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const green = Color(0xFF2E9E5B);
+    final fg = _copied ? green : context.colors.creamDim;
+    return GestureDetector(
+      onTap: _copy,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: context.colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _copied ? green : Colors.transparent),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  widget.value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppFonts.body(text: widget.value, color: context.colors.cream, size: 13)
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Icon(_copied ? Icons.check_circle_rounded : Icons.copy_rounded, size: 18, color: fg),
+            const SizedBox(width: 6),
+            Text(
+              _copied ? context.strings.copied : context.strings.copy,
+              style: AppFonts.body(
+                text: _copied ? context.strings.copied : context.strings.copy,
+                color: fg, size: 12,
+              ).copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _OrderSuccessDialog extends StatelessWidget {
   final String name;
   final VoidCallback onOpenWhatsApp;
   final PaymentMethod paymentMethod;
   final String paymentNumber;
+  final String instapayLink;
   final VoidCallback? onPay;
 
   const _OrderSuccessDialog({
@@ -971,6 +1046,7 @@ class _OrderSuccessDialog extends StatelessWidget {
     required this.onOpenWhatsApp,
     required this.paymentMethod,
     required this.paymentNumber,
+    required this.instapayLink,
     this.onPay,
   });
 
@@ -1038,33 +1114,11 @@ class _OrderSuccessDialog extends StatelessWidget {
               ),
               if (paymentMethod == PaymentMethod.vodafoneCash && paymentNumber.isNotEmpty) ...[
                 const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () async {
-                    await Clipboard.setData(ClipboardData(text: paymentNumber));
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.stringsRead.numberCopied)),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.copy_rounded, size: 16, color: context.colors.creamDim),
-                      const SizedBox(width: 8),
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Text(paymentNumber,
-                          style: AppFonts.body(text: paymentNumber, color: context.colors.cream, size: 15)
-                              .copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(context.strings.copyNumber,
-                        style: AppFonts.body(text: context.strings.copyNumber, color: context.colors.creamDim, size: 12),
-                      ),
-                    ],
-                  ),
-                ),
+                _CopyRow(value: paymentNumber),
+              ],
+              if (paymentMethod == PaymentMethod.instapay && instapayLink.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _CopyRow(value: instapayLink),
               ],
               const SizedBox(height: 14),
             ],

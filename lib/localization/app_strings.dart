@@ -323,8 +323,8 @@ class AppText {
         'Tap below to open the payment app and send the total.',
         'اضغط بالأسفل لفتح تطبيق الدفع وإرسال قيمة الطلب.',
       );
-  String get copyNumber => _t('Copy number', 'نسخ الرقم');
-  String get numberCopied => _t('Number copied', 'تم نسخ الرقم');
+  String get copy => _t('Copy', 'نسخ');
+  String get copied => _t('Copied', 'تم النسخ');
 
   String couldntOpenWhatsApp(String err) =>
       _t('Couldn\'t open WhatsApp: $err', 'تعذر فتح واتساب: $err');
