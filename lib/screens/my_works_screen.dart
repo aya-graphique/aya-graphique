@@ -595,14 +595,20 @@ class _CategoryCardState extends State<_CategoryCard> {
     final colors = context.colors;
     final isArabic = context.isArabicLanguage;
     final categoryLabel = widget.category.labelFor(isArabic);
+    // A category with no projects yet is shown as "SOON" and locked.
+    // It unlocks by itself the moment the first project is added to
+    // kProjects for that category — nothing to remove by hand.
+    final isComingSoon = widget.projects.isEmpty;
 
     return RevealOnScroll(
       delay: Duration(milliseconds: 60 * (widget.index % 6)),
       offsetY: 26,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovering = true),
+        onEnter: (_) {
+          if (!isComingSoon) setState(() => _hovering = true);
+        },
         onExit: (_) => setState(() => _hovering = false),
-        cursor: SystemMouseCursors.click,
+        cursor: isComingSoon ? SystemMouseCursors.basic : SystemMouseCursors.click,
         child: GestureDetector(
           // Routed by the category's own stable enum name (e.g.
           // '/my-works/category/packaging') instead of passing the
@@ -615,12 +621,14 @@ class _CategoryCardState extends State<_CategoryCard> {
           // route can look the projects back up itself every time, so
           // back/refresh always lands here correctly instead of bouncing
           // all the way to '/my-works'.
-          onTap: () => context.push('/my-works/category/${widget.category.name}'),
+          onTap: isComingSoon
+              ? null
+              : () => context.push('/my-works/category/${widget.category.name}'),
           child: AspectRatio(
             aspectRatio: widget.aspectRatio,
             child: Tilt3DCard(
-              maxTiltDegrees: 5,
-              liftOnHover: 5,
+              maxTiltDegrees: isComingSoon ? 0 : 5,
+              liftOnHover: isComingSoon ? 0 : 5,
               borderRadius: BorderRadius.circular(16),
               child: Stack(
                 fit: StackFit.expand,
@@ -695,6 +703,17 @@ class _CategoryCardState extends State<_CategoryCard> {
                       decoration: BoxDecoration(color: Colors.black.withOpacity(0.2)),
                     ),
                   ),
+                  if (isComingSoon) ...[
+                    // Soft dim so the card reads as "not available yet".
+                    DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.28)),
+                    ),
+                    // "SOON" pill, just under the category name.
+                    Align(
+                      alignment: const Alignment(0, 0.38),
+                      child: _SoonBadge(colors: colors),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -702,6 +721,42 @@ class _CategoryCardState extends State<_CategoryCard> {
         ),
       ),
     );
+  }
+}
+
+/// Small glowing "SOON" pill shown on category cards that don't have
+/// any projects yet (see [_CategoryCard]).
+class _SoonBadge extends StatelessWidget {
+  final AppColors colors;
+  const _SoonBadge({required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: colors.violetGradient,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: colors.violetPop.withOpacity(0.55),
+            blurRadius: 18,
+          ),
+        ],
+      ),
+      child: Text(
+        'SOON',
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 3.2,
+          color: Colors.white,
+        ),
+      ),
+    )
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .fade(begin: 0.75, end: 1.0, duration: 1400.ms, curve: Curves.easeInOut);
   }
 }
 
